@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Générateur d'icônes PWA</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+    
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+    }
+    
+    .upload-area {
+      border: 3px dashed #667eea;
+      border-radius: 12px;
+      padding: 3rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin: 2rem 0;
+    }
+    
+    .upload-area:hover {
+      border-color: #764ba2;
+      background: #f8f9fa;
+    }
+    
+    .upload-area.dragover {
+      background: #e3f2fd;
+      border-color: #2196f3;
+    }
+    
+    input[type="file"] {
+      display: none;
+    }
+    
+    .preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    
+    .preview-item {
+      text-align: center;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    
+    .preview-item img {
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .preview-item .size {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #7f8c8d;
+      font-weight: 600;
+    }
+    
+    button {
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      width: 100%;
+      margin-top: 1rem;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .info-box {
+      background: #e3f2fd;
+      padding: 1rem;
+      border-radius: 8px;
+      border-left: 4px solid #2196f3;
+      margin: 1rem 0;
+    }
+    
+    .success-box {
+      background: #d4edda;
+      padding: 1rem;
+      border-radius: 8px;
+      border-left: 4px solid #28a745;
+      margin: 1rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 Générateur d'icônes PWA</h1>
+    <p>Uploadez une image 512x512px pour générer toutes les tailles d'icônes nécessaires.</p>
+    
+    <div class="info-box">
+      <strong>ℹ️ Conseils :</strong>
+      <ul>
+        <li>Image carrée (512x512px minimum)</li>
+        <li>Format PNG avec transparence</li>
+        <li>Design simple et reconnaissable</li>
+        <li>Évitez les détails trop fins</li>
+      </ul>
+    </div>
+    
+    <div class="upload-area" id="uploadArea">
+      <div style="font-size: 4rem; margin-bottom: 1rem;">📤</div>
+      <p style="font-size: 1.2rem; font-weight: 600; margin: 0;">
+        Cliquez ou glissez-déposez une image
+      </p>
+      <p style="color: #7f8c8d; margin-top: 0.5rem;">
+        PNG, JPG ou SVG
+      </p>
+      <input type="file" id="fileInput" accept="image/*">
+    </div>
+    
+    <div id="preview" class="preview"></div>
+    
+    <button id="downloadBtn" style="display: none;">
+      📥 Télécharger toutes les icônes (ZIP)
+    </button>
+    
+    <div id="successMsg" class="success-box" style="display: none;">
+      ✅ Icônes générées avec succès ! Téléchargez le fichier ZIP et extrayez-le dans votre dossier <code>/icons/</code>
+    </div>
+  </div>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  
+  <script>
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const successMsg = document.getElementById('successMsg');
+    
+    const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+    let generatedIcons = {};
+    
+    // Gestion du clic sur la zone de upload
+    uploadArea.addEventListener('click', () => {
+      fileInput.click();
+    });
+    
+    // Gestion du drag & drop
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        processImage(file);
+      }
+    });
+    
+    // Gestion de la sélection de fichier
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        processImage(file);
+      }
+    });
+    
+    // Traiter l'image
+    function processImage(file) {
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          generateIcons(img);
+        };
+        img.src = e.target.result;
+      };
+      
+      reader.readAsDataURL(file);
+    }
+    
+    // Générer toutes les tailles d'icônes
+    function generateIcons(img) {
+      preview.innerHTML = '';
+      generatedIcons = {};
+      
+      sizes.forEach(size => {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, size, size);
+        
+        // Convertir en blob
+        canvas.toBlob((blob) => {
+          const url = URL.createObjectURL(blob);
+          generatedIcons[`icon-${size}x${size}.png`] = blob;
+          
+          // Afficher la preview
+          const previewItem = document.createElement('div');
+          previewItem.className = 'preview-item';
+          previewItem.innerHTML = `
+            <img src="${url}" alt="${size}x${size}">
+            <div class="size">${size}x${size}</div>
+          `;
+          preview.appendChild(previewItem);
+          
+          // Afficher le bouton de téléchargement quand toutes les icônes sont générées
+          if (Object.keys(generatedIcons).length === sizes.length) {
+            downloadBtn.style.display = 'block';
+            successMsg.style.display = 'block';
+          }
+        }, 'image/png');
+      });
+    }
+    
+    // Télécharger toutes les icônes dans un ZIP
+    downloadBtn.addEventListener('click', async () => {
+      const zip = new JSZip();
+      const iconsFolder = zip.folder('icons');
+      
+      // Ajouter toutes les icônes au ZIP
+      for (const [filename, blob] of Object.entries(generatedIcons)) {
+        iconsFolder.file(filename, blob);
+      }
+      
+      // Générer le ZIP
+      const content = await zip.generateAsync({ type: 'blob' });
+      
+      // Télécharger
+      const url = URL.createObjectURL(content);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'pwa-icons.zip';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Liaison Bien - Locataire</title>
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css" />
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="manifest" href="/manifest.json">
+  <style>
+    body { 
+      max-width: 1400px; 
+      margin: 0 auto; 
+      padding: 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .container { 
+      background: white; 
+      padding: 2.5rem; 
+      border-radius: 16px; 
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      margin-bottom: 2rem;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    
+    h1 { 
+      color: #2c3e50; 
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      transition: all 0.3s;
+    }
+    
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .selection-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .selection-panel {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .selection-panel h2 {
+      color: #667eea;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+    
+    .item-card {
+      background: white;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .item-card:hover {
+      border-color: #667eea;
+      background: #f8f9ff;
+    }
+    
+    .item-card.selected {
+      border-color: #667eea;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    }
+    
+    .item-card.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .item-card.occupied {
+      border-color: #e74c3c;
+      background: #ffe8e8;
+    }
+    
+    .item-title {
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 0.3rem;
+    }
+    
+    .item-details {
+      font-size: 0.85rem;
+      color: #7f8c8d;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 15px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+      margin-top: 0.3rem;
+    }
+    
+    .badge-success {
+      background: #27ae60;
+      color: white;
+    }
+    
+    .badge-danger {
+      background: #e74c3c;
+      color: white;
+    }
+    
+    .badge-warning {
+      background: #f39c12;
+      color: white;
+    }
+    
+    .badge-info {
+      background: #3498db;
+      color: white;
+    }
+    
+    .liaison-section {
+      background: #e8f5e9;
+      padding: 2rem;
+      border-radius: 8px;
+      border-left: 4px solid #4caf50;
+      margin-bottom: 2rem;
+    }
+    
+    .liaison-section h2 {
+      color: #2e7d32;
+      margin-bottom: 1rem;
+    }
+    
+    .liaison-item {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      border: 1px solid #ddd;
+    }
+    
+    .liaison-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 0.8rem;
+    }
+    
+    .liaison-bien {
+      font-weight: 700;
+      color: #2c3e50;
+      font-size: 1.1rem;
+    }
+    
+    .liaison-locataire {
+      color: #667eea;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+    
+    .liaison-details {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+    
+    .co-locataires-list {
+      background: #fff3cd;
+      padding: 0.8rem;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+    }
+    
+    button {
+      padding: 0.8rem 2rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .btn-danger {
+      background: #e74c3c;
+      color: white;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: #7f8c8d;
+      font-style: italic;
+    }
+    
+    .info-box {
+      background: #e3f2fd;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid #2196f3;
+      font-size: 0.9rem;
+      color: #1976d2;
+    }
+    
+    #scrollTopBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 48px;
+      height: 48px;
+      background: #667eea;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    #scrollTopBtn.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #scrollTopBtn:hover {
+      transform: scale(1.2);
+      background: #764ba2;
+    }
+    
+    @media (max-width: 968px) {
+      .selection-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="/pages/menu.html" class="back-link">← Retour au menu</a>
+  
+  <div class="container">
+    <div class="header">
+      <h1>🔗 Liaison Bien - Locataire</h1>
+      <p style="color: #7f8c8d;">Attribuez des logements aux locataires</p>
+    </div>
+    
+    <div class="info-box">
+      ℹ️ <strong>Comment ça marche :</strong> Sélectionnez un bien disponible, puis sélectionnez un locataire (avec ses éventuels co-locataires). Un bien ne peut être occupé que par un seul groupe de locataires à la fois.
+    </div>
+    
+    <div class="selection-grid">
+      <!-- Sélection du bien -->
+      <div class="selection-panel">
+        <h2>🏢 Sélectionner un Bien</h2>
+        <div id="listeBiens"></div>
+      </div>
+      
+      <!-- Sélection du locataire -->
+      <div class="selection-panel">
+        <h2>👥 Sélectionner un Locataire</h2>
+        <div id="listeLocataires"></div>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <button id="btnAssocier" class="btn-primary" onclick="associer()" disabled>
+        ✅ Attribuer le logement au locataire
+      </button>
+    </div>
+    
+    <!-- Liaisons existantes -->
+    <div class="liaison-section">
+      <h2>📋 Attributions Actuelles</h2>
+      <div id="liaisonsExistantes"></div>
+    </div>
+  </div>
+  
+  <a href="#" id="scrollTopBtn" title="Retour en haut">↑</a>
+
+  <script type="module">
+    import { getBiens, initDB } from '/js/db.js';
+    import { getLocataires, updateLocataire } from '/js/db.js';
+    import { getProprietaires } from '/js/db.js';
+    import { showNotification } from '/js/app.js';
+    
+    let bienSelectionne = null;
+    let locataireSelectionne = null;
+    
+    // Gestion du scroll
+    window.addEventListener('scroll', function() {
+      const scrollBtn = document.getElementById('scrollTopBtn');
+      if (window.pageYOffset > 300) {
+        scrollBtn.classList.add('visible');
+      } else {
+        scrollBtn.classList.remove('visible');
+      }
+    });
+
+    document.getElementById("scrollTopBtn").addEventListener("click", function(e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    
+    async function chargerBiens() {
+      try {
+        const biens = await getBiens();
+        const locataires = await getLocataires();
+        const container = document.getElementById('listeBiens');
+        
+        if (biens.length === 0) {
+          container.innerHTML = '<div class="empty-state">Aucun bien enregistré. <a href="/pages/bien.html">Créer un bien</a></div>';
+          return;
+        }
+        
+        container.innerHTML = biens.map(b => {
+          const estOccupe = locataires.some(l => l.bienId === b.id);
+          const locataireActuel = locataires.find(l => l.bienId === b.id);
+          
+          return `
+            <div class="item-card ${bienSelectionne === b.id ? 'selected' : ''} ${estOccupe ? 'occupied' : ''}" 
+                 onclick="${estOccupe ? '' : `window.selectionnerBien('${b.id}')`}">
+              <div class="item-title">${b.typeBien ? (b.typeBien.charAt(0).toUpperCase() + b.typeBien.slice(1)) : 'Bien'} - ${b.reference || 'Sans référence'}</div>
+              <div class="item-details">
+                📍 ${b.adresse || 'Adresse non renseignée'}, ${b.ville || 'Ville non renseignée'}<br>
+                📐 ${b.surface || '?'} m² • ${b.nbPieces || '?'} pièce(s)
+                ${estOccupe ? 
+                  `<span class="badge badge-danger">🔒 Occupé par ${locataireActuel.civilite} ${locataireActuel.nom}</span>` : 
+                  `<span class="badge badge-success">✅ Disponible</span>`
+                }
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error('Erreur chargement biens:', err);
+        showNotification('Erreur lors du chargement des biens', 'error');
+      }
+    }
+    
+    async function chargerLocataires() {
+      try {
+        const locataires = await getLocataires();
+        const container = document.getElementById('listeLocataires');
+        
+        if (locataires.length === 0) {
+          container.innerHTML = '<div class="empty-state">Aucun locataire enregistré. <a href="/pages/locataire.html">Créer un locataire</a></div>';
+          return;
+        }
+        
+        const disabled = !bienSelectionne;
+        
+        container.innerHTML = locataires.map(l => {
+          const aDejaUnBien = l.bienId !== null && l.bienId !== undefined;
+          
+          return `
+            <div class="item-card ${locataireSelectionne === l.id ? 'selected' : ''} ${disabled || aDejaUnBien ? 'disabled' : ''}" 
+                 onclick="${disabled || aDejaUnBien ? '' : `window.selectionnerLocataire('${l.id}')`}">
+              <div class="item-title">${l.civilite} ${l.nom} ${l.prenom}</div>
+              <div class="item-details">
+                📧 ${l.email} • 📱 ${l.telephone}
+                ${l.profession ? `<br>💼 ${l.profession}` : ''}
+                ${l.revenus ? `<br>💰 ${parseFloat(l.revenus).toLocaleString('fr-FR')} € / mois` : ''}
+                ${l.coLocataires && l.coLocataires.length > 0 ? 
+                  `<span class="badge badge-warning">👥 ${l.coLocataires.length} co-locataire(s)</span>` : 
+                  ''
+                }
+                ${aDejaUnBien ? 
+                  `<span class="badge badge-info">🏠 Déjà logé</span>` : 
+                  `<span class="badge badge-success">✅ Disponible</span>`
+                }
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error('Erreur chargement locataires:', err);
+        showNotification('Erreur lors du chargement des locataires', 'error');
+      }
+    }
+    
+    window.selectionnerBien = async function(id) {
+      bienSelectionne = id;
+      locataireSelectionne = null;
+      await chargerBiens();
+      await chargerLocataires();
+      updateBouton();
+    };
+    
+    window.selectionnerLocataire = async function(id) {
+      locataireSelectionne = id;
+      await chargerLocataires();
+      updateBouton();
+    };
+    
+    function updateBouton() {
+      const btn = document.getElementById('btnAssocier');
+      btn.disabled = !bienSelectionne || !locataireSelectionne;
+    }
+    
+    window.associer = async function() {
+      if (!bienSelectionne || !locataireSelectionne) return;
+      
+      try {
+        // Vérifier que le bien n'est pas déjà occupé
+        let locataires = await getLocataires();
+        const bienDejaOccupe = locataires.some(l => l.bienId === bienSelectionne);
+        
+        if (bienDejaOccupe) {
+          showNotification('⚠️ Ce bien est déjà occupé par un autre locataire !', 'warning');
+          return;
+        }
+        
+        // Mise à jour du locataire
+        let locataire = locataires.find(l => l.id === locataireSelectionne);
+        if (locataire) {
+          locataire.bienId = bienSelectionne;
+          locataire.dateAttribution = new Date().toISOString();
+          await updateLocataire(locataire);
+        }
+        
+        showNotification('✅ Logement attribué avec succès !');
+        
+        // Réinitialisation
+        bienSelectionne = null;
+        locataireSelectionne = null;
+        await chargerBiens();
+        await chargerLocataires();
+        await chargerLiaisons();
+        updateBouton();
+      } catch (err) {
+        console.error('Erreur association:', err);
+        showNotification('Erreur lors de l\'attribution', 'error');
+      }
+    };
+    
+    async function chargerLiaisons() {
+      try {
+        const biens = await getBiens();
+        const locataires = await getLocataires();
+        const proprietaires = await getProprietaires();
+        const container = document.getElementById('liaisonsExistantes');
+        
+        const liaisons = locataires.filter(l => l.bienId).map(l => {
+          const bien = biens.find(b => b.id === l.bienId);
+          const proprios = bien && bien.proprietairesIds ? 
+            bien.proprietairesIds.map(pId => proprietaires.find(p => p.id === pId)).filter(p => p) : 
+            [];
+          
+          return {
+            locataire: l,
+            bien: bien,
+            proprietaires: proprios
+          };
+        }).filter(l => l.bien);
+        
+        if (liaisons.length === 0) {
+          container.innerHTML = '<div class="empty-state">Aucune attribution enregistrée</div>';
+          return;
+        }
+        
+        container.innerHTML = liaisons.map(l => `
+          <div class="liaison-item">
+            <div class="liaison-header">
+              <div>
+                <div class="liaison-bien">🏢 ${l.bien.reference || 'Sans référence'} - ${l.bien.adresse}</div>
+                <div class="liaison-locataire">👤 ${l.locataire.civilite} ${l.locataire.nom} ${l.locataire.prenom}</div>
+                ${l.locataire.coLocataires && l.locataire.coLocataires.length > 0 ? `
+                  <div class="co-locataires-list">
+                    <strong>👥 Co-locataires :</strong> 
+                    ${l.locataire.coLocataires.map(c => `${c.civilite} ${c.nom} ${c.prenom}`).join(', ')}
+                  </div>
+                ` : ''}
+              </div>
+              <button class="btn-danger" onclick="window.libererBien('${l.locataire.id}')">
+                🔓 Libérer le bien
+              </button>
+            </div>
+            <div class="liaison-details">
+              📐 ${l.bien.surface || '?'} m² • ${l.bien.nbPieces || '?'} pièce(s) • ${l.bien.ville}
+              ${l.proprietaires.length > 0 ? `<br>🏠 Propriétaire(s) : ${l.proprietaires.map(p => `${p.civilite} ${p.nom} ${p.prenom}`).join(', ')}` : ''}
+              ${l.locataire.dateAttribution ? `<br>📅 Attribué le ${new Date(l.locataire.dateAttribution).toLocaleDateString('fr-FR')}` : ''}
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Erreur chargement liaisons:', err);
+        showNotification('Erreur lors du chargement des liaisons', 'error');
+      }
+    }
+    
+    window.libererBien = async function(locataireId) {
+      if (!confirm('Voulez-vous vraiment libérer ce bien ? Le locataire n\'aura plus de logement attribué.')) return;
+      
+      try {
+        let locataires = await getLocataires();
+        let locataire = locataires.find(l => l.id === locataireId);
+        
+        if (locataire) {
+          locataire.bienId = null;
+          locataire.dateAttribution = null;
+          await updateLocataire(locataire);
+        }
+        
+        showNotification('✅ Bien libéré avec succès');
+        await chargerBiens();
+        await chargerLocataires();
+        await chargerLiaisons();
+      } catch (err) {
+        console.error('Erreur libération bien:', err);
+        showNotification('Erreur lors de la libération', 'error');
+      }
+    };
+    
+    // Initialisation
+    window.addEventListener('load', async function() {
+      await initDB();
+      await chargerBiens();
+      await chargerLocataires();
+      await chargerLiaisons();
+    });
+  </script>
+</body>
+</html>

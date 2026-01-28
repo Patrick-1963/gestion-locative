@@ -1,0 +1,1044 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Gestion des Locataires</title>
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css" />
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="manifest" href="/manifest.json">
+  <style>
+    body { 
+      max-width: 1400px; 
+      margin: 0 auto; 
+      padding: 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .container { 
+      background: white; 
+      padding: 2.5rem; 
+      border-radius: 16px; 
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      margin-bottom: 2rem;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    
+    h1 { 
+      color: #2c3e50; 
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid #e0e0e0;
+      /*flex-wrap: wrap;*/
+    }
+    
+    .tab {
+      padding: 1rem 2rem;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-weight: 600;
+      color: #7f8c8d;
+      transition: all 0.3s;
+    }
+    
+    .tab:hover {
+      color: #667eea;
+    }
+    
+    .tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .section {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      border-left: 4px solid #667eea;
+    }
+    
+    .section h2 {
+      color: #667eea;
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.3rem;
+      color: #2c3e50;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    
+    input, select, textarea {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      transition: border-color 0.3s;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .required::after {
+      content: " *";
+      color: #e74c3c;
+    }
+    
+    button {
+      padding: 0.8rem 2rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-danger {
+      background: #e74c3c;
+      color: white;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .btn-success {
+      background: #27ae60;
+      color: white;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .btn-success:hover {
+      background: #229954;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      transition: all 0.3s;
+    }
+    
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .locataire-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      border: 2px solid #e0e0e0;
+      transition: all 0.3s;
+    }
+    
+    .locataire-card:hover {
+      border-color: #667eea;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .locataire-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 1rem;
+    }
+    
+    .locataire-nom {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+    
+    .locataire-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .locataire-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.5rem;
+      color: #7f8c8d;
+      font-size: 0.9rem;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+      margin-right: 0.5rem;
+    }
+    
+    .badge-primary {
+      background: #667eea;
+      color: white;
+    }
+    
+    .badge-warning {
+      background: #f39c12;
+      color: white;
+    }
+    
+    .badge-success {
+      background: #27ae60;
+      color: white;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #7f8c8d;
+    }
+    
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    
+    .co-locataires-section {
+      background: #fff3cd;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-top: 1rem;
+      border-left: 4px solid #ffc107;
+    }
+    
+    .co-locataire-item {
+      background: white;
+      padding: 0.8rem;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .document-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8f9fa;
+      padding: 0.8rem;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .document-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .document-type {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    
+    .document-name {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+    }
+    
+    .document-date {
+      color: #95a5a6;
+      font-size: 0.8rem;
+      font-style: italic;
+    }
+    
+    .upload-section {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      border: 2px dashed #ddd;
+    }
+    
+    .upload-controls {
+      display: flex;
+      gap: 1rem;
+      align-items: end;
+      flex-wrap: wrap;
+    }
+    
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+    
+    .file-input-wrapper input[type=file] {
+      position: absolute;
+      left: -9999px;
+    }
+    
+    .file-input-label {
+      display: inline-block;
+      padding: 0.8rem 1.5rem;
+      background: white;
+      border: 2px solid #667eea;
+      color: #667eea;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    .file-input-label:hover {
+      background: #667eea;
+      color: white;
+    }
+    
+    .selected-file {
+      padding: 0.5rem 1rem;
+      background: #e3f2fd;
+      border-radius: 6px;
+      color: #1976d2;
+      font-size: 0.9rem;
+    }
+    
+    #scrollTopBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 48px;
+      height: 48px;
+      background: #667eea;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    #scrollTopBtn.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #scrollTopBtn:hover {
+      transform: scale(1.2);
+      background: #764ba2;
+    }
+    
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .tabs {
+        flex-direction: column;
+      }
+      
+      .locataire-actions {
+        flex-direction: column;
+      }
+      
+      .upload-controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="/pages/menu.html" class="back-link">← Retour au menu</a>
+  
+  <div class="container">
+    <div class="header">
+      <h1>👥 Gestion des Locataires</h1>
+      <p style="color: #7f8c8d;">Gérez vos locataires et co-locataires</p>
+    </div>
+    
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('liste', this)">📋 Liste</button>
+      <button class="tab" onclick="switchTab('ajouter', this)">➕ Ajouter</button>
+      <button class="tab" onclick="switchTab('admin', this)">📂 Administratif</button>
+    </div>
+    
+    <!-- Onglet Liste -->
+    <div id="tab-liste" class="tab-content active">
+      <div id="listeLocataires"></div>
+    </div>
+
+    <!-- Onglet Ajouter -->
+    <div id="tab-ajouter" class="tab-content">
+      <form id="locataireForm">
+        <div class="section">
+          <h2>📋 Identité</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="required">Civilité</label>
+              <select id="civilite" required>
+                <option value="">-- Sélectionner --</option>
+                <option value="M.">M.</option>
+                <option value="Mme">Mme</option>
+                <option value="Mlle">Mlle</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label class="required">Nom</label>
+              <input type="text" id="nom" placeholder="Ex: Martin" required />
+            </div>
+            
+            <div class="form-group">
+              <label class="required">Prénom</label>
+              <input type="text" id="prenom" placeholder="Ex: Sophie" required />
+            </div>
+            
+            <div class="form-group">
+              <label>Date de naissance</label>
+              <input type="date" id="dateNaissance" />
+            </div>
+            
+            <div class="form-group">
+              <label>Lieu de naissance</label>
+              <input type="text" id="lieuNaissance" placeholder="Ex: Lyon" />
+            </div>
+            
+            <div class="form-group">
+              <label>Nationalité</label>
+              <input type="text" id="nationalite" value="Française" />
+            </div>
+          </div>
+        </div>
+        
+        <div class="section">
+          <h2>📞 Coordonnées</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="required">Email</label>
+              <input type="email" id="email" placeholder="exemple@email.com" required />
+            </div>
+            
+            <div class="form-group">
+              <label class="required">Téléphone</label>
+              <input type="tel" id="telephone" placeholder="06 12 34 56 78" required />
+            </div>
+            
+            <div class="form-group">
+              <label>Téléphone secondaire</label>
+              <input type="tel" id="telephoneSecondaire" placeholder="01 23 45 67 89" />
+            </div>
+          </div>
+        </div>
+        
+        <div class="section">
+          <h2>💼 Situation Professionnelle</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Profession</label>
+              <input type="text" id="profession" placeholder="Ex: Ingénieur informatique" />
+            </div>
+            
+            <div class="form-group">
+              <label>Employeur</label>
+              <input type="text" id="employeur" placeholder="Nom de l'entreprise" />
+            </div>
+            
+            <div class="form-group">
+              <label>Type de contrat</label>
+              <select id="typeContrat">
+                <option value="">-- Sélectionner --</option>
+                <option value="cdi">CDI</option>
+                <option value="cdd">CDD</option>
+                <option value="interim">Intérim</option>
+                <option value="independant">Indépendant</option>
+                <option value="etudiant">Étudiant</option>
+                <option value="retraite">Retraité</option>
+                <option value="autre">Autre</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label>Revenus mensuels nets (€)</label>
+              <input type="number" id="revenus" step="0.01" placeholder="Ex: 2500.00" />
+            </div>
+          </div>
+        </div>
+        
+        <div class="section">
+          <h2>👨‍👩‍👧‍👦 Co-locataires (optionnel)</h2>
+          <p style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 1rem;">
+            Si plusieurs personnes occupent le logement, ajoutez les co-locataires
+          </p>
+          
+          <div id="coLocatairesListe"></div>
+          
+          <div id="coLocataireForm" style="display: none; background: white; padding: 1rem; border-radius: 6px; margin-top: 1rem;">
+            <h3 style="margin-bottom: 1rem;">Ajouter un co-locataire</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Civilité</label>
+                <select id="colocCivilite">
+                  <option value="M.">M.</option>
+                  <option value="Mme">Mme</option>
+                  <option value="Mlle">Mlle</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Nom</label>
+                <input type="text" id="colocNom" placeholder="Nom" />
+              </div>
+              <div class="form-group">
+                <label>Prénom</label>
+                <input type="text" id="colocPrenom" placeholder="Prénom" />
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="colocEmail" placeholder="Email" />
+              </div>
+              <div class="form-group">
+                <label>Téléphone</label>
+                <input type="tel" id="colocTelephone" placeholder="Téléphone" />
+              </div>
+            </div>
+            <div style="margin-top: 1rem;">
+              <button type="button" class="btn-secondary" onclick="annulerColocataire()">Annuler</button>
+              <button type="button" class="btn-success" onclick="ajouterColocataire()">✅ Ajouter</button>
+            </div>
+          </div>
+          
+          <button type="button" class="btn-secondary" id="btnAjouterColoc" onclick="afficherFormulaireColoc()" style="width: 100%; margin-top: 1rem;">
+            ➕ Ajouter un co-locataire
+          </button>
+        </div>
+        
+        <div class="section">
+          <h2>📋 Informations Complémentaires</h2>
+          <div class="form-group">
+            <label>Observations / Remarques</label>
+            <textarea id="observations" placeholder="Ajoutez toute information complémentaire utile..."></textarea>
+          </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 2rem;">
+          <button type="button" class="btn-secondary" onclick="resetForm()">Réinitialiser</button>
+          <button type="submit" class="btn-primary">💾 Enregistrer</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Onglet Administratif -->
+    <div id="tab-admin" class="tab-content">
+      <div id="listeDocsLocataires"></div>
+    </div>
+  </div>
+
+  <a href="#" id="scrollTopBtn" title="Retour en haut">↑</a>
+
+  <script type="module">
+    import { getLocataires, addLocataire, updateLocataire, deleteLocataire, initDB } from '/js/db.js';
+    import { showNotification } from '/js/app.js';
+    
+    let coLocataires = [];
+    let currentUploadFile = null;
+    let currentLocataireId = null;
+
+    // Gestion du scroll
+    window.addEventListener('scroll', function() {
+      const scrollBtn = document.getElementById('scrollTopBtn');
+      if (window.pageYOffset > 300) {
+        scrollBtn.classList.add('visible');
+      } else {
+        scrollBtn.classList.remove('visible');
+      }
+    });
+
+    document.getElementById("scrollTopBtn").addEventListener("click", function(e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Switch Tab
+    window.switchTab = function(tabName, element) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
+      element.classList.add('active');
+      document.getElementById('tab-' + tabName).classList.add('active');
+
+      if (tabName === 'liste') afficherListe();
+      if (tabName === 'admin') afficherDocsLocataires();
+    };
+
+    // Afficher la liste des locataires
+    async function afficherListe() {
+      try {
+        const locataires = await getLocataires();
+        const liste = document.getElementById('listeLocataires');
+        
+        if (locataires.length === 0) {
+          liste.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">👥</div>
+              <h3>Aucun locataire enregistré</h3>
+              <p>Cliquez sur l'onglet "Ajouter" pour créer votre premier locataire</p>
+            </div>
+          `;
+          return;
+        }
+        
+        liste.innerHTML = locataires.map(l => `
+          <div class="locataire-card">
+            <div class="locataire-header">
+              <div>
+                <div class="locataire-nom">${l.civilite} ${l.nom} ${l.prenom}</div>
+                ${l.profession ? `<span class="badge badge-primary">💼 ${l.profession}</span>` : ''}
+                ${l.coLocataires && l.coLocataires.length > 0 ? 
+                  `<span class="badge badge-warning">👥 ${l.coLocataires.length} co-locataire(s)</span>` : 
+                  ''}
+                ${l.bienId ? `<span class="badge badge-success">🏠 Logement attribué</span>` : ''}
+                ${(l.documents && l.documents.length > 0) ? `<span class="badge badge-primary">${l.documents.length} doc(s)</span>` : ''}
+              </div>
+              <div class="locataire-actions">
+                <button class="btn-danger" onclick="window.supprimerLocataire('${l.id}')">
+                  🗑️ Supprimer
+                </button>
+              </div>
+            </div>
+            <div class="locataire-details">
+              <div>📧 ${l.email}</div>
+              <div>📱 ${l.telephone}</div>
+              ${l.revenus ? `<div>💰 ${parseFloat(l.revenus).toLocaleString('fr-FR')} € / mois</div>` : ''}
+            </div>
+            ${l.coLocataires && l.coLocataires.length > 0 ? `
+              <div class="co-locataires-section">
+                <strong>Co-locataires :</strong>
+                ${l.coLocataires.map(c => `
+                  <div class="co-locataire-item">
+                    <span>${c.civilite} ${c.nom} ${c.prenom}</span>
+                    <span style="font-size: 0.85rem; color: #7f8c8d;">${c.email || ''} ${c.telephone || ''}</span>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Erreur affichage locataires:', err);
+        showNotification('Erreur lors du chargement', 'error');
+      }
+    }
+
+    // Afficher les documents des locataires
+    async function afficherDocsLocataires() {
+      try {
+        const locataires = await getLocataires();
+        const liste = document.getElementById('listeDocsLocataires');
+
+        if (locataires.length === 0) {
+          liste.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📂</div>
+              <h3>Aucun locataire</h3>
+              <p>Ajoutez un locataire dans l'onglet "Ajouter".</p>
+            </div>
+          `;
+          return;
+        }
+
+        liste.innerHTML = locataires.map(l => `
+          <div class="locataire-card">
+            <div class="locataire-header">
+              <div class="locataire-nom">${l.civilite} ${l.nom} ${l.prenom}</div>
+            </div>
+
+            <div style="margin-top: 1rem;">
+              <strong style="color: #2c3e50;">📄 Documents :</strong>
+              <div id="docs-${l.id}" style="margin-top: 0.5rem;">
+                ${afficherListeDocsLocataire(l)}
+              </div>
+            </div>
+
+            <div class="upload-section">
+              <label style="margin-bottom: 0.5rem; display: block; color: #667eea; font-weight: 600;">
+                ➕ Ajouter un document
+              </label>
+              <div class="upload-controls">
+                <div class="form-group" style="margin: 0; flex: 1; min-width: 200px;">
+                  <select id="typeDoc-${l.id}" style="margin: 0;">
+                    <option value="Pièce d'identité">Pièce d'identité</option>
+                    <option value="Justificatif de domicile">Justificatif de domicile</option>
+                    <option value="Attestation d'assurance">Attestation d'assurance</option>
+                    <option value="Contrat de travail">Contrat de travail</option>
+                    <option value="Bulletins de salaire">Bulletins de salaire</option>
+                    <option value="Avis d'imposition">Avis d'imposition</option>
+                    <option value="RIB">RIB</option>
+                    <option value="Autre">Autre</option>
+                  </select>
+                </div>
+
+                <div class="file-input-wrapper">
+                  <input type="file" id="fileInput-${l.id}" accept=".pdf,.jpg,.jpeg,.png" onchange="window.selectFileLocataire('${l.id}', this.files[0])">
+                  <label for="fileInput-${l.id}" class="file-input-label">
+                    📎 Choisir un fichier
+                  </label>
+                </div>
+
+                <div id="selectedFile-${l.id}" style="flex: 1;"></div>
+
+                <button class="btn-success" id="uploadBtn-${l.id}" style="display: none;" onclick="window.confirmerAjoutDocLocataire('${l.id}')">
+                  ✅ Ajouter
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Erreur affichage docs:', err);
+        showNotification('Erreur lors du chargement', 'error');
+      }
+    }
+
+    // Afficher la liste des documents d'un locataire
+    function afficherListeDocsLocataire(l) {
+      if (!l.documents || l.documents.length === 0) {
+        return `<p style="color: #95a5a6; font-style: italic;">Aucun document</p>`;
+      }
+
+      return l.documents.map((doc, index) => {
+        const dateAjout = new Date(doc.dateAjout).toLocaleDateString('fr-FR');
+        return `
+          <div class="document-item">
+            <div class="document-info">
+              <span>📄</span>
+              <div>
+                <div>
+                  <span class="document-type">${doc.type}</span>
+                  <span class="document-name"> — ${doc.nom}</span>
+                </div>
+                <div class="document-date">Ajouté le ${dateAjout}</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn-success" onclick="window.telechargerDocLocataire('${l.id}', ${index})" title="Télécharger">
+                📥
+              </button>
+              <button class="btn-danger" onclick="window.supprimerDocLocataire('${l.id}', ${index})" title="Supprimer">
+                🗑️
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Sélectionner un fichier
+    window.selectFileLocataire = function(id, file) {
+      if (!file) return;
+
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        showNotification('⚠️ Le fichier est trop volumineux (max 5MB)', 'warning');
+        return;
+      }
+
+      currentUploadFile = file;
+      currentLocataireId = id;
+
+      const selectedFileDiv = document.getElementById(`selectedFile-${id}`);
+      selectedFileDiv.innerHTML = `
+        <div class="selected-file">
+          📎 ${file.name} (${(file.size / 1024).toFixed(2)} KB)
+        </div>
+      `;
+
+      document.getElementById(`uploadBtn-${id}`).style.display = 'inline-block';
+    };
+
+    // Confirmer l'ajout du document
+    window.confirmerAjoutDocLocataire = async function(id) {
+      if (!currentUploadFile || currentLocataireId !== id) {
+        showNotification('⚠️ Veuillez sélectionner un fichier', 'warning');
+        return;
+      }
+
+      const typeSelect = document.getElementById(`typeDoc-${id}`);
+      const type = typeSelect.value;
+
+      const reader = new FileReader();
+      reader.onload = async function() {
+        try {
+          const locataires = await getLocataires();
+          let l = locataires.find(x => x.id === id);
+
+          if (!l.documents) l.documents = [];
+
+          l.documents.push({
+            nom: currentUploadFile.name,
+            type: type,
+            data: reader.result,
+            dateAjout: new Date().toISOString()
+          });
+
+          await updateLocataire(l);
+          
+          showNotification('✅ Document ajouté avec succès');
+          
+          currentUploadFile = null;
+          currentLocataireId = null;
+          
+          afficherDocsLocataires();
+        } catch (err) {
+          console.error('Erreur ajout doc:', err);
+          showNotification('Erreur lors de l\'ajout', 'error');
+        }
+      };
+
+      reader.readAsDataURL(currentUploadFile);
+    };
+
+    // Télécharger un document
+    window.telechargerDocLocataire = async function(id, index) {
+      try {
+        const locataires = await getLocataires();
+        let l = locataires.find(x => x.id === id);
+        
+        if (!l || !l.documents || !l.documents[index]) return;
+
+        const doc = l.documents[index];
+        const link = document.createElement('a');
+        link.href = doc.data;
+        link.download = doc.nom;
+        link.click();
+        
+        showNotification('📥 Téléchargement en cours...');
+      } catch (err) {
+        console.error('Erreur téléchargement:', err);
+      }
+    };
+
+    // Supprimer un document
+    window.supprimerDocLocataire = async function(id, index) {
+      if (!confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) return;
+
+      try {
+        const locataires = await getLocataires();
+        let l = locataires.find(x => x.id === id);
+
+        l.documents.splice(index, 1);
+
+        await updateLocataire(l);
+        
+        showNotification('✅ Document supprimé');
+        afficherDocsLocataires();
+      } catch (err) {
+        console.error('Erreur suppression:', err);
+        showNotification('Erreur lors de la suppression', 'error');
+      }
+    };
+
+    // Supprimer un locataire
+    window.supprimerLocataire = async function(id) {
+      if (!confirm('Êtes-vous sûr de vouloir supprimer ce locataire ?')) return;
+      
+      try {
+        await deleteLocataire(id);
+        showNotification('✅ Locataire supprimé avec succès');
+        afficherListe();
+      } catch (err) {
+        console.error('Erreur suppression:', err);
+        showNotification('Erreur lors de la suppression', 'error');
+      }
+    };
+
+    // Gestion des co-locataires
+    window.afficherFormulaireColoc = function() {
+      document.getElementById('coLocataireForm').style.display = 'block';
+      document.getElementById('btnAjouterColoc').style.display = 'none';
+    };
+    
+    window.annulerColocataire = function() {
+      document.getElementById('coLocataireForm').style.display = 'none';
+      document.getElementById('btnAjouterColoc').style.display = 'block';
+      document.getElementById('colocCivilite').value = 'M.';
+      document.getElementById('colocNom').value = '';
+      document.getElementById('colocPrenom').value = '';
+      document.getElementById('colocEmail').value = '';
+      document.getElementById('colocTelephone').value = '';
+    };
+    
+    window.ajouterColocataire = function() {
+      const nom = document.getElementById('colocNom').value.trim();
+      const prenom = document.getElementById('colocPrenom').value.trim();
+      
+      if (!nom || !prenom) {
+        showNotification('⚠️ Le nom et le prénom sont obligatoires', 'warning');
+        return;
+      }
+      
+      const coloc = {
+        civilite: document.getElementById('colocCivilite').value,
+        nom: nom,
+        prenom: prenom,
+        email: document.getElementById('colocEmail').value,
+        telephone: document.getElementById('colocTelephone').value
+      };
+      
+      coLocataires.push(coloc);
+      afficherColocataires();
+      annulerColocataire();
+      showNotification('✅ Co-locataire ajouté');
+    };
+    
+    function afficherColocataires() {
+      const liste = document.getElementById('coLocatairesListe');
+      
+      if (coLocataires.length === 0) {
+        liste.innerHTML = '<p style="color: #7f8c8d; font-style: italic;">Aucun co-locataire ajouté</p>';
+        return;
+      }
+      
+      liste.innerHTML = `
+        <div class="co-locataires-section">
+          <strong>Co-locataires ajoutés :</strong>
+          ${coLocataires.map((c, index) => `
+            <div class="co-locataire-item">
+              <div>
+                <strong>${c.civilite} ${c.nom} ${c.prenom}</strong><br>
+                <span style="font-size: 0.85rem; color: #7f8c8d;">${c.email || ''} ${c.telephone || ''}</span>
+              </div>
+              <button type="button" class="btn-danger" onclick="window.retirerColocataire(${index})" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+                🗑️ Retirer
+              </button>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+    
+    window.retirerColocataire = function(index) {
+      coLocataires.splice(index, 1);
+      afficherColocataires();
+      showNotification('✅ Co-locataire retiré');
+    };
+
+    // Réinitialiser le formulaire
+    window.resetForm = function() {
+      document.getElementById('locataireForm').reset();
+      coLocataires = [];
+      afficherColocataires();
+      annulerColocataire();
+    };
+
+    // Soumettre le formulaire
+    document.getElementById('locataireForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      try {
+        const locataireData = {
+          civilite: document.getElementById('civilite').value,
+          nom: document.getElementById('nom').value,
+          prenom: document.getElementById('prenom').value,
+          dateNaissance: document.getElementById('dateNaissance').value,
+          lieuNaissance: document.getElementById('lieuNaissance').value,
+          nationalite: document.getElementById('nationalite').value,
+          email: document.getElementById('email').value,
+          telephone: document.getElementById('telephone').value,
+          telephoneSecondaire: document.getElementById('telephoneSecondaire').value,
+          profession: document.getElementById('profession').value,
+          employeur: document.getElementById('employeur').value,
+          typeContrat: document.getElementById('typeContrat').value,
+          revenus: document.getElementById('revenus').value,
+          coLocataires: coLocataires,
+          observations: document.getElementById('observations').value,
+          bienId: null
+        };
+        
+        await addLocataire(locataireData);
+        showNotification('✅ Locataire enregistré avec succès !');
+        resetForm();
+        
+        const firstTab = document.querySelectorAll('.tab')[0];
+        switchTab('liste', firstTab);
+      } catch (err) {
+        console.error('Erreur enregistrement:', err);
+        showNotification('Erreur lors de l\'enregistrement', 'error');
+      }
+    });
+    
+    // Initialisation au chargement
+    window.addEventListener('load', async function() {
+      await initDB();
+      await afficherListe();
+      afficherColocataires();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Application de gestion locative professionnelle">
+  <meta name="theme-color" content="#667eea">
+  
+  <title>Gestion Locative Pro</title>
+  
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  
+  <!-- Apple -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GestionLoc">
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css">
+  
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    
+    .container {
+      max-width: 600px;
+      background: white;
+      padding: 3rem;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      animation: fadeIn 0.6s ease;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .logo {
+      font-size: 5rem;
+      margin-bottom: 1rem;
+    }
+    
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+      font-size: 2.5rem;
+      font-weight: 700;
+    }
+    
+    .subtitle {
+      color: #7f8c8d;
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .features {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin: 2rem 0;
+      text-align: left;
+    }
+    
+    .feature {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .feature-title {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 0.25rem;
+    }
+    
+    .feature-desc {
+      font-size: 0.9rem;
+      color: #7f8c8d;
+    }
+    
+    .btn-start {
+      display: inline-block;
+      padding: 1rem 3rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      margin-top: 2rem;
+    }
+    
+    .btn-start:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+    }
+    
+    .install-prompt {
+      background: #e3f2fd;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 2rem;
+      border-left: 4px solid #2196f3;
+      display: none;
+    }
+    
+    .install-prompt.visible {
+      display: block;
+      animation: slideUp 0.4s ease;
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .install-btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.8rem 2rem;
+      background: #2196f3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .install-btn:hover {
+      background: #1976d2;
+      transform: translateY(-2px);
+    }
+    
+    .status {
+      margin-top: 2rem;
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+    
+    .status.loading {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .status.ready {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 2rem;
+        margin: 1rem;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .features {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">🏠</div>
+    <h1>Gestion Locative Pro</h1>
+    <p class="subtitle">Gérez vos biens immobiliers en toute simplicité</p>
+    
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">🏢</div>
+        <div class="feature-title">Biens</div>
+        <div class="feature-desc">Gérez votre parc immobilier</div>
+      </div>
+      
+      <div class="feature">
+        <div class="feature-icon">👥</div>
+        <div class="feature-title">Locataires</div>
+        <div class="feature-desc">Suivez vos locataires</div>
+      </div>
+      
+      <div class="feature">
+        <div class="feature-icon">📄</div>
+        <div class="feature-title">Baux</div>
+        <div class="feature-desc">Créez des contrats conformes</div>
+      </div>
+      
+      <div class="feature">
+        <div class="feature-icon">🧾</div>
+        <div class="feature-title">Quittances</div>
+        <div class="feature-desc">Générez vos quittances</div>
+      </div>
+    </div>
+    
+    <a href="/pages/menu.html" class="btn-start" id="btnStart">
+      🚀 Commencer
+    </a>
+    
+    <div id="installPrompt" class="install-prompt">
+      <strong>📱 Installer l'application</strong>
+      <p>Installez Gestion Locative Pro sur votre appareil pour un accès rapide et un mode hors ligne.</p>
+      <button id="installBtn" class="install-btn">
+        ⬇️ Installer maintenant
+      </button>
+    </div>
+    
+    <div id="status" class="status loading">
+      ⏳ Initialisation de l'application...
+    </div>
+  </div>
+  
+  <script type="module">
+    import { init } from '/js/app.js';
+    
+    const statusEl = document.getElementById('status');
+    const installPromptEl = document.getElementById('installPrompt');
+    const installBtn = document.getElementById('installBtn');
+    const btnStart = document.getElementById('btnStart');
+    let deferredPrompt = null;
+    
+    // Désactiver le bouton pendant l'initialisation
+    btnStart.style.opacity = '0.5';
+    btnStart.style.pointerEvents = 'none';
+    
+    // Initialiser l'application
+    try {
+      await init();
+      statusEl.className = 'status ready';
+      statusEl.textContent = '✅ Application prête - Redirection...';
+      
+      // Activer le bouton
+      btnStart.style.opacity = '1';
+      btnStart.style.pointerEvents = 'auto';
+      
+      // Rediriger automatiquement vers le menu après 1 seconde
+      setTimeout(() => {
+        window.location.href = '/pages/menu.html';
+      }, 1000);
+    } catch (err) {
+      console.error('Erreur initialisation:', err);
+      statusEl.className = 'status error';
+      statusEl.textContent = '❌ Erreur d\'initialisation';
+      
+      // Réactiver le bouton même en cas d'erreur
+      btnStart.style.opacity = '1';
+      btnStart.style.pointerEvents = 'auto';
+    }
+    
+    // Gestion de l'installation PWA
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installPromptEl.classList.add('visible');
+    });
+    
+    installBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      
+      if (outcome === 'accepted') {
+        console.log('✅ PWA installée');
+        installPromptEl.classList.remove('visible');
+      }
+      
+      deferredPrompt = null;
+    });
+    
+    // Détection si déjà installée
+    window.addEventListener('appinstalled', () => {
+      console.log('✅ PWA installée avec succès');
+      installPromptEl.classList.remove('visible');
+    });
+    
+    // Vérifier si lancée depuis l'écran d'accueil
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+      console.log('✅ Lancée en mode standalone');
+    }
+  </script>
+</body>
+</html>

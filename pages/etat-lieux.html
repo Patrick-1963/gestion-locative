@@ -1,0 +1,1525 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>État des Lieux</title>
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css" />
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="manifest" href="/manifest.json">
+  <style>
+    body { 
+      max-width: 1600px; 
+      margin: 0 auto; 
+      padding: 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .container { 
+      background: white; 
+      padding: 2.5rem; 
+      border-radius: 16px; 
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      margin-bottom: 2rem;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    
+    h1 { 
+      color: #2c3e50; 
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid #e0e0e0;
+      flex-wrap: wrap;
+    }
+    
+    .tab {
+      padding: 1rem 1.5rem;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-weight: 600;
+      color: #7f8c8d;
+      transition: all 0.3s;
+      font-size: 0.95rem;
+    }
+    
+    .tab:hover {
+      color: #667eea;
+    }
+    
+    .tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .section {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      border-left: 4px solid #667eea;
+    }
+    
+    .section h2 {
+      color: #667eea;
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.3rem;
+      color: #2c3e50;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    
+    input, select, textarea {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      transition: border-color 0.3s;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    
+    .required::after {
+      content: " *";
+      color: #e74c3c;
+    }
+    
+    button {
+      padding: 0.8rem 2rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-success {
+      background: #27ae60;
+      color: white;
+    }
+    
+    .btn-danger {
+      background: #e74c3c;
+      color: white;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      transition: all 0.3s;
+    }
+    
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .info-box {
+      background: #e3f2fd;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid #2196f3;
+      font-size: 0.9rem;
+      color: #1976d2;
+    }
+    
+    .piece-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      border: 2px solid #e0e0e0;
+      transition: all 0.3s;
+    }
+    
+    .piece-card:hover {
+      border-color: #667eea;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .piece-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .piece-titre {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+    
+    .element-item {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 0.8rem;
+      border-left: 3px solid #667eea;
+    }
+    
+    .element-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 0.8rem;
+    }
+    
+    .element-nom {
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 1.05rem;
+    }
+    
+    .etat-badge {
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    .etat-bon {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .etat-moyen {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .etat-mauvais {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .photos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .photo-item {
+      position: relative;
+      aspect-ratio: 1;
+      border: 2px dashed #ddd;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8f9fa;
+      cursor: pointer;
+      transition: all 0.3s;
+      overflow: hidden;
+    }
+    
+    .photo-item:hover {
+      border-color: #667eea;
+      background: #f0f2ff;
+    }
+    
+    .photo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .photo-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    .photo-item:hover .photo-overlay {
+      display: flex;
+    }
+    
+    .photo-btn {
+      background: white;
+      border: none;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+    
+    .photo-btn:hover {
+      transform: scale(1.1);
+    }
+    
+    .photo-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 0.3rem;
+      font-size: 0.75rem;
+      text-align: center;
+    }
+    
+    .photo-upload-zone {
+      border: 2px dashed #667eea;
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      background: #f8f9ff;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .photo-upload-zone:hover {
+      background: #e8ebff;
+      border-color: #5568d3;
+    }
+    
+    .photo-upload-zone.dragover {
+      background: #d4dbff;
+      border-color: #4450b8;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #7f8c8d;
+    }
+    
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal.active {
+      display: flex;
+    }
+    
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .modal-close {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #scrollTopBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 48px;
+      height: 48px;
+      background: #667eea;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    #scrollTopBtn.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #scrollTopBtn:hover {
+      transform: scale(1.2);
+      background: #764ba2;
+    }
+    
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .tabs {
+        flex-direction: column;
+      }
+      
+      .tab {
+        border-bottom: none;
+        border-left: 3px solid transparent;
+      }
+      
+      .tab.active {
+        border-bottom: none;
+        border-left-color: #667eea;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="/pages/menu.html" class="back-link">← Retour au menu</a>
+  
+  <div class="container">
+    <div class="header">
+      <h1>📋 État des Lieux</h1>
+      <p style="color: #7f8c8d;">Créez un état des lieux complet et détaillé</p>
+    </div>
+    
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('general')">📋 Informations</button>
+      <button class="tab" onclick="switchTab('pieces')">🏠 Pièces</button>
+      <button class="tab" onclick="switchTab('compteurs')">⚡ Compteurs</button>
+      <button class="tab" onclick="switchTab('cles')">🔑 Clés & Accès</button>
+      <button class="tab" onclick="switchTab('equipements')">🔧 Équipements</button>
+      <button class="tab" onclick="switchTab('photos')">📸 Photos</button>
+      <button class="tab" onclick="switchTab('finalisation')">✅ Finalisation</button>
+    </div>
+    
+    <!-- Onglet Général -->
+    <div id="tab-general" class="tab-content active">
+      <div class="info-box">
+        ℹ️ Sélectionnez le bien et le type d'état des lieux pour commencer
+      </div>
+      
+      <div class="section">
+        <h2>🏢 Sélection du Bien</h2>
+        <div class="form-group">
+          <label class="required">Bien concerné</label>
+          <select id="bienId" required onchange="chargerInfosBien()">
+            <option value="">-- Sélectionner un bien --</option>
+          </select>
+        </div>
+        <div id="infoBien" style="margin-top: 1rem;"></div>
+      </div>
+      
+      <div class="section">
+        <h2>📝 Type d'État des Lieux</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="required">Type</label>
+            <select id="typeEDL" required>
+              <option value="">-- Sélectionner --</option>
+              <option value="entree">État des lieux d'entrée</option>
+              <option value="sortie">État des lieux de sortie</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label class="required">Date de l'état des lieux</label>
+            <input type="date" id="dateEDL" required />
+          </div>
+          
+          <div class="form-group">
+            <label>Heure de début</label>
+            <input type="time" id="heureDebut" />
+          </div>
+          
+          <div class="form-group">
+            <label>Heure de fin</label>
+            <input type="time" id="heureFin" />
+          </div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <h2>👥 Présents lors de l'état des lieux</h2>
+        <div id="presentsInfo"></div>
+        <div class="form-group" style="margin-top: 1rem;">
+          <label>Autres présents (expert, huissier, etc.)</label>
+          <textarea id="autresPresents" placeholder="Nom, qualité, coordonnées..."></textarea>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Onglet Pièces -->
+    <div id="tab-pieces" class="tab-content">
+      <div class="info-box">
+        💡 Ajoutez toutes les pièces du logement et décrivez l'état de chaque élément
+      </div>
+      
+      <button class="btn-success" onclick="ouvrirModalPiece()" style="margin-bottom: 1.5rem;">
+        ➕ Ajouter une pièce
+      </button>
+      
+      <div id="listePieces"></div>
+    </div>
+    
+    <!-- Onglet Compteurs -->
+    <div id="tab-compteurs" class="tab-content">
+      <div class="info-box">
+        ⚡ Relevez tous les compteurs (électricité, gaz, eau)
+      </div>
+      
+      <div class="section">
+        <h2>💡 Électricité</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Numéro de compteur</label>
+            <input type="text" id="compteurElecNum" placeholder="Ex: 123456789" />
+          </div>
+          <div class="form-group">
+            <label>Index (kWh)</label>
+            <input type="number" id="compteurElecIndex" step="1" placeholder="Ex: 12345" />
+          </div>
+          <div class="form-group">
+            <label>Type</label>
+            <select id="compteurElecType">
+              <option value="">-- Sélectionner --</option>
+              <option value="simple">Simple</option>
+              <option value="double">Double (heures pleines/creuses)</option>
+            </select>
+          </div>
+        </div>
+        <div id="elecDouble" style="display: none;">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Index Heures Pleines</label>
+              <input type="number" id="compteurElecHP" step="1" placeholder="Ex: 7500" />
+            </div>
+            <div class="form-group">
+              <label>Index Heures Creuses</label>
+              <input type="number" id="compteurElecHC" step="1" placeholder="Ex: 4845" />
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <h2>🔥 Gaz</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Numéro de compteur</label>
+            <input type="text" id="compteurGazNum" placeholder="Ex: GZ987654321" />
+          </div>
+          <div class="form-group">
+            <label>Index (m³)</label>
+            <input type="number" id="compteurGazIndex" step="1" placeholder="Ex: 5678" />
+          </div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <h2>💧 Eau Froide</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Numéro de compteur</label>
+            <input type="text" id="compteurEauNum" placeholder="Ex: EAU123456" />
+          </div>
+          <div class="form-group">
+            <label>Index (m³)</label>
+            <input type="number" id="compteurEauIndex" step="0.001" placeholder="Ex: 123.456" />
+          </div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <h2>🌡️ Eau Chaude (si compteur individuel)</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Numéro de compteur</label>
+            <input type="text" id="compteurEauChaudeNum" placeholder="Ex: EC123456" />
+          </div>
+          <div class="form-group">
+            <label>Index (m³)</label>
+            <input type="number" id="compteurEauChaudeIndex" step="0.001" placeholder="Ex: 45.678" />
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Onglet Clés -->
+    <div id="tab-cles" class="tab-content">
+      <div class="info-box">
+        🔑 Inventaire des clés, badges et moyens d'accès remis
+      </div>
+      
+      <button class="btn-success" onclick="ajouterCle()" style="margin-bottom: 1.5rem;">
+        ➕ Ajouter une clé/badge
+      </button>
+      
+      <div id="listeCles"></div>
+    </div>
+    
+    <!-- Onglet Équipements -->
+    <div id="tab-equipements" class="tab-content">
+      <div class="info-box">
+        🔧 Liste des équipements et appareils fournis avec le logement
+      </div>
+      
+      <button class="btn-success" onclick="ajouterEquipement()" style="margin-bottom: 1.5rem;">
+        ➕ Ajouter un équipement
+      </button>
+      
+      <div id="listeEquipements"></div>
+    </div>
+    
+    <!-- Onglet Photos Générales -->
+    <div id="tab-photos" class="tab-content">
+      <div class="info-box">
+        📸 Photos générales du bien (extérieur, vues d'ensemble, compteurs, etc.)
+      </div>
+      
+      <div class="section">
+        <h2>📷 Ajouter des photos</h2>
+        <div class="photo-upload-zone" onclick="document.getElementById('photosGeneralesInput').click()" ondrop="handleDrop(event, 'general')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+          <div style="font-size: 4rem; margin-bottom: 1rem;">📸</div>
+          <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;">Cliquez pour ajouter des photos</div>
+          <div style="font-size: 0.95rem; color: #7f8c8d; margin-bottom: 0.5rem;">ou glissez-déposez vos images ici</div>
+          <div style="font-size: 0.85rem; color: #95a5a6;">JPG, PNG - Max 5 Mo par photo</div>
+        </div>
+        <input type="file" id="photosGeneralesInput" accept="image/*" multiple style="display: none;" onchange="ajouterPhotosGenerales(event)" />
+      </div>
+      
+      <div id="photosGeneralesContainer"></div>
+    </div>
+    
+    <!-- Onglet Finalisation -->
+    <div id="tab-finalisation" class="tab-content">
+      <div class="section">
+        <h2>📝 Observations Générales</h2>
+        <div class="form-group">
+          <label>Remarques importantes</label>
+          <textarea id="observationsGenerales" placeholder="Ajoutez toute remarque importante concernant l'état général du logement..." style="min-height: 150px;"></textarea>
+        </div>
+      </div>
+      
+      <div class="section">
+        <h2>✏️ Signatures</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="signatureBailleur" />
+              Le bailleur (ou son représentant) a signé
+            </label>
+          </div>
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="signatureLocataire" />
+              Le locataire a signé
+            </label>
+          </div>
+        </div>
+      </div>
+      
+      <div style="text-align: center; margin-top: 2rem;">
+        <button class="btn-secondary" onclick="window.location.href='/pages/menu.html'">Annuler</button>
+        <button class="btn-primary" onclick="enregistrerEtatDesLieux()">💾 Enregistrer l'État des Lieux</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Ajout Pièce -->
+  <div id="modalPiece" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalPieceTitre">Ajouter une pièce</h2>
+        <button class="modal-close" onclick="fermerModalPiece()">×</button>
+      </div>
+      
+      <div class="form-group">
+        <label class="required">Type de pièce</label>
+        <select id="pieceType" required>
+          <option value="">-- Sélectionner --</option>
+          <option value="entree">Entrée</option>
+          <option value="salon">Salon</option>
+          <option value="salle_a_manger">Salle à manger</option>
+          <option value="cuisine">Cuisine</option>
+          <option value="chambre">Chambre</option>
+          <option value="bureau">Bureau</option>
+          <option value="salle_de_bain">Salle de bain</option>
+          <option value="salle_d_eau">Salle d'eau</option>
+          <option value="wc">WC</option>
+          <option value="couloir">Couloir</option>
+          <option value="dressing">Dressing</option>
+          <option value="cellier">Cellier</option>
+          <option value="buanderie">Buanderie</option>
+          <option value="balcon">Balcon</option>
+          <option value="terrasse">Terrasse</option>
+          <option value="jardin">Jardin</option>
+          <option value="garage">Garage</option>
+          <option value="cave">Cave</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>Nom personnalisé (optionnel)</label>
+        <input type="text" id="pieceNom" placeholder="Ex: Chambre 1, Grande salle de bain..." />
+      </div>
+      
+      <div class="form-group">
+        <label>Surface (m²)</label>
+        <input type="number" id="pieceSurface" step="0.01" placeholder="Ex: 12.50" />
+      </div>
+      
+      <button class="btn-primary" onclick="ajouterPieceToList()" style="width: 100%; margin-top: 1rem;">
+        ✅ Ajouter la pièce
+      </button>
+    </div>
+  </div>
+  
+  <!-- Modal Ajout Élément -->
+  <div id="modalElement" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Ajouter un élément</h2>
+        <button class="modal-close" onclick="fermerModalElement()">×</button>
+      </div>
+      
+      <div class="form-group">
+        <label class="required">Type d'élément</label>
+        <select id="elementType" required>
+          <option value="">-- Sélectionner --</option>
+          <optgroup label="Revêtements">
+            <option value="sol">Sol</option>
+            <option value="murs">Murs</option>
+            <option value="plafond">Plafond</option>
+            <option value="plinthe">Plinthes</option>
+          </optgroup>
+          <optgroup label="Menuiseries">
+            <option value="porte">Porte</option>
+            <option value="fenetre">Fenêtre</option>
+            <option value="volet">Volet</option>
+            <option value="porte_fenetre">Porte-fenêtre</option>
+          </optgroup>
+          <optgroup label="Électricité">
+            <option value="prise">Prise électrique</option>
+            <option value="interrupteur">Interrupteur</option>
+            <option value="eclairage">Éclairage</option>
+          </optgroup>
+          <optgroup label="Plomberie/Sanitaire">
+            <option value="lavabo">Lavabo</option>
+            <option value="baignoire">Baignoire</option>
+            <option value="douche">Douche</option>
+            <option value="wc">WC</option>
+            <option value="robinetterie">Robinetterie</option>
+            <option value="evier">Évier</option>
+          </optgroup>
+          <optgroup label="Chauffage">
+            <option value="radiateur">Radiateur</option>
+            <option value="thermostat">Thermostat</option>
+            <option value="chaudiere">Chaudière</option>
+          </optgroup>
+          <optgroup label="Autre">
+            <option value="placard">Placard</option>
+            <option value="autre">Autre</option>
+          </optgroup>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>Description</label>
+        <input type="text" id="elementDescription" placeholder="Ex: Parquet chêne, Prise double, Fenêtre double vitrage..." />
+      </div>
+      
+      <div class="form-group">
+        <label>Quantité</label>
+        <input type="number" id="elementQuantite" value="1" min="1" />
+      </div>
+      
+      <div class="form-group">
+        <label class="required">État</label>
+        <select id="elementEtat" required>
+          <option value="bon">Bon état</option>
+          <option value="moyen">État moyen (usure normale)</option>
+          <option value="mauvais">Mauvais état (dégradation)</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>Observations</label>
+        <textarea id="elementObservations" placeholder="Détails, défauts constatés, rayures, taches..."></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label>Photos de l'élément</label>
+        <div class="photo-upload-zone" onclick="document.getElementById('elementPhotoInput').click()" ondrop="handleDrop(event, 'element')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+          <div style="font-size: 3rem; margin-bottom: 0.5rem;">📸</div>
+          <div><strong>Cliquez pour ajouter des photos</strong></div>
+          <div style="font-size: 0.85rem; color: #7f8c8d; margin-top: 0.5rem;">ou glissez-déposez vos images ici</div>
+          <div style="font-size: 0.75rem; color: #95a5a6; margin-top: 0.3rem;">JPG, PNG - Max 5 Mo par photo</div>
+        </div>
+        <input type="file" id="elementPhotoInput" accept="image/*" multiple style="display: none;" onchange="ajouterPhotosElement(event)" />
+        <div id="elementPhotosPreview" class="photos-grid" style="margin-top: 1rem;"></div>
+      </div>
+      
+      <button class="btn-primary" onclick="ajouterElementToPiece()" style="width: 100%; margin-top: 1rem;">
+        ✅ Ajouter l'élément
+      </button>
+    </div>
+  </div>
+
+  <a href="#" id="scrollTopBtn" title="Retour en haut">↑</a>
+
+  <script type="module">
+    import { getBiens, initDB } from '/js/db.js';
+    import { getProprietaires, getLocataires } from '/js/db.js';
+    import { addEtatDesLieux } from '/js/db.js';
+    import { showNotification } from '/js/app.js';
+    
+    let pieces = [];
+    let cles = [];
+    let equipements = [];
+    let pieceEnCours = null;
+    let photosElementTemp = [];
+    let photosGenerales = [];
+    
+    // Gestion du scroll
+    window.addEventListener('scroll', function() {
+      const scrollBtn = document.getElementById('scrollTopBtn');
+      if (window.pageYOffset > 300) {
+        scrollBtn.classList.add('visible');
+      } else {
+        scrollBtn.classList.remove('visible');
+      }
+    });
+
+    document.getElementById("scrollTopBtn").addEventListener("click", function(e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', async function() {
+      await initDB();
+      await chargerBiens();
+      document.getElementById('dateEDL').valueAsDate = new Date();
+      
+      // Gestion compteur électricité double
+      document.getElementById('compteurElecType').addEventListener('change', function() {
+        document.getElementById('elecDouble').style.display = 
+          this.value === 'double' ? 'block' : 'none';
+      });
+    });
+    
+    // Gestion drag & drop
+    window.handleDragOver = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.classList.add('dragover');
+    };
+    
+    window.handleDragLeave = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.classList.remove('dragover');
+    };
+    
+    window.handleDrop = function(e, type) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.classList.remove('dragover');
+      
+      const files = e.dataTransfer.files;
+      if (type === 'element') {
+        ajouterPhotosElement({ target: { files } });
+      } else if (type === 'general') {
+        ajouterPhotosGenerales({ target: { files } });
+      }
+    };
+    
+    // Gestion des photos d'éléments
+    window.ajouterPhotosElement = function(event) {
+      const files = event.target.files;
+      
+      for (let file of files) {
+        if (!file.type.startsWith('image/')) {
+          showNotification('⚠️ Seules les images sont acceptées', 'warning');
+          continue;
+        }
+        
+        if (file.size > 5 * 1024 * 1024) {
+          showNotification('⚠️ L\'image ' + file.name + ' dépasse 5 Mo', 'warning');
+          continue;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          photosElementTemp.push({
+            data: e.target.result,
+            nom: file.name,
+            date: new Date().toISOString()
+          });
+          afficherPhotosElementPreview();
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    
+    function afficherPhotosElementPreview() {
+      const container = document.getElementById('elementPhotosPreview');
+      
+      if (photosElementTemp.length === 0) {
+        container.innerHTML = '';
+        return;
+      }
+      
+      container.innerHTML = photosElementTemp.map((photo, index) => `
+        <div class="photo-item">
+          <img src="${photo.data}" alt="${photo.nom}" />
+          <div class="photo-overlay">
+            <button class="photo-btn" onclick="window.supprimerPhotoElementTemp(${index}); event.stopPropagation();" title="Supprimer">
+              🗑️
+            </button>
+          </div>
+          <div class="photo-label">${photo.nom}</div>
+        </div>
+      `).join('');
+    }
+    
+    window.supprimerPhotoElementTemp = function(index) {
+      photosElementTemp.splice(index, 1);
+      afficherPhotosElementPreview();
+    };
+    
+    // Gestion des photos générales
+    window.ajouterPhotosGenerales = function(event) {
+      const files = event.target.files;
+      
+      for (let file of files) {
+        if (!file.type.startsWith('image/')) {
+          showNotification('⚠️ Seules les images sont acceptées', 'warning');
+          continue;
+        }
+        
+        if (file.size > 5 * 1024 * 1024) {
+          showNotification('⚠️ L\'image ' + file.name + ' dépasse 5 Mo', 'warning');
+          continue;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const categorie = prompt('Catégorie de la photo (ex: Extérieur, Compteurs, Vue d\'ensemble, etc.) :', 'Général');
+          photosGenerales.push({
+            data: e.target.result,
+            nom: file.name,
+            categorie: categorie || 'Général',
+            date: new Date().toISOString()
+          });
+          afficherPhotosGenerales();
+        };
+        reader.readAsDataURL(file);
+      }
+      
+      document.getElementById('photosGeneralesInput').value = '';
+    };
+    
+    function afficherPhotosGenerales() {
+      const container = document.getElementById('photosGeneralesContainer');
+      
+      if (photosGenerales.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>Aucune photo ajoutée</p></div>';
+        return;
+      }
+      
+      const parCategorie = {};
+      photosGenerales.forEach((photo, index) => {
+        if (!parCategorie[photo.categorie]) {
+          parCategorie[photo.categorie] = [];
+        }
+        parCategorie[photo.categorie].push({ ...photo, index });
+      });
+      
+      let html = '';
+      Object.keys(parCategorie).forEach(categorie => {
+        html += `
+          <div class="section" style="margin-top: 1.5rem;">
+            <h2>${categorie} (${parCategorie[categorie].length})</h2>
+            <div class="photos-grid">
+              ${parCategorie[categorie].map(photo => `
+                <div class="photo-item">
+                  <img src="${photo.data}" alt="${photo.nom}" onclick="window.agrandirPhoto('${photo.data}')" />
+                  <div class="photo-overlay">
+                    <button class="photo-btn" onclick="window.modifierCategoriePhoto(${photo.index}); event.stopPropagation();" title="Modifier catégorie">
+                      ✏️
+                    </button>
+                    <button class="photo-btn" onclick="window.supprimerPhotoGenerale(${photo.index}); event.stopPropagation();" title="Supprimer">
+                      🗑️
+                    </button>
+                  </div>
+                  <div class="photo-label">${photo.nom}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+    
+    window.modifierCategoriePhoto = function(index) {
+      const nouvelleCategorie = prompt('Nouvelle catégorie :', photosGenerales[index].categorie);
+      if (nouvelleCategorie) {
+        photosGenerales[index].categorie = nouvelleCategorie;
+        afficherPhotosGenerales();
+      }
+    };
+    
+    window.supprimerPhotoGenerale = function(index) {
+      if (confirm('Supprimer cette photo ?')) {
+        photosGenerales.splice(index, 1);
+        afficherPhotosGenerales();
+      }
+    };
+    
+    window.agrandirPhoto = function(data) {
+      const modal = document.createElement('div');
+      modal.className = 'modal active';
+      modal.onclick = () => modal.remove();
+      modal.innerHTML = `
+        <div style="max-width: 90%; max-height: 90%; position: relative;">
+          <img src="${data}" style="max-width: 100%; max-height: 90vh; border-radius: 8px;" />
+          <button class="modal-close" style="position: absolute; top: 10px; right: 10px;">×</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    };
+    
+    async function chargerBiens() {
+      try {
+        const biens = await getBiens();
+        const select = document.getElementById('bienId');
+        
+        select.innerHTML = '<option value="">-- Sélectionner un bien --</option>';
+        biens.forEach(b => {
+          const option = document.createElement('option');
+          option.value = b.id;
+          option.textContent = `${b.reference || 'Sans ref'} - ${b.adresse}, ${b.ville}`;
+          select.appendChild(option);
+        });
+      } catch (err) {
+        console.error('Erreur chargement biens:', err);
+        showNotification('Erreur lors du chargement des biens', 'error');
+      }
+    }
+    
+    window.chargerInfosBien = async function() {
+      const bienId = document.getElementById('bienId').value;
+      if (!bienId) {
+        document.getElementById('infoBien').innerHTML = '';
+        document.getElementById('presentsInfo').innerHTML = '';
+        return;
+      }
+      
+      try {
+        const biens = await getBiens();
+        const proprietaires = await getProprietaires();
+        const locataires = await getLocataires();
+        
+        const bien = biens.find(b => b.id === bienId);
+        if (!bien) return;
+        
+        const proprios = bien.proprietairesIds ? 
+          bien.proprietairesIds.map(pId => proprietaires.find(p => p.id === pId)).filter(p => p) : [];
+        
+        const locataire = locataires.find(l => l.bienId === bienId);
+        
+        document.getElementById('infoBien').innerHTML = `
+          <div style="background: #e3f2fd; padding: 1rem; border-radius: 6px;">
+            <strong>🏢 ${bien.typeBien ? (bien.typeBien.charAt(0).toUpperCase() + bien.typeBien.slice(1)) : 'Bien'}</strong><br>
+            📍 ${bien.adresse}, ${bien.codePostal} ${bien.ville}<br>
+            📐 ${bien.surface || '?'} m² • ${bien.nbPieces || '?'} pièce(s)
+          </div>
+        `;
+        
+        let presentsHTML = '<div style="background: #f8f9fa; padding: 1rem; border-radius: 6px;">';
+        
+        if (proprios.length > 0) {
+          presentsHTML += '<strong>🏠 Propriétaire(s) :</strong><br>';
+          proprios.forEach(p => {
+            presentsHTML += `${p.civilite} ${p.nom} ${p.prenom} - ${p.telephone}<br>`;
+          });
+        }
+        
+        if (locataire) {
+          presentsHTML += '<br><strong>👤 Locataire :</strong><br>';
+          presentsHTML += `${locataire.civilite} ${locataire.nom} ${locataire.prenom} - ${locataire.telephone}<br>`;
+          
+          if (locataire.coLocataires && locataire.coLocataires.length > 0) {
+            presentsHTML += '<br><strong>👥 Co-locataire(s) :</strong><br>';
+            locataire.coLocataires.forEach(c => {
+              presentsHTML += `${c.civilite} ${c.nom} ${c.prenom}<br>`;
+            });
+          }
+        }
+        
+        presentsHTML += '</div>';
+        document.getElementById('presentsInfo').innerHTML = presentsHTML;
+      } catch (err) {
+        console.error('Erreur chargement infos bien:', err);
+        showNotification('Erreur lors du chargement', 'error');
+      }
+    };
+    
+    window.switchTab = function(tabName) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      document.getElementById('tab-' + tabName).classList.add('active');
+      
+      if (tabName === 'pieces') afficherPieces();
+      if (tabName === 'cles') afficherCles();
+      if (tabName === 'equipements') afficherEquipements();
+      if (tabName === 'photos') afficherPhotosGenerales();
+    };
+    
+    // Gestion des pièces
+    window.ouvrirModalPiece = function(index = null) {
+      pieceEnCours = index;
+      document.getElementById('modalPiece').classList.add('active');
+      
+      if (index !== null) {
+        const piece = pieces[index];
+        document.getElementById('modalPieceTitre').textContent = 'Modifier la pièce';
+        document.getElementById('pieceType').value = piece.type;
+        document.getElementById('pieceNom').value = piece.nom || '';
+        document.getElementById('pieceSurface').value = piece.surface || '';
+      } else {
+        document.getElementById('modalPieceTitre').textContent = 'Ajouter une pièce';
+        document.getElementById('pieceType').value = '';
+        document.getElementById('pieceNom').value = '';
+        document.getElementById('pieceSurface').value = '';
+      }
+    };
+    
+    window.fermerModalPiece = function() {
+      document.getElementById('modalPiece').classList.remove('active');
+      pieceEnCours = null;
+    };
+    
+    window.ajouterPieceToList = function() {
+      const type = document.getElementById('pieceType').value;
+      const nom = document.getElementById('pieceNom').value;
+      const surface = document.getElementById('pieceSurface').value;
+      
+      if (!type) {
+        showNotification('Veuillez sélectionner un type de pièce', 'warning');
+        return;
+      }
+      
+      const piece = {
+        type: type,
+        nom: nom,
+        surface: surface,
+        elements: [],
+        id: 'piece_' + Date.now()
+      };
+      
+      if (pieceEnCours !== null) {
+        pieces[pieceEnCours] = { ...pieces[pieceEnCours], ...piece };
+      } else {
+        pieces.push(piece);
+      }
+      
+      fermerModalPiece();
+      afficherPieces();
+    };
+    
+    function afficherPieces() {
+      const container = document.getElementById('listePieces');
+      
+      if (pieces.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🏠</div><p>Aucune pièce ajoutée</p></div>';
+        return;
+      }
+      
+      container.innerHTML = pieces.map((p, index) => {
+        const nomPiece = p.nom || p.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        return `
+          <div class="piece-card">
+            <div class="piece-header">
+              <div class="piece-titre">${nomPiece} ${p.surface ? `(${p.surface} m²)` : ''}</div>
+              <div>
+                <button class="btn-success" onclick="window.ouvrirModalElement(${index})" style="padding: 0.5rem 1rem; margin-right: 0.5rem;">
+                  ➕ Élément
+                </button>
+                <button class="btn-danger" onclick="window.supprimerPiece(${index})" style="padding: 0.5rem 1rem;">
+                  🗑️
+                </button>
+              </div>
+            </div>
+            ${p.elements.length > 0 ? `
+              ${p.elements.map((e, eIndex) => `
+                <div class="element-item">
+                  <div class="element-header">
+                    <div>
+                      <div class="element-nom">${e.type.replace(/_/g, ' ')} ${e.quantite > 1 ? `(x${e.quantite})` : ''}</div>
+                      ${e.description ? `<div style="color: #7f8c8d; font-size: 0.9rem;">${e.description}</div>` : ''}
+                    </div>
+                    <div>
+                      <span class="etat-badge etat-${e.etat}">${e.etat === 'bon' ? '✅ Bon' : e.etat === 'moyen' ? '⚠️ Moyen' : '❌ Mauvais'}</span>
+                      <button class="btn-danger" onclick="window.supprimerElement(${index}, ${eIndex})" style="padding: 0.3rem 0.6rem; margin-left: 0.5rem; font-size: 0.85rem;">
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                  ${e.observations ? `<div style="margin-top: 0.5rem; color: #7f8c8d; font-size: 0.85rem;"><strong>Obs:</strong> ${e.observations}</div>` : ''}
+                  ${e.photos && e.photos.length > 0 ? `
+                    <div class="photos-grid" style="margin-top: 0.8rem;">
+                      ${e.photos.map((photo, pIndex) => `
+                        <div class="photo-item">
+                          <img src="${photo.data}" alt="${photo.nom}" onclick="window.agrandirPhoto('${photo.data}')" />
+                          <div class="photo-overlay">
+                            <button class="photo-btn" onclick="window.supprimerPhotoElement(${index}, ${eIndex}, ${pIndex}); event.stopPropagation();" title="Supprimer">
+                              🗑️
+                            </button>
+                          </div>
+                          <div class="photo-label">${photo.nom}</div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  ` : ''}
+                </div>
+              `).join('')}
+            ` : '<p style="color: #7f8c8d; font-style: italic; margin: 1rem 0;">Aucun élément ajouté</p>'}
+          </div>
+        `;
+      }).join('');
+    }
+    
+    window.supprimerPiece = function(index) {
+      if (confirm('Supprimer cette pièce et tous ses éléments ?')) {
+        pieces.splice(index, 1);
+        afficherPieces();
+      }
+    };
+    
+    let pieceIndexEnCours = null;
+    
+    window.ouvrirModalElement = function(pieceIndex) {
+      pieceIndexEnCours = pieceIndex;
+      document.getElementById('modalElement').classList.add('active');
+      document.getElementById('elementType').value = '';
+      document.getElementById('elementDescription').value = '';
+      document.getElementById('elementQuantite').value = '1';
+      document.getElementById('elementEtat').value = 'bon';
+      document.getElementById('elementObservations').value = '';
+      photosElementTemp = [];
+      document.getElementById('elementPhotosPreview').innerHTML = '';
+    };
+    
+    window.fermerModalElement = function() {
+      document.getElementById('modalElement').classList.remove('active');
+      pieceIndexEnCours = null;
+      photosElementTemp = [];
+      document.getElementById('elementPhotosPreview').innerHTML = '';
+    };
+    
+    window.ajouterElementToPiece = function() {
+      if (pieceIndexEnCours === null) return;
+      
+      const type = document.getElementById('elementType').value;
+      if (!type) {
+        showNotification('Veuillez sélectionner un type d\'élément', 'warning');
+        return;
+      }
+      
+      const element = {
+        type: type,
+        description: document.getElementById('elementDescription').value,
+        quantite: parseInt(document.getElementById('elementQuantite').value) || 1,
+        etat: document.getElementById('elementEtat').value,
+        observations: document.getElementById('elementObservations').value,
+        photos: [...photosElementTemp]
+      };
+      
+      pieces[pieceIndexEnCours].elements.push(element);
+      fermerModalElement();
+      afficherPieces();
+    };
+    
+    window.supprimerElement = function(pieceIndex, elementIndex) {
+      if (confirm('Supprimer cet élément ?')) {
+        pieces[pieceIndex].elements.splice(elementIndex, 1);
+        afficherPieces();
+      }
+    };
+    
+    window.supprimerPhotoElement = function(pieceIndex, elementIndex, photoIndex) {
+      if (confirm('Supprimer cette photo ?')) {
+        pieces[pieceIndex].elements[elementIndex].photos.splice(photoIndex, 1);
+        afficherPieces();
+      }
+    };
+    
+    // Gestion des clés
+    window.ajouterCle = function() {
+      const cle = {
+        type: prompt('Type (clé porte, badge, télécommande, etc.) :') || 'Clé',
+        description: prompt('Description :') || '',
+        quantite: parseInt(prompt('Quantité :')) || 1,
+        numero: prompt('Numéro/Référence (optionnel) :') || ''
+      };
+      
+      cles.push(cle);
+      afficherCles();
+    };
+    
+    function afficherCles() {
+      const container = document.getElementById('listeCles');
+      
+      if (cles.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>Aucune clé/badge ajouté</p></div>';
+        return;
+      }
+      
+      container.innerHTML = cles.map((c, index) => `
+        <div class="element-item">
+          <div class="element-header">
+            <div>
+              <div class="element-nom">${c.type} ${c.quantite > 1 ? `(x${c.quantite})` : ''}</div>
+              ${c.description ? `<div style="color: #7f8c8d; font-size: 0.9rem;">${c.description}</div>` : ''}
+              ${c.numero ? `<div style="color: #7f8c8d; font-size: 0.85rem;">N° ${c.numero}</div>` : ''}
+            </div>
+            <button class="btn-danger" onclick="window.supprimerCle(${index})" style="padding: 0.4rem 0.8rem;">
+              🗑️
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    window.supprimerCle = function(index) {
+      if (confirm('Supprimer cette clé/badge ?')) {
+        cles.splice(index, 1);
+        afficherCles();
+      }
+    };
+    
+    // Gestion des équipements
+    window.ajouterEquipement = function() {
+      const equip = {
+        nom: prompt('Nom de l\'équipement :') || 'Équipement',
+        marque: prompt('Marque (optionnel) :') || '',
+        modele: prompt('Modèle (optionnel) :') || '',
+        etat: prompt('État (bon/moyen/mauvais) :', 'bon') || 'bon',
+        observations: prompt('Observations (optionnel) :') || ''
+      };
+      
+      equipements.push(equip);
+      afficherEquipements();
+    };
+    
+    function afficherEquipements() {
+      const container = document.getElementById('listeEquipements');
+      
+      if (equipements.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>Aucun équipement ajouté</p></div>';
+        return;
+      }
+      
+      container.innerHTML = equipements.map((e, index) => `
+        <div class="element-item">
+          <div class="element-header">
+            <div>
+              <div class="element-nom">${e.nom}</div>
+              ${e.marque || e.modele ? `<div style="color: #7f8c8d; font-size: 0.9rem;">${e.marque} ${e.modele}</div>` : ''}
+              ${e.observations ? `<div style="color: #7f8c8d; font-size: 0.85rem; margin-top: 0.3rem;">${e.observations}</div>` : ''}
+            </div>
+            <div>
+              <span class="etat-badge etat-${e.etat}">${e.etat === 'bon' ? '✅ Bon' : e.etat === 'moyen' ? '⚠️ Moyen' : '❌ Mauvais'}</span>
+              <button class="btn-danger" onclick="window.supprimerEquipement(${index})" style="padding: 0.4rem 0.8rem; margin-left: 0.5rem;">
+                🗑️
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    window.supprimerEquipement = function(index) {
+      if (confirm('Supprimer cet équipement ?')) {
+        equipements.splice(index, 1);
+        afficherEquipements();
+      }
+    };
+    
+    // Enregistrement final
+    window.enregistrerEtatDesLieux = async function() {
+      const bienId = document.getElementById('bienId').value;
+      const typeEDL = document.getElementById('typeEDL').value;
+      const dateEDL = document.getElementById('dateEDL').value;
+      
+      if (!bienId || !typeEDL || !dateEDL) {
+        showNotification('⚠️ Veuillez remplir les informations obligatoires (bien, type, date)', 'warning');
+        return;
+      }
+      
+      try {
+        const etatDesLieux = {
+          bienId: bienId,
+          type: typeEDL,
+          date: dateEDL,
+          heureDebut: document.getElementById('heureDebut').value,
+          heureFin: document.getElementById('heureFin').value,
+          autresPresents: document.getElementById('autresPresents').value,
+          
+          compteurs: {
+            electricite: {
+              numero: document.getElementById('compteurElecNum').value,
+              index: document.getElementById('compteurElecIndex').value,
+              type: document.getElementById('compteurElecType').value,
+              indexHP: document.getElementById('compteurElecHP').value,
+              indexHC: document.getElementById('compteurElecHC').value
+            },
+            gaz: {
+              numero: document.getElementById('compteurGazNum').value,
+              index: document.getElementById('compteurGazIndex').value
+            },
+            eau: {
+              numero: document.getElementById('compteurEauNum').value,
+              index: document.getElementById('compteurEauIndex').value
+            },
+            eauChaude: {
+              numero: document.getElementById('compteurEauChaudeNum').value,
+              index: document.getElementById('compteurEauChaudeIndex').value
+            }
+          },
+          
+          pieces: pieces,
+          cles: cles,
+          equipements: equipements,
+          photosGenerales: photosGenerales,
+          
+          observationsGenerales: document.getElementById('observationsGenerales').value,
+          signatureBailleur: document.getElementById('signatureBailleur').checked,
+          signatureLocataire: document.getElementById('signatureLocataire').checked
+        };
+        
+        await addEtatDesLieux(etatDesLieux);
+        showNotification('✅ État des lieux enregistré avec succès !');
+        window.location.href = '/pages/menu.html';
+      } catch (err) {
+        console.error('Erreur enregistrement:', err);
+        showNotification('Erreur lors de l\'enregistrement', 'error');
+      }
+    };
+  </script>
+</body>
+</html>

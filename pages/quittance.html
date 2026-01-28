@@ -1,0 +1,1035 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quittances de Loyer</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css" />
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <style>
+    body {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      background: white;
+      padding: 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      margin-bottom: 2rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      transition: all 0.3s;
+    }
+
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .tab {
+      padding: 1rem 2rem;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-weight: 600;
+      color: #7f8c8d;
+      transition: all 0.3s;
+    }
+
+    .tab:hover {
+      color: #667eea;
+    }
+
+    .tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .section {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      border-left: 4px solid #667eea;
+    }
+
+    .section h2 {
+      color: #667eea;
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .form-group input.error,
+    .form-group select.error {
+      border-color: #c62828;
+    }
+
+    .total-preview {
+      background: #667eea;
+      color: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .total-preview h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.1rem;
+    }
+
+    .total-preview .amount {
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .quittance-preview {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      margin-top: 2rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .quittance-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .quittance-title {
+      font-size: 1.5rem;
+      color: #2c3e50;
+      margin: 0;
+    }
+
+    .quittance-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.5rem;
+    }
+
+    .quittance-table th,
+    .quittance-table td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .quittance-table th {
+      background: #f8f9fa;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .quittance-total {
+      font-weight: 700;
+      color: #2c3e50;
+      font-size: 1.1rem;
+    }
+
+    .quittance-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      justify-content: center;
+    }
+
+    .quittance-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s;
+    }
+
+    .quittance-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .quittance-titre {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .quittance-info {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+    }
+
+    .badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+
+    .badge-payee {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .badge-impayee {
+      background: #ffebee;
+      color: #c62828;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #7f8c8d;
+    }
+
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+      max-width: 350px;
+    }
+
+    .notification.success {
+      background: #4caf50;
+      color: white;
+    }
+
+    .notification.error {
+      background: #f44336;
+      color: white;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+
+    /* Styles d'impression */
+    @media print {
+      body {
+        background: white !important;
+        padding: 0;
+        margin: 0;
+      }
+
+      .back-link,
+      .tabs,
+      .tab,
+      .tab-content:not(#generer),
+      #generer > *:not(#quittancePreview),
+      #scrollTopBtn,
+      .notification,
+      .quittance-actions {
+        display: none !important;
+      }
+
+      .container {
+        box-shadow: none;
+        padding: 20px;
+        margin: 0;
+        background: white !important;
+      }
+
+      #generer {
+        display: block !important;
+      }
+
+      #quittancePreview {
+        display: block !important;
+        box-shadow: none;
+        margin: 0;
+        padding: 20px;
+        page-break-after: avoid;
+        background: white !important;
+      }
+
+      .quittance-header {
+        display: flex !important;
+        border-bottom: 2px solid #000;
+      }
+
+      .quittance-table {
+        border: 1px solid #000;
+      }
+
+      .quittance-table th,
+      .quittance-table td {
+        border: 1px solid #000;
+        color: #000 !important;
+      }
+
+      .quittance-signature {
+        page-break-inside: avoid;
+      }
+
+      * {
+        color: #000 !important;
+      }
+    }
+
+    #scrollTopBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 999;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      opacity: 0;
+      visibility: hidden;
+      background: #667eea;
+      color: white;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    #scrollTopBtn.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #scrollTopBtn:hover {
+      transform: translateY(-5px);
+      background: #764ba2;
+    }
+
+    .filters {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .filters select {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .quittance-signature {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .signature-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .signature-box {
+      text-align: center;
+    }
+
+    .signature-box p {
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .signature-line {
+      border-bottom: 1px solid #2c3e50;
+      height: 60px;
+      margin-top: 0.5rem;
+    }
+
+    .quittance-footer {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e0e0e0;
+      font-size: 0.85rem;
+      color: #7f8c8d;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <a href="menu.html" class="back-link">← Retour au menu</a>
+
+  <div class="container">
+
+    <div class="header">
+      <h1>Gestion des Quittances de Loyer</h1>
+      <p>Générez et consultez les quittances de loyer</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('generer', this)">Générer une quittance</button>
+      <button class="tab" onclick="switchTab('historique', this)">Historique</button>
+    </div>
+
+    <!-- Onglet Générer -->
+    <div id="generer" class="tab-content active">
+
+      <div class="section">
+        <h2>Informations du bien</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="bienSelect">Bien *</label>
+            <select id="bienSelect" required onchange="calculerTotal()">
+              <option value="">Sélectionnez un bien</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Informations du locataire</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="locataireSelect">Locataire *</label>
+            <select id="locataireSelect" required onchange="calculerTotal()">
+              <option value="">Sélectionnez un locataire</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Période de location</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="mois">Mois *</label>
+            <select id="mois" required onchange="calculerTotal()">
+              <option value="">Sélectionnez un mois</option>
+              <option value="1">Janvier</option>
+              <option value="2">Février</option>
+              <option value="3">Mars</option>
+              <option value="4">Avril</option>
+              <option value="5">Mai</option>
+              <option value="6">Juin</option>
+              <option value="7">Juillet</option>
+              <option value="8">Août</option>
+              <option value="9">Septembre</option>
+              <option value="10">Octobre</option>
+              <option value="11">Novembre</option>
+              <option value="12">Décembre</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="annee">Année *</label>
+            <input type="number" id="annee" placeholder="Ex: 2024" required onchange="calculerTotal()">
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Montant et détails</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="loyer">Loyer (€) *</label>
+            <input type="number" id="loyer" placeholder="Ex: 750" required step="0.01" oninput="calculerTotal()">
+          </div>
+
+          <div class="form-group">
+            <label for="charges">Charges (€)</label>
+            <input type="number" id="charges" placeholder="Ex: 100" step="0.01" value="0" oninput="calculerTotal()">
+          </div>
+
+          <div class="form-group">
+            <label for="datePaiement">Date de paiement</label>
+            <input type="date" id="datePaiement">
+          </div>
+        </div>
+
+        <div class="total-preview" id="totalPreview" style="display:none;">
+          <h3>Total à payer</h3>
+          <div class="amount" id="totalAmount">0.00 €</div>
+        </div>
+      </div>
+
+      <div class="quittance-actions">
+        <button onclick="genererQuittance()">Générer la quittance</button>
+      </div>
+
+      <div id="quittancePreview" class="quittance-preview" style="display:none;"></div>
+
+    </div>
+
+    <!-- Onglet Historique -->
+    <div id="historique" class="tab-content">
+      <div class="section">
+        <h2>Historique des quittances</h2>
+        
+        <div class="filters">
+          <select id="filterAnnee" onchange="afficherHistorique()">
+            <option value="">Toutes les années</option>
+          </select>
+          <select id="filterStatut" onchange="afficherHistorique()">
+            <option value="">Tous les statuts</option>
+            <option value="payee">Payées</option>
+            <option value="impayee">En attente</option>
+          </select>
+        </div>
+
+        <div id="listeQuittances"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <a href="#" id="scrollTopBtn" title="Retour en haut">
+    ↑
+  </a>
+
+<!-- Nouveau script quittance (IndexedDB) -->
+<script type="module" id="script-quittance">
+ import {
+  initDB,
+  getBiens,
+  getLocataires,
+  getQuittances,
+  addQuittance,
+  deleteQuittance
+} from "../js/db.js";
+
+let quittances = [];
+let quittanceEnEdition = null;
+
+/* ---------------------------------------------------------
+   NOTIFICATIONS
+--------------------------------------------------------- */
+function showNotification(message, type = "success") {
+  const notification = document.createElement("div");
+  notification.className = `notification ${type}`;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  setTimeout(() => notification.remove(), 3000);
+}
+
+/* ---------------------------------------------------------
+   CHANGEMENT D’ONGLET
+--------------------------------------------------------- */
+function switchTab(tabId, el) {
+  document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+
+  document.getElementById(tabId).classList.add("active");
+  el.classList.add("active");
+
+  if (tabId === "historique") {
+    chargerFiltres();
+    afficherHistorique();
+  }
+}
+
+/* ---------------------------------------------------------
+   CONVERSION NOMBRE → LETTRES
+--------------------------------------------------------- */
+function nombreEnLettres(n) {
+  const unites = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+  const dizaines = ['', 'dix', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante', 'quatre-vingt', 'quatre-vingt'];
+
+  if (n === 0) return 'zéro';
+  if (n < 10) return unites[n];
+  if (n < 20) return ['dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf'][n - 10];
+  if (n < 100) {
+    const d = Math.floor(n / 10);
+    const u = n % 10;
+    return dizaines[d] + (u > 0 ? '-' + unites[u] : '');
+  }
+  if (n < 1000) {
+    const c = Math.floor(n / 100);
+    const r = n % 100;
+    return (c > 1 ? unites[c] + '-' : '') + 'cent' + (r > 0 ? '-' + nombreEnLettres(r) : '');
+  }
+  return n.toString();
+}
+
+/* ---------------------------------------------------------
+   CALCUL AUTOMATIQUE DU TOTAL
+--------------------------------------------------------- */
+function calculerTotal() {
+  const loyer = parseFloat(document.getElementById("loyer").value) || 0;
+  const charges = parseFloat(document.getElementById("charges").value) || 0;
+  const total = loyer + charges;
+
+  const preview = document.getElementById("totalPreview");
+  const amount = document.getElementById("totalAmount");
+
+  if (total > 0) {
+    preview.style.display = "block";
+    amount.textContent = total.toFixed(2) + " €";
+  } else {
+    preview.style.display = "none";
+  }
+}
+/* ---------------------------------------------------------
+   CHARGEMENT DES DONNÉES (IndexedDB)
+--------------------------------------------------------- */
+async function chargerDonnees() {
+  await initDB();
+
+  const biens = await getBiens();
+  const locataires = await getLocataires();
+  quittances = await getQuittances();
+
+  const bienSelect = document.getElementById("bienSelect");
+  const locataireSelect = document.getElementById("locataireSelect");
+
+  /* -------------------------
+     Remplissage des biens
+  ------------------------- */
+  bienSelect.innerHTML = '<option value="">Sélectionnez un bien</option>';
+  biens.forEach(bien => {
+    const option = document.createElement("option");
+    option.value = bien.id;
+    option.textContent = `${bien.typeBien} — ${bien.adresse}, ${bien.codePostal} ${bien.ville}`;
+    option.dataset.bien = JSON.stringify(bien);
+    bienSelect.appendChild(option);
+  });
+
+  /* -------------------------
+     Remplissage des locataires
+  ------------------------- */
+  locataireSelect.innerHTML = '<option value="">Sélectionnez un locataire</option>';
+  locataires.forEach(loc => {
+    const option = document.createElement("option");
+    option.value = loc.id;
+    option.textContent = `${loc.civilite} ${loc.nom} ${loc.prenom}`;
+    option.dataset.locataire = JSON.stringify(loc);
+    locataireSelect.appendChild(option);
+  });
+}
+/* ---------------------------------------------------------
+   GÉNÉRATION D’UNE QUITTANCE (IndexedDB)
+--------------------------------------------------------- */
+async function genererQuittance() {
+  const bienSelect = document.getElementById("bienSelect");
+  const locataireSelect = document.getElementById("locataireSelect");
+  const mois = document.getElementById("mois").value;
+  const annee = document.getElementById("annee").value;
+  const loyer = parseFloat(document.getElementById("loyer").value) || 0;
+  const charges = parseFloat(document.getElementById("charges").value) || 0;
+  const datePaiement = document.getElementById("datePaiement").value;
+
+  /* ---------------------------------------------------------
+     VALIDATION
+  --------------------------------------------------------- */
+  let isValid = true;
+  [bienSelect, locataireSelect, document.getElementById("mois"),
+   document.getElementById("annee"), document.getElementById("loyer")].forEach(el => {
+    if (!el.value || (el.type === "number" && parseFloat(el.value) <= 0)) {
+      el.classList.add("error");
+      isValid = false;
+    } else {
+      el.classList.remove("error");
+    }
+  });
+
+  if (!isValid) {
+    showNotification("Veuillez remplir tous les champs obligatoires", "error");
+    return;
+  }
+
+  /* ---------------------------------------------------------
+     RÉCUPÉRATION DES DONNÉES
+  --------------------------------------------------------- */
+  const bien = JSON.parse(bienSelect.options[bienSelect.selectedIndex].dataset.bien);
+  const locataire = JSON.parse(locataireSelect.options[locataireSelect.selectedIndex].dataset.locataire);
+
+  const total = loyer + charges;
+
+  /* ---------------------------------------------------------
+     CONSTRUCTION DE LA QUITTANCE
+  --------------------------------------------------------- */
+  const quittance = {
+    id: "quittance_" + Date.now(),
+    bien,
+    locataire,
+    mois,
+    annee,
+    loyer,
+    charges,
+    total,
+    datePaiement,
+    dateCreation: new Date().toISOString()
+  };
+
+  /* ---------------------------------------------------------
+     ENREGISTREMENT DANS INDEXEDDB
+  --------------------------------------------------------- */
+  await addQuittance(quittance);
+  quittances = await getQuittances();
+
+  showNotification("Quittance générée avec succès !");
+
+  afficherApercuQuittance(quittance);
+}
+/* ---------------------------------------------------------
+   FILTRES (années + statut)
+--------------------------------------------------------- */
+function chargerFiltres() {
+  const annees = [...new Set(quittances.map(q => q.annee))].sort((a, b) => b - a);
+  const filterAnnee = document.getElementById("filterAnnee");
+
+  filterAnnee.innerHTML = '<option value="">Toutes les années</option>';
+  annees.forEach(annee => {
+    const option = document.createElement("option");
+    option.value = annee;
+    option.textContent = annee;
+    filterAnnee.appendChild(option);
+  });
+}
+
+/* ---------------------------------------------------------
+   AFFICHAGE DE L’HISTORIQUE
+--------------------------------------------------------- */
+function afficherHistorique() {
+  const container = document.getElementById("listeQuittances");
+  const filterAnnee = document.getElementById("filterAnnee").value;
+  const filterStatut = document.getElementById("filterStatut").value;
+
+  let quittancesFiltrees = [...quittances];
+
+  if (filterAnnee) {
+    quittancesFiltrees = quittancesFiltrees.filter(q => q.annee === filterAnnee);
+  }
+
+  if (filterStatut === "payee") {
+    quittancesFiltrees = quittancesFiltrees.filter(q => q.datePaiement);
+  } else if (filterStatut === "impayee") {
+    quittancesFiltrees = quittancesFiltrees.filter(q => !q.datePaiement);
+  }
+
+  if (quittancesFiltrees.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">🧾</div>
+        <h3>Aucune quittance trouvée</h3>
+        <p>${quittances.length === 0
+          ? 'Cliquez sur "Générer" pour créer votre première quittance'
+          : 'Aucune quittance ne correspond aux filtres sélectionnés'}</p>
+      </div>`;
+    return;
+  }
+
+  const moisNoms = ['', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+                    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+
+  const quittancesTries = quittancesFiltrees.sort((a, b) =>
+    `${b.annee}-${String(b.mois).padStart(2, '0')}`.localeCompare(
+      `${a.annee}-${String(a.mois).padStart(2, '0')}`
+    )
+  );
+
+  container.innerHTML = quittancesTries.map(q => {
+    const index = quittances.findIndex(qi => qi.id === q.id);
+    return `
+      <div class="quittance-card">
+        <div>
+          <div class="quittance-titre">
+            ${moisNoms[parseInt(q.mois)]} ${q.annee}
+            ${q.datePaiement
+              ? '<span class="badge badge-payee">Payée</span>'
+              : '<span class="badge badge-impayee">En attente</span>'}
+          </div>
+          <div class="quittance-info">
+            🏢 ${q.bien.reference} - ${q.locataire.civilite} ${q.locataire.nom} ${q.locataire.prenom}
+          </div>
+          <div class="quittance-info">
+            💰 Total: ${q.total.toFixed(2)} € (Loyer: ${q.loyer.toFixed(2)} € + Charges: ${q.charges.toFixed(2)} €)
+          </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button onclick="voirQuittance(${index})">Voir</button>
+          <button onclick="supprimerQuittance(${index})" class="secondary">Supprimer</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+/* ---------------------------------------------------------
+   VOIR UNE QUITTANCE
+--------------------------------------------------------- */
+function voirQuittance(index) {
+  switchTab("generer", document.querySelector(".tab"));
+  setTimeout(() => {
+    afficherApercuQuittance(quittances[index]);
+  }, 100);
+}
+
+/* ---------------------------------------------------------
+   SUPPRIMER UNE QUITTANCE (IndexedDB)
+--------------------------------------------------------- */
+async function supprimerQuittance(index) {
+  const quittance = quittances[index];
+  if (!quittance) return;
+
+  if (!confirm("Voulez-vous vraiment supprimer cette quittance ?")) return;
+
+  await deleteQuittance(quittance.id);
+  quittances = await getQuittances();
+
+  showNotification("Quittance supprimée avec succès");
+  afficherHistorique();
+}
+/* ---------------------------------------------------------
+   AFFICHAGE DE L’APERÇU DE LA QUITTANCE
+--------------------------------------------------------- */
+function afficherApercuQuittance(quittance) {
+  const previewContainer = document.getElementById("quittancePreview");
+  previewContainer.style.display = "block";
+
+  const moisNoms = ['', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+                    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+
+  const dateEmission = new Date(quittance.dateCreation);
+  const dateEmissionStr = dateEmission.toLocaleDateString("fr-FR");
+
+  previewContainer.innerHTML = `
+    <div class="quittance-header">
+      <h2 class="quittance-title">QUITTANCE DE LOYER</h2>
+    </div>
+
+    <div style="margin-bottom: 2rem;">
+      <p style="text-align: right;"><strong>Date d'émission :</strong> ${dateEmissionStr}</p>
+      <p style="text-align: right;"><strong>Période :</strong> ${moisNoms[parseInt(quittance.mois)]} ${quittance.annee}</p>
+    </div>
+
+    <div style="margin-bottom: 2rem;">
+      <h3 style="color: #667eea; margin-bottom: 1rem;">Bailleur</h3>
+      <p><strong>Référence du bien :</strong> ${quittance.bien.reference}</p>
+      <p><strong>Adresse du bien :</strong> ${quittance.bien.adresse}, ${quittance.bien.codePostal} ${quittance.bien.ville}</p>
+    </div>
+
+    <div style="margin-bottom: 2rem;">
+      <h3 style="color: #667eea; margin-bottom: 1rem;">Locataire</h3>
+      <p><strong>${quittance.locataire.civilite} ${quittance.locataire.nom} ${quittance.locataire.prenom}</strong></p>
+      ${quittance.locataire.adresse ? `<p>${quittance.locataire.adresse}</p>` : ''}
+      ${quittance.locataire.codePostal && quittance.locataire.ville ? `<p>${quittance.locataire.codePostal} ${quittance.locataire.ville}</p>` : ''}
+    </div>
+
+    <table class="quittance-table">
+      <thead>
+        <tr>
+          <th>Désignation</th>
+          <th style="text-align: right;">Montant (€)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Loyer mensuel hors charges</td>
+          <td style="text-align: right;">${quittance.loyer.toFixed(2)}</td>
+        </tr>
+        <tr>
+          <td>Provision pour charges</td>
+          <td style="text-align: right;">${quittance.charges.toFixed(2)}</td>
+        </tr>
+        <tr class="quittance-total">
+          <td><strong>TOTAL</strong></td>
+          <td style="text-align: right;"><strong>${quittance.total.toFixed(2)} €</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top: 1.5rem;"><strong>Arrêté la présente quittance à la somme de :</strong><br>
+      <em>${nombreEnLettres(Math.floor(quittance.total))} euros et ${Math.round((quittance.total % 1) * 100)} centimes</em>
+    </p>
+
+    ${quittance.datePaiement ? `
+      <p style="margin-top: 1rem; color: #2e7d32; font-weight: 600;">
+        ✓ Paiement reçu le ${new Date(quittance.datePaiement).toLocaleDateString('fr-FR')}
+      </p>
+    ` : ''}
+
+    <div class="quittance-signature">
+      <p style="margin-bottom: 1rem; font-style: italic; color: #7f8c8d;">
+        Cette quittance annule tous les reçus qui auraient pu être remis précédemment en cas d'acomptes versés sur la période concernée.
+      </p>
+      
+      <div class="signature-row">
+        <div class="signature-box">
+          <p>Fait à _______________</p>
+          <p>Le _______________</p>
+          <div class="signature-line"></div>
+          <p style="margin-top: 0.5rem; font-size: 0.9rem;">Signature du bailleur</p>
+        </div>
+        <div class="signature-box">
+          <p style="visibility: hidden;">Espacer</p>
+          <p style="visibility: hidden;">Espacer</p>
+          <div class="signature-line"></div>
+          <p style="margin-top: 0.5rem; font-size: 0.9rem;">Signature du locataire</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="quittance-footer">
+      <p><strong>Article 21 de la loi n°89-462 du 6 juillet 1989 :</strong></p>
+      <p>Le bailleur est obligé de transmettre gratuitement une quittance au locataire qui en fait la demande. La quittance porte le détail des sommes versées par le locataire en distinguant le loyer et les charges.</p>
+    </div>
+
+    <div class="quittance-actions" style="margin-top: 2rem;">
+      <button onclick="imprimerQuittance()">🖨️ Imprimer</button>
+      <button onclick="telechargerQuittance()" class="secondary">📥 Télécharger PDF</button>
+      <button onclick="fermerApercu()" class="secondary">Fermer</button>
+    </div>
+  `;
+
+  previewContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+/* ---------------------------------------------------------
+   FERMER L’APERÇU
+--------------------------------------------------------- */
+function fermerApercu() {
+  document.getElementById("quittancePreview").style.display = "none";
+}
+
+/* ---------------------------------------------------------
+   IMPRESSION
+--------------------------------------------------------- */
+function imprimerQuittance() {
+  window.print();
+}
+
+/* ---------------------------------------------------------
+   EXPORT PDF (html2canvas)
+--------------------------------------------------------- */
+function telechargerQuittance() {
+  const content = document.getElementById("quittancePreview");
+  if (!content) return;
+
+  html2canvas(content, { scale: 2 }).then(canvas => {
+    const link = document.createElement("a");
+    link.download = `quittance_${new Date().toLocaleDateString("fr-FR").replace(/\//g, "-")}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+}
+
+/* ---------------------------------------------------------
+   EXPOSER LES FONCTIONS AU DOM
+--------------------------------------------------------- */
+window.switchTab = switchTab;
+window.genererQuittance = genererQuittance;
+window.afficherApercuQuittance = afficherApercuQuittance;
+window.voirQuittance = voirQuittance;
+window.supprimerQuittance = supprimerQuittance;
+window.imprimerQuittance = imprimerQuittance;
+window.telechargerQuittance = telechargerQuittance;
+window.fermerApercu = fermerApercu;
+
+/* ---------------------------------------------------------
+   CHARGEMENT INITIAL
+--------------------------------------------------------- */
+window.addEventListener("load", async () => {
+  await chargerDonnees();
+  afficherHistorique();
+});
+
+</script>
+
+<!-- html2canvas pour PDF -->
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Gestionnaire de Documents</title>
+  
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css" />
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="manifest" href="/manifest.json">
+  
+  <style>
+    body { 
+      max-width: 1600px; 
+      margin: 0 auto; 
+      padding: 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .container { 
+      background: white; 
+      padding: 2.5rem; 
+      border-radius: 16px; 
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      margin-bottom: 2rem;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    
+    h1 { 
+      color: #2c3e50; 
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      transition: all 0.3s;
+    }
+    
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .filters {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      border-left: 4px solid #667eea;
+    }
+    
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    
+    .stats-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    .stat-card {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      flex: 1;
+      min-width: 150px;
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #667eea;
+    }
+    
+    .stat-label {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    
+    .bien-section {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      border: 2px solid #e0e0e0;
+      transition: all 0.3s;
+    }
+    
+    .bien-section:hover {
+      border-color: #667eea;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .bien-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #e0e0e0;
+      cursor: pointer;
+    }
+    
+    .bien-titre {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+    
+    .bien-info {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      margin-top: 0.3rem;
+    }
+    
+    .badge {
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+    
+    .badge-docs {
+      background: #3498db;
+      color: white;
+    }
+    
+    .badge-photos {
+      background: #e67e22;
+      color: white;
+    }
+    
+    .toggle-icon {
+      font-size: 1.5rem;
+      transition: transform 0.3s;
+    }
+    
+    .toggle-icon.open {
+      transform: rotate(180deg);
+    }
+    
+    .documents-grid {
+      display: none;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .documents-grid.open {
+      display: grid;
+    }
+    
+    .document-card {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+      transition: all 0.3s;
+    }
+    
+    .document-card:hover {
+      border-color: #667eea;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .document-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .document-name {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+      word-break: break-word;
+    }
+    
+    .document-meta {
+      font-size: 0.85rem;
+      color: #7f8c8d;
+      margin-bottom: 0.8rem;
+    }
+    
+    .document-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .photos-grid {
+      display: none;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .photos-grid.open {
+      display: grid;
+    }
+    
+    .photo-card {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 2px solid #e0e0e0;
+      transition: all 0.3s;
+    }
+    
+    .photo-card:hover {
+      border-color: #667eea;
+      transform: scale(1.05);
+    }
+    
+    .photo-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .photo-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 0.3rem;
+      font-size: 0.75rem;
+      text-align: center;
+    }
+    
+    button {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-info {
+      background: #3498db;
+      color: white;
+    }
+    
+    .btn-success {
+      background: #27ae60;
+      color: white;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #7f8c8d;
+    }
+    
+    .empty-state-icon {
+      font-size: 5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal.active {
+      display: flex;
+    }
+    
+    .modal img {
+      max-width: 90%;
+      max-height: 90vh;
+      border-radius: 8px;
+    }
+    
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.5rem;
+    }
+    
+    #scrollTopBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 48px;
+      height: 48px;
+      background: #667eea;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    #scrollTopBtn.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    #scrollTopBtn:hover {
+      transform: scale(1.2);
+      background: #764ba2;
+    }
+    
+    @media (max-width: 768px) {
+      .filter-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats-bar {
+        flex-direction: column;
+      }
+      
+      .documents-grid, .photos-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="/pages/menu.html" class="back-link">← Retour au menu</a>
+  
+  <div class="container">
+    <div class="header">
+      <h1>📂 Gestionnaire de Documents</h1>
+      <p style="color: #7f8c8d;">Tous vos documents et photos centralisés</p>
+    </div>
+    
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-number" id="stat-biens">0</div>
+        <div class="stat-label">Biens avec documents</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-documents">0</div>
+        <div class="stat-label">Documents au total</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-photos">0</div>
+        <div class="stat-label">Photos au total</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="stat-taille">0 Mo</div>
+        <div class="stat-label">Espace utilisé</div>
+      </div>
+    </div>
+    
+    <div class="filters">
+      <h3 style="margin-bottom: 1rem;">🔍 Filtres et recherche</h3>
+      <div class="filter-grid">
+        <div>
+          <label>Type de bien</label>
+          <select id="filterType" onchange="window.appliquerFiltres()">
+            <option value="">Tous les types</option>
+            <option value="appartement">Appartement</option>
+            <option value="maison">Maison</option>
+            <option value="studio">Studio</option>
+            <option value="duplex">Duplex</option>
+            <option value="loft">Loft</option>
+          </select>
+        </div>
+        
+        <div>
+          <label>Type de document</label>
+          <select id="filterDocType" onchange="window.appliquerFiltres()">
+            <option value="">Tous les documents</option>
+            <option value="Acte de propriété">Acte de propriété</option>
+            <option value="DPE">DPE</option>
+            <option value="Diagnostic amiante">Diagnostic amiante</option>
+            <option value="Diagnostic plomb">Diagnostic plomb</option>
+            <option value="Diagnostic termites">Diagnostic termites</option>
+            <option value="Diagnostic électricité">Diagnostic électricité</option>
+            <option value="Diagnostic gaz">Diagnostic gaz</option>
+            <option value="État des risques">État des risques</option>
+          </select>
+        </div>
+        
+        <div>
+          <label>Ville</label>
+          <select id="filterVille" onchange="window.appliquerFiltres()">
+            <option value="">Toutes les villes</option>
+          </select>
+        </div>
+        
+        <div>
+          <label>Recherche</label>
+          <input type="text" id="filterSearch" placeholder="Nom de fichier, référence..." oninput="window.appliquerFiltres()" />
+        </div>
+      </div>
+      
+      <div style="margin-top: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+        <button class="btn-primary" onclick="window.toutOuvrir()">📂 Tout ouvrir</button>
+        <button class="btn-secondary" onclick="window.toutFermer()">📁 Tout fermer</button>
+      </div>
+    </div>
+    
+    <div id="listeBiens"></div>
+  </div>
+  
+  <div id="modalPhoto" class="modal" onclick="window.fermerModal()">
+    <button class="modal-close">×</button>
+    <img id="modalPhotoImg" src="" alt="" />
+  </div>
+  
+  <a href="#" id="scrollTopBtn" title="Retour en haut">↑</a>
+
+  <script type="module">
+    import { getBiens } from '/js/db.js';
+    import { getEtatsDesLieux } from '/js/db.js';
+    import { showNotification } from '/js/app.js';
+    
+    let biens = [];
+    let etatsDesLieux = [];
+    
+    // Gestion du scroll
+    window.addEventListener('scroll', function() {
+      const scrollBtn = document.getElementById('scrollTopBtn');
+      if (window.pageYOffset > 300) {
+        scrollBtn.classList.add('visible');
+      } else {
+        scrollBtn.classList.remove('visible');
+      }
+    });
+    
+    document.getElementById("scrollTopBtn").addEventListener("click", function(e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    
+    async function chargerDonnees() {
+      try {
+        biens = await getBiens();
+        etatsDesLieux = await getEtatsDesLieux();
+      } catch (err) {
+        console.error('Erreur chargement:', err);
+        showNotification('Erreur lors du chargement des données', 'error');
+      }
+    }
+    
+    function chargerFilterVilles() {
+      const villes = [...new Set(biens.map(b => b.ville))].sort();
+      const select = document.getElementById('filterVille');
+      select.innerHTML = '<option value="">Toutes les villes</option>';
+      villes.forEach(v => {
+        const option = document.createElement('option');
+        option.value = v;
+        option.textContent = v;
+        select.appendChild(option);
+      });
+    }
+    
+    window.appliquerFiltres = function() {
+      const filterType = document.getElementById('filterType').value;
+      const filterDocType = document.getElementById('filterDocType').value;
+      const filterVille = document.getElementById('filterVille').value;
+      const filterSearch = document.getElementById('filterSearch').value.toLowerCase();
+      
+      let biensFiltres = [...biens];
+      
+      if (filterType) {
+        biensFiltres = biensFiltres.filter(b => b.typeBien === filterType);
+      }
+      
+      if (filterVille) {
+        biensFiltres = biensFiltres.filter(b => b.ville === filterVille);
+      }
+      
+      if (filterSearch) {
+        biensFiltres = biensFiltres.filter(b => {
+          const textBien = `${b.reference} ${b.adresse} ${b.ville}`.toLowerCase();
+          const hasDocMatch = b.documents && b.documents.some(d => d.nom.toLowerCase().includes(filterSearch));
+          return textBien.includes(filterSearch) || hasDocMatch;
+        });
+      }
+      
+      if (filterDocType) {
+        biensFiltres = biensFiltres.filter(b => 
+          b.documents && b.documents.some(d => d.type === filterDocType)
+        );
+      }
+      
+      afficherDocuments(biensFiltres);
+    };
+    
+    function afficherDocuments(biensFiltres = biens) {
+      const container = document.getElementById('listeBiens');
+      
+      // Calculer les statistiques
+      let totalDocs = 0;
+      let totalPhotos = 0;
+      let totalTaille = 0;
+      let biensAvecDocs = 0;
+      
+      biens.forEach(b => {
+        const nbDocs = (b.documents || []).length;
+        if (nbDocs > 0) biensAvecDocs++;
+        totalDocs += nbDocs;
+        
+        (b.documents || []).forEach(d => {
+          totalTaille += d.taille || 0;
+        });
+      });
+      
+      etatsDesLieux.forEach(edl => {
+        if (edl.photosGenerales) totalPhotos += edl.photosGenerales.length;
+        if (edl.pieces) {
+          edl.pieces.forEach(p => {
+            if (p.elements) {
+              p.elements.forEach(e => {
+                if (e.photos) totalPhotos += e.photos.length;
+              });
+            }
+          });
+        }
+      });
+      
+      document.getElementById('stat-biens').textContent = biensAvecDocs;
+      document.getElementById('stat-documents').textContent = totalDocs;
+      document.getElementById('stat-photos').textContent = totalPhotos;
+      document.getElementById('stat-taille').textContent = (totalTaille / (1024 * 1024)).toFixed(2) + ' Mo';
+      
+      // Filtrer les biens qui ont des documents ou photos
+      const biensAvecContenu = biensFiltres.map(b => {
+        const aDocs = b.documents && b.documents.length > 0;
+        const edl = etatsDesLieux.find(e => e.bienId === b.id);
+        
+        let aPhotos = false;
+        if (edl) {
+          aPhotos = (edl.photosGenerales && edl.photosGenerales.length > 0) || 
+                    (edl.pieces && edl.pieces.some(p => p.elements && p.elements.some(e => e.photos && e.photos.length > 0)));
+        }
+        
+        return {
+          bien: b,
+          aDocs: aDocs,
+          aPhotos: aPhotos,
+          hasContent: aDocs || aPhotos
+        };
+      }).filter(item => item.hasContent);
+      
+      if (biensAvecContenu.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📂</div>
+            <h3>Aucun document ou photo trouvé</h3>
+            <p>Ajoutez des documents dans la fiche du bien ou des photos dans les états des lieux</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = biensAvecContenu.map((item, index) => {
+        const bien = item.bien;
+        const docs = bien.documents || [];
+        const edl = etatsDesLieux.find(e => e.bienId === bien.id);
+        
+        let photos = [];
+        if (edl) {
+          if (edl.photosGenerales) {
+            photos = photos.concat(edl.photosGenerales.map(p => ({ ...p, source: 'général' })));
+          }
+          if (edl.pieces) {
+            edl.pieces.forEach(piece => {
+              if (piece.elements) {
+                piece.elements.forEach(elem => {
+                  if (elem.photos) {
+                    photos = photos.concat(elem.photos.map(p => ({ 
+                      ...p, 
+                      source: `${piece.type} - ${elem.type}` 
+                    })));
+                  }
+                });
+              }
+            });
+          }
+        }
+        
+        return `
+          <div class="bien-section">
+            <div class="bien-header" onclick="window.toggleBien(${index})">
+              <div>
+                <div class="bien-titre">
+                  ${bien.typeBien.charAt(0).toUpperCase() + bien.typeBien.slice(1)} - ${bien.reference}
+                  ${docs.length > 0 ? `<span class="badge badge-docs">${docs.length} doc(s)</span>` : ''}
+                  ${photos.length > 0 ? `<span class="badge badge-photos">${photos.length} photo(s)</span>` : ''}
+                </div>
+                <div class="bien-info">📍 ${bien.adresse}, ${bien.ville} • ${bien.surface} m²</div>
+              </div>
+              <span class="toggle-icon" id="toggle-${index}">🔽</span>
+            </div>
+            
+            ${docs.length > 0 ? `
+              <h4 style="margin-top: 1rem; margin-bottom: 0.5rem; color: #667eea;">📄 Documents (${docs.length})</h4>
+              <div class="documents-grid" id="docs-${index}">
+                ${docs.map((doc) => {
+                  const tailleMo = (doc.taille / (1024 * 1024)).toFixed(2);
+                  const tailleKo = (doc.taille / 1024).toFixed(1);
+                  const tailleAffichee = doc.taille < 1024 * 1024 ? tailleKo + ' Ko' : tailleMo + ' Mo';
+                  const iconType = doc.mimeType && doc.mimeType.includes('pdf') ? '📕' : 
+                                  doc.mimeType && doc.mimeType.includes('image') ? '🖼️' : '📄';
+                  
+                  return `
+                    <div class="document-card">
+                      <div class="document-icon">${iconType}</div>
+                      <div class="document-name">${doc.nom}</div>
+                      <div class="document-meta">
+                        <strong>${doc.type}</strong><br>
+                        ${tailleAffichee} • ${new Date(doc.dateAjout).toLocaleDateString('fr-FR')}
+                      </div>
+                      <div class="document-actions">
+                        <button class="btn-info" onclick="window.telechargerDocument('${doc.data}', '${doc.nom}')">
+                          📥 Télécharger
+                        </button>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            ` : ''}
+            
+            ${photos.length > 0 ? `
+              <h4 style="margin-top: 1.5rem; margin-bottom: 0.5rem; color: #667eea;">📸 Photos (${photos.length})</h4>
+              <div class="photos-grid" id="photos-${index}">
+                ${photos.map((photo) => `
+                  <div class="photo-card" onclick="window.ouvrirPhoto('${photo.data}'); event.stopPropagation();">
+                    <img src="${photo.data}" alt="${photo.nom || ''}" />
+                    <div class="photo-overlay">${photo.source}</div>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+    
+    window.toggleBien = function(index) {
+      const docs = document.getElementById('docs-' + index);
+      const photos = document.getElementById('photos-' + index);
+      const icon = document.getElementById('toggle-' + index);
+      
+      const isOpen = icon.classList.contains('open');
+      
+      if (docs) docs.classList.toggle('open');
+      if (photos) photos.classList.toggle('open');
+      icon.classList.toggle('open');
+    };
+    
+    window.toutOuvrir = function() {
+      document.querySelectorAll('.documents-grid, .photos-grid').forEach(el => el.classList.add('open'));
+      document.querySelectorAll('.toggle-icon').forEach(el => el.classList.add('open'));
+    };
+    
+    window.toutFermer = function() {
+      document.querySelectorAll('.documents-grid, .photos-grid').forEach(el => el.classList.remove('open'));
+      document.querySelectorAll('.toggle-icon').forEach(el => el.classList.remove('open'));
+    };
+    
+    window.telechargerDocument = function(data, nom) {
+      const a = document.createElement('a');
+      a.href = data;
+      a.download = nom;
+      a.click();
+    };
+    
+    window.ouvrirPhoto = function(data) {
+      document.getElementById('modalPhotoImg').src = data;
+      document.getElementById('modalPhoto').classList.add('active');
+    };
+    
+    window.fermerModal = function() {
+      document.getElementById('modalPhoto').classList.remove('active');
+    };
+    
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', async () => {
+      await chargerDonnees();
+      chargerFilterVilles();
+      afficherDocuments();
+    });
+  </script>
+</body>
+</html>

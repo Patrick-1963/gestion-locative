@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Liaison Bien - Propriétaire</title>
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css" />
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="manifest" href="/manifest.json">
+  <style>
+    body { 
+      max-width: 1400px; 
+      margin: 0 auto; 
+      padding: 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .container { 
+      background: white; 
+      padding: 2.5rem; 
+      border-radius: 16px; 
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      margin-bottom: 2rem;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    
+    h1 { 
+      color: #2c3e50; 
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      transition: all 0.3s;
+    }
+    
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .selection-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .selection-panel {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .selection-panel h2 {
+      color: #667eea;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+    
+    .item-card {
+      background: white;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      border: 2px solid #e0e0e0;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .item-card:hover {
+      border-color: #667eea;
+      background: #f8f9ff;
+    }
+    
+    .item-card.selected {
+      border-color: #667eea;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    }
+    
+    .item-card.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .item-title {
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 0.3rem;
+    }
+    
+    .item-details {
+      font-size: 0.85rem;
+      color: #7f8c8d;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 15px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #667eea;
+      color: white;
+      margin-left: 0.5rem;
+    }
+    
+    .liaison-section {
+      background: #e8f5e9;
+      padding: 2rem;
+      border-radius: 8px;
+      border-left: 4px solid #4caf50;
+      margin-bottom: 2rem;
+    }
+    
+    .liaison-section h2 {
+      color: #2e7d32;
+      margin-bottom: 1rem;
+    }
+    
+    .liaison-item {
+      background: white;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    button {
+      padding: 0.8rem 2rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .btn-danger {
+      background: #e74c3c;
+      color: white;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: #7f8c8d;
+      font-style: italic;
+    }
+    
+    .info-box {
+      background: #e3f2fd;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid #2196f3;
+      font-size: 0.9rem;
+      color: #1976d2;
+    }
+    
+    #scrollTopBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 48px;
+      height: 48px;
+      background: #667eea;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    #scrollTopBtn.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #scrollTopBtn:hover {
+      transform: scale(1.2);
+      background: #764ba2;
+    }
+    
+    @media (max-width: 968px) {
+      .selection-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="/pages/menu.html" class="back-link">← Retour au menu</a>
+  
+  <div class="container">
+    <div class="header">
+      <h1>🔗 Liaison Bien - Propriétaire</h1>
+      <p style="color: #7f8c8d;">Associez les biens immobiliers à leurs propriétaires</p>
+    </div>
+    
+    <div class="info-box">
+      ℹ️ <strong>Comment ça marche :</strong> Sélectionnez un bien, puis sélectionnez un ou plusieurs propriétaires à associer. Vous pouvez créer des indivisions (plusieurs propriétaires pour un bien).
+    </div>
+   <h2> <center>Selectionner</h2></center>
+    <div class="selection-grid">
+      
+      <!-- Sélection du bien -->
+      <div class="selection-panel">
+        <h2>🏢 Un Bien</h2>
+        <div id="listeBiens"></div>
+      </div>
+      
+      <!-- Sélection des propriétaires -->
+      <div class="selection-panel">
+        <h2>👥 le(s) Propriétaire(s)</h2>
+        <div id="listeProprietaires"></div>
+      </div>
+    </div>
+    
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <button id="btnAssocier" class="btn-primary" onclick="associer()" disabled>
+        ✅ Associer le bien aux propriétaires sélectionnés
+      </button>
+    </div>
+    
+    <!-- Liaisons existantes -->
+    <div class="liaison-section">
+      <h2>📋 Liaisons Existantes</h2>
+      <div id="liaisonsExistantes"></div>
+    </div>
+  </div>
+  
+  <a href="#" id="scrollTopBtn" title="Retour en haut">↑</a>
+
+  <script type="module">
+    import { getBiens, updateBien, initDB } from '/js/db.js';
+    import { getProprietaires, updateProprietaire } from '/js/db.js';
+    import { showNotification } from '/js/app.js';
+    
+    let bienSelectionne = null;
+    let proprietairesSelectionnes = [];
+    
+    // Gestion du scroll
+    window.addEventListener('scroll', function() {
+      const scrollBtn = document.getElementById('scrollTopBtn');
+      if (window.pageYOffset > 300) {
+        scrollBtn.classList.add('visible');
+      } else {
+        scrollBtn.classList.remove('visible');
+      }
+    });
+
+    document.getElementById("scrollTopBtn").addEventListener("click", function(e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    
+    async function chargerBiens() {
+      try {
+        console.log('🔍 Chargement des biens...');
+        const biens = await getBiens();
+        console.log('📦 Biens récupérés:', biens);
+        const container = document.getElementById('listeBiens');
+        
+        if (!biens || biens.length === 0) {
+          console.log('⚠️ Aucun bien trouvé');
+          container.innerHTML = '<div class="empty-state">Aucun bien enregistré. <a href="/pages/bien.html">Créer un bien</a></div>';
+          return;
+        }
+        
+        container.innerHTML = biens.map(b => {
+          console.log('📋 Bien:', b);
+          return `
+            <div class="item-card ${bienSelectionne === b.id ? 'selected' : ''}" onclick="window.selectionnerBien('${b.id}')">
+              <div class="item-title">${b.typeBien ? (b.typeBien.charAt(0).toUpperCase() + b.typeBien.slice(1)) : 'Bien'} - ${b.reference || 'Sans référence'}</div>
+              <div class="item-details">
+                📍 ${b.adresse || 'Adresse non renseignée'}, ${b.ville || 'Ville non renseignée'}
+                ${(b.proprietairesIds || []).length > 0 ? 
+                  `<span class="badge">${b.proprietairesIds.length} propriétaire(s)</span>` : 
+                  ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error('❌ Erreur chargement biens:', err);
+        const container = document.getElementById('listeBiens');
+        container.innerHTML = `<div class="empty-state" style="color: #e74c3c;">Erreur: ${err.message}</div>`;
+        showNotification('Erreur lors du chargement des biens', 'error');
+      }
+    }
+    
+    async function chargerProprietaires() {
+      try {
+        console.log('🔍 Chargement des propriétaires...');
+        const proprietaires = await getProprietaires();
+        console.log('📦 Propriétaires récupérés:', proprietaires);
+        const container = document.getElementById('listeProprietaires');
+        
+        if (!proprietaires || proprietaires.length === 0) {
+          console.log('⚠️ Aucun propriétaire trouvé');
+          container.innerHTML = '<div class="empty-state">Aucun propriétaire enregistré. <a href="/pages/proprietaire.html">Créer un propriétaire</a></div>';
+          return;
+        }
+        
+        const disabled = !bienSelectionne;
+        
+        container.innerHTML = proprietaires.map(p => {
+          console.log('📋 Propriétaire:', p);
+          return `
+            <div class="item-card ${proprietairesSelectionnes.includes(p.id) ? 'selected' : ''} ${disabled ? 'disabled' : ''}" 
+                 onclick="${disabled ? '' : `window.toggleProprietaire('${p.id}')`}">
+              <div class="item-title">${p.civilite} ${p.nom} ${p.prenom}</div>
+              <div class="item-details">
+                📧 ${p.email} • 📱 ${p.telephone}
+                ${(p.biensIds || []).length > 0 ? 
+                  `<span class="badge">${p.biensIds.length} bien(s)</span>` : 
+                  ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error('❌ Erreur chargement propriétaires:', err);
+        const container = document.getElementById('listeProprietaires');
+        container.innerHTML = `<div class="empty-state" style="color: #e74c3c;">Erreur: ${err.message}</div>`;
+        showNotification('Erreur lors du chargement des propriétaires', 'error');
+      }
+    }
+    
+    window.selectionnerBien = async function(id) {
+      bienSelectionne = id;
+      proprietairesSelectionnes = [];
+      await chargerBiens();
+      await chargerProprietaires();
+      updateBouton();
+    };
+    
+    window.toggleProprietaire = async function(id) {
+      const index = proprietairesSelectionnes.indexOf(id);
+      if (index > -1) {
+        proprietairesSelectionnes.splice(index, 1);
+      } else {
+        proprietairesSelectionnes.push(id);
+      }
+      await chargerProprietaires();
+      updateBouton();
+    };
+    
+    function updateBouton() {
+      const btn = document.getElementById('btnAssocier');
+      btn.disabled = !bienSelectionne || proprietairesSelectionnes.length === 0;
+    }
+    
+    window.associer = async function() {
+      if (!bienSelectionne || proprietairesSelectionnes.length === 0) return;
+      
+      try {
+        // Mise à jour du bien
+        const biens = await getBiens();
+        let bien = biens.find(b => b.id === bienSelectionne);
+        
+        if (!bien) {
+          showNotification('Bien non trouvé', 'error');
+          return;
+        }
+        
+        if (!bien.proprietairesIds) bien.proprietairesIds = [];
+        bien.proprietairesIds = [...new Set([...bien.proprietairesIds, ...proprietairesSelectionnes])];
+        await updateBien(bien);
+        
+        // Mise à jour des propriétaires
+        const proprietaires = await getProprietaires();
+        for (const pId of proprietairesSelectionnes) {
+          let proprio = proprietaires.find(p => p.id === pId);
+          if (proprio) {
+            if (!proprio.biensIds) proprio.biensIds = [];
+            if (!proprio.biensIds.includes(bienSelectionne)) {
+              proprio.biensIds.push(bienSelectionne);
+            }
+            await updateProprietaire(proprio);
+          }
+        }
+        
+        showNotification(`✅ Association réussie ! ${proprietairesSelectionnes.length} propriétaire(s) associé(s) au bien.`);
+        
+        // Réinitialisation
+        bienSelectionne = null;
+        proprietairesSelectionnes = [];
+        await chargerBiens();
+        await chargerProprietaires();
+        await chargerLiaisons();
+        updateBouton();
+      } catch (err) {
+        console.error('Erreur association:', err);
+        showNotification('Erreur lors de l\'association', 'error');
+      }
+    };
+    
+    async function chargerLiaisons() {
+      try {
+        const biens = await getBiens();
+        const proprietaires = await getProprietaires();
+        const container = document.getElementById('liaisonsExistantes');
+        
+        const liaisons = [];
+        
+        biens.forEach(b => {
+          if (b.proprietairesIds && b.proprietairesIds.length > 0) {
+            b.proprietairesIds.forEach(pId => {
+              const proprio = proprietaires.find(p => p.id === pId);
+              if (proprio) {
+                liaisons.push({
+                  bien: b,
+                  proprietaire: proprio
+                });
+              }
+            });
+          }
+        });
+        
+        if (liaisons.length === 0) {
+          container.innerHTML = '<div class="empty-state">Aucune liaison enregistrée</div>';
+          return;
+        }
+        
+        container.innerHTML = liaisons.map((l, index) => `
+          <div class="liaison-item">
+            <div>
+              <strong>🏢 ${l.bien.reference || 'Sans référence'}</strong> (${l.bien.adresse})
+              ↔️
+              <strong>👤 ${l.proprietaire.civilite} ${l.proprietaire.nom} ${l.proprietaire.prenom}</strong>
+            </div>
+            <button class="btn-danger" onclick="window.supprimerLiaison('${l.bien.id}', '${l.proprietaire.id}')">
+              🗑️ Supprimer
+            </button>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Erreur chargement liaisons:', err);
+        showNotification('Erreur lors du chargement des liaisons', 'error');
+      }
+    }
+    
+    window.supprimerLiaison = async function(bienId, proprioId) {
+      if (!confirm('Voulez-vous vraiment supprimer cette liaison ?')) return;
+      
+      try {
+        // Retirer le propriétaire du bien
+        const biens = await getBiens();
+        let bien = biens.find(b => b.id === bienId);
+        if (bien && bien.proprietairesIds) {
+          bien.proprietairesIds = bien.proprietairesIds.filter(id => id !== proprioId);
+          await updateBien(bien);
+        }
+        
+        // Retirer le bien du propriétaire
+        const proprietaires = await getProprietaires();
+        let proprio = proprietaires.find(p => p.id === proprioId);
+        if (proprio && proprio.biensIds) {
+          proprio.biensIds = proprio.biensIds.filter(id => id !== bienId);
+          await updateProprietaire(proprio);
+        }
+        
+        showNotification('✅ Liaison supprimée');
+        await chargerBiens();
+        await chargerProprietaires();
+        await chargerLiaisons();
+      } catch (err) {
+        console.error('Erreur suppression liaison:', err);
+        showNotification('Erreur lors de la suppression', 'error');
+      }
+    };
+    
+    // Initialisation au chargement
+    window.addEventListener('load', async function() {
+      console.log('🚀 Initialisation de la page liaison...');
+      try {
+        // IMPORTANT: Initialiser la DB avant toute opération
+        console.log('🔧 Initialisation de la base de données...');
+        await initDB();
+        console.log('✅ Base de données prête');
+        
+        // Maintenant on peut charger les données
+        await chargerBiens();
+        await chargerProprietaires();
+        await chargerLiaisons();
+        console.log('✅ Initialisation terminée');
+      } catch (err) {
+        console.error('❌ Erreur lors de l\'initialisation:', err);
+        showNotification('Erreur lors de l\'initialisation de la page', 'error');
+      }
+    });
+  </script>
+</body>
+</html>
