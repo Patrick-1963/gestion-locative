@@ -1,0 +1,1102 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aide - Gestion Locative</title>
+  <link rel="icon" type="image/png" href="../favicon.png">
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css" />
+  <style>
+    body {
+      max-width: 90%;
+      margin: 0 auto;
+      padding: 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      transition: all 0.3s;
+      backdrop-filter: blur(10px);
+    }
+
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateX(-5px);
+    }
+
+    .container {
+      max-width: 1200px;
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      margin-bottom: 2rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+      font-size: 2.5rem;
+    }
+
+    .subtitle {
+      color: #7f8c8d;
+      font-size: 1.1rem;
+    }
+
+    .search-box {
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 1rem 1rem 1rem 3rem;
+      border-radius: 50px;
+      border: 2px solid #e0e0e0;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+
+    .search-box input:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.2rem;
+      color: #7f8c8d;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid #e0e0e0;
+      /*flex-wrap: wrap;*/
+    }
+
+    .tab {
+      padding: 1rem 1.5rem;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-weight: 600;
+      color: #7f8c8d;
+      transition: all 0.3s;
+      font-size: 0.95rem;
+    }
+
+    .tab:hover {
+      color: #667eea;
+    }
+
+    .tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      border-left: 4px solid #667eea;
+    }
+
+    .section h2 {
+      color: #667eea;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section h3 {
+      color: #2c3e50;
+      font-size: 1.2rem;
+      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .section p {
+      line-height: 1.8;
+      color: #555;
+      margin-bottom: 1rem;
+    }
+
+    .section ul, .section ol {
+      line-height: 1.8;
+      color: #555;
+      margin-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .section li {
+      margin-bottom: 0.5rem;
+    }
+
+    .faq-item {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .faq-item:hover {
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .faq-question {
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 1.1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .faq-answer {
+      color: #555;
+      line-height: 1.8;
+      display: none;
+      padding-top: 1rem;
+      border-top: 1px solid #e0e0e0;
+      margin-top: 1rem;
+    }
+
+    .faq-item.open .faq-answer {
+      display: block;
+    }
+
+    .faq-icon {
+      color: #667eea;
+      transition: transform 0.3s;
+    }
+
+    .faq-item.open .faq-icon {
+      transform: rotate(180deg);
+    }
+
+    .info-box {
+      background: #e3f2fd;
+      padding: 1.5rem;
+      border-radius: 8px;
+      border-left: 4px solid #2196f3;
+      margin: 1.5rem 0;
+    }
+
+    .info-box strong {
+      color: #1976d2;
+    }
+
+    .warning-box {
+      background: #fff3cd;
+      padding: 1.5rem;
+      border-radius: 8px;
+      border-left: 4px solid #ffc107;
+      margin: 1.5rem 0;
+    }
+
+    .warning-box strong {
+      color: #856404;
+    }
+
+    .success-box {
+      background: #d4edda;
+      padding: 1.5rem;
+      border-radius: 8px;
+      border-left: 4px solid #28a745;
+      margin: 1.5rem 0;
+    }
+
+    .success-box strong {
+      color: #155724;
+    }
+
+    .quick-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+
+    .quick-link {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .quick-link:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      color: white;
+    }
+
+    .quick-link h3 {
+      margin: 0.5rem 0;
+      font-size: 1.2rem;
+    }
+
+    .quick-link p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 0.9rem;
+    }
+
+    .quick-link-icon {
+      font-size: 2rem;
+    }
+
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      border-radius: 8px;
+      margin: 1.5rem 0;
+    }
+
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .code-block {
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      margin: 1rem 0;
+    }
+
+    .kbd {
+      background: #2c3e50;
+      color: white;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .feature-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-card h3 {
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-card p {
+      color: #7f8c8d;
+      line-height: 1.6;
+    }
+
+    .contact-section {
+      text-align: center;
+      padding: 3rem 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 12px;
+      margin-top: 2rem;
+    }
+
+    .contact-section h2 {
+      margin-bottom: 1rem;
+    }
+
+    .contact-section p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      margin-bottom: 2rem;
+    }
+
+    .scrollTop {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #667eea;
+      color: white;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+    }
+
+    .scrollTop.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .scrollTop:hover {
+      background: #764ba2;
+      transform: translateY(-5px);
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 3rem;
+      color: #7f8c8d;
+    }
+
+    .no-results-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <a href="menu.html" class="back-link">← Retour au menu</a>
+
+  <div class="container">
+
+    <div class="header">
+      <h1>📚 Centre d'aide</h1>
+      <p class="subtitle">Trouvez rapidement des réponses à vos questions</p>
+    </div>
+
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Rechercher dans l'aide..." />
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('demarrage', this)">🚀 Démarrage rapide</button>
+      <button class="tab" onclick="switchTab('fonctionnalites', this)">⚡ Fonctionnalités</button>
+      <button class="tab" onclick="switchTab('guides', this)">📖 Guides</button>
+      <button class="tab" onclick="switchTab('faq', this)">❓ FAQ</button>
+      <button class="tab" onclick="switchTab('techniques', this)">🔧 Technique</button>
+    </div>
+
+    <!-- Démarrage rapide -->
+    <div id="demarrage" class="tab-content active">
+      
+      <div class="section">
+        <h2>🚀 Bienvenue dans Gestion Locative</h2>
+        <p>Cette application vous permet de gérer facilement vos biens immobiliers, vos locataires et tous les documents associés.</p>
+        
+        <div class="info-box">
+          <strong>💡 Première utilisation ?</strong><br>
+          Suivez ces étapes pour démarrer rapidement avec l'application.
+        </div>
+
+        <h3>Étape 1 : Configurer le stockage</h3>
+        <p>Avant de commencer, configurez un dossier local pour stocker vos documents :</p>
+        <ol>
+          <li>Allez dans <strong>Paramètres</strong> (⚙️)</li>
+          <li>Cliquez sur <strong>"Choisir un dossier"</strong></li>
+          <li>Sélectionnez un dossier sur votre ordinateur</li>
+          <li>Accordez les permissions nécessaires</li>
+        </ol>
+
+        <h3>Étape 2 : Ajouter un bien immobilier</h3>
+        <ol>
+          <li>Cliquez sur <strong>"Biens"</strong> dans le menu</li>
+          <li>Remplissez les informations du bien (adresse, superficie, etc.)</li>
+          <li>Ajoutez des photos et documents si nécessaire</li>
+          <li>Sauvegardez</li>
+        </ol>
+
+        <h3>Étape 3 : Enregistrer un propriétaire</h3>
+        <ol>
+          <li>Allez dans <strong>"Propriétaires"</strong></li>
+          <li>Ajoutez les coordonnées du propriétaire</li>
+          <li>Associez-le à un ou plusieurs biens</li>
+        </ol>
+
+        <h3>Étape 4 : Ajouter un locataire</h3>
+        <ol>
+          <li>Cliquez sur <strong>"Locataires"</strong></li>
+          <li>Remplissez les informations du locataire</li>
+          <li>Joignez les documents (pièce d'identité, justificatifs, etc.)</li>
+        </ol>
+
+        <h3>Étape 5 : Générer un bail</h3>
+        <ol>
+          <li>Rendez-vous dans <strong>"Baux"</strong></li>
+          <li>Sélectionnez le bien, le propriétaire et le locataire</li>
+          <li>Configurez les conditions (loyer, durée, clauses)</li>
+          <li>Générez et imprimez le bail</li>
+        </ol>
+      </div>
+
+      <div class="quick-links">
+        <a href="#" class="quick-link" onclick="switchTab('guides', document.querySelectorAll('.tab')[2]); return false;">
+          <div class="quick-link-icon">📖</div>
+          <h3>Guides détaillés</h3>
+          <p>Tutoriels pas à pas pour chaque fonctionnalité</p>
+        </a>
+        <a href="#" class="quick-link" onclick="switchTab('faq', document.querySelectorAll('.tab')[3]); return false;">
+          <div class="quick-link-icon">❓</div>
+          <h3>Questions fréquentes</h3>
+          <p>Réponses aux questions les plus courantes</p>
+        </a>
+        <a href="settings.html" class="quick-link">
+          <div class="quick-link-icon">⚙️</div>
+          <h3>Paramètres</h3>
+          <p>Configurez l'application selon vos besoins</p>
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Fonctionnalités -->
+    <div id="fonctionnalites" class="tab-content">
+      
+      <div class="section">
+        <h2>⚡ Fonctionnalités principales</h2>
+        
+        <div class="feature-grid">
+          
+          <div class="feature-card">
+            <div class="feature-icon">🏢</div>
+            <h3>Gestion des biens</h3>
+            <p>Enregistrez tous vos biens immobiliers avec leurs caractéristiques, photos et documents associés.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">👥</div>
+            <h3>Propriétaires & Locataires</h3>
+            <p>Base de données complète avec coordonnées, documents et historique pour chaque contact.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">📄</div>
+            <h3>Génération de baux</h3>
+            <p>Créez des contrats de location conformes à la législation française en quelques clics.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🧾</div>
+            <h3>Quittances de loyer</h3>
+            <p>Générez automatiquement des quittances professionnelles pour vos locataires.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">📋</div>
+            <h3>États des lieux</h3>
+            <p>Documentez précisément l'état du bien à l'entrée et à la sortie du locataire.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">💾</div>
+            <h3>Stockage local</h3>
+            <p>Tous vos documents sont stockés localement sur votre ordinateur en toute sécurité.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">📤</div>
+            <h3>Import/Export</h3>
+            <p>Sauvegardez et restaurez vos données facilement au format JSON.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🌐</div>
+            <h3>Hors ligne</h3>
+            <p>Utilisez l'application même sans connexion internet grâce à la PWA.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3>Données privées</h3>
+            <p>Vos données restent sur votre appareil, aucun envoi vers des serveurs externes.</p>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>🆕 Fonctionnalités à venir</h2>
+        <ul>
+          <li>📊 Tableau de bord avec statistiques et graphiques</li>
+          <li>💰 Suivi des paiements et rappels automatiques</li>
+          <li>📅 Calendrier des échéances (loyers, révisions, diagnostics)</li>
+          <li>🔔 Notifications pour les dates importantes</li>
+          <li>📱 Application mobile native</li>
+          <li>☁️ Synchronisation cloud optionnelle</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Guides -->
+    <div id="guides" class="tab-content">
+      
+      <div class="section">
+        <h2>📖 Guide : Créer un bail complet</h2>
+        
+        <h3>1. Préparer les informations</h3>
+        <p>Avant de commencer, assurez-vous d'avoir :</p>
+        <ul>
+          <li>Les informations complètes du bien</li>
+          <li>Les coordonnées du propriétaire</li>
+          <li>Les informations du locataire</li>
+          <li>Le montant du loyer et des charges</li>
+          <li>Les diagnostics obligatoires</li>
+        </ul>
+
+        <h3>2. Choisir le type de bail</h3>
+        <p>Trois types de baux sont disponibles :</p>
+        <ul>
+          <li><strong>Location vide :</strong> Durée minimale 3 ans (6 ans pour personne morale)</li>
+          <li><strong>Location meublée :</strong> Durée minimale 1 an (9 mois pour étudiants)</li>
+          <li><strong>Location mixte :</strong> Usage habitation + professionnel</li>
+        </ul>
+
+        <div class="info-box">
+          <strong>💡 Bon à savoir :</strong><br>
+          Le dépôt de garantie est limité à 1 mois de loyer pour une location vide et 2 mois pour une location meublée.
+        </div>
+
+        <h3>3. Configurer les clauses</h3>
+        <p>Personnalisez votre bail avec les clauses optionnelles :</p>
+        <ul>
+          <li>Révision annuelle du loyer (IRL)</li>
+          <li>Clause de résiliation facilitée</li>
+          <li>Clause de solidarité (colocation)</li>
+          <li>Autorisation préalable pour travaux</li>
+          <li>Interdiction de sous-location</li>
+        </ul>
+
+        <h3>4. Vérifier les diagnostics</h3>
+        <p>Cochez les diagnostics obligatoires selon votre bien :</p>
+        <ul>
+          <li>DPE (obligatoire pour tous)</li>
+          <li>Diagnostic amiante (si construction avant 1997)</li>
+          <li>CREP - Plomb (si construction avant 1949)</li>
+          <li>Diagnostic gaz et électricité (si installation > 15 ans)</li>
+          <li>ERP - État des Risques et Pollutions</li>
+        </ul>
+
+        <h3>5. Générer et imprimer</h3>
+        <ol>
+          <li>Vérifiez toutes les informations</li>
+          <li>Cliquez sur "Générer le bail"</li>
+          <li>Prévisualisez le document</li>
+          <li>Imprimez en 2 exemplaires originaux</li>
+          <li>Faites signer les deux parties</li>
+        </ol>
+
+        <div class="warning-box">
+          <strong>⚠️ Important :</strong><br>
+          Le bail doit être signé avant la remise des clés. Conservez précieusement un exemplaire signé.
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>📖 Guide : Gérer les documents</h2>
+        
+        <h3>Stocker des documents</h3>
+        <ol>
+          <li>Configurez d'abord un dossier de stockage dans les paramètres</li>
+          <li>Lors de l'ajout d'un bien, propriétaire ou locataire, cliquez sur "Ajouter un document"</li>
+          <li>Sélectionnez le fichier (PDF, image, scan)</li>
+          <li>Le fichier est automatiquement copié dans votre dossier</li>
+        </ol>
+
+        <h3>Organiser les fichiers</h3>
+        <p>L'application organise automatiquement vos fichiers par catégorie :</p>
+        <div class="code-block">
+📁 Dossier de stockage/
+  📁 biens/
+    📁 bien_123456/
+      📄 photo_1.jpg
+      📄 diagnostic_dpe.pdf
+  📁 proprietaires/
+    📁 proprio_789012/
+      📄 carte_identite.pdf
+  📁 locataires/
+    📁 locataire_345678/
+      📄 justificatif_domicile.pdf
+        </div>
+
+        <div class="success-box">
+          <strong>✅ Avantage :</strong><br>
+          Vous gardez le contrôle total de vos fichiers. Ils restent accessibles même sans l'application.
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>📖 Guide : Sauvegarder et restaurer</h2>
+        
+        <h3>Créer une sauvegarde</h3>
+        <ol>
+          <li>Allez dans <strong>Paramètres</strong></li>
+          <li>Cliquez sur <strong>"Exporter toutes les données"</strong></li>
+          <li>Un fichier JSON est téléchargé avec toutes vos informations</li>
+          <li>Conservez ce fichier en lieu sûr (cloud, clé USB, etc.)</li>
+        </ol>
+
+        <h3>Restaurer une sauvegarde</h3>
+        <ol>
+          <li>Allez dans <strong>Paramètres</strong></li>
+          <li>Cliquez sur <strong>"Importer des données"</strong></li>
+          <li>Sélectionnez votre fichier de sauvegarde JSON</li>
+          <li>Confirmez l'import</li>
+        </ol>
+
+        <div class="warning-box">
+          <strong>⚠️ Attention :</strong><br>
+          L'import remplace les données existantes. Faites une sauvegarde avant d'importer si vous avez des données importantes.
+        </div>
+
+        <h3>Fréquence recommandée</h3>
+        <p>Nous recommandons de faire une sauvegarde :</p>
+        <ul>
+          <li>Après chaque ajout important (nouveau bail, nouveau bien)</li>
+          <li>Une fois par semaine si vous utilisez l'application régulièrement</li>
+          <li>Avant toute mise à jour de l'application</li>
+          <li>Avant de vider le cache ou les données</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- FAQ -->
+    <div id="faq" class="tab-content">
+      
+      <div class="section">
+        <h2>❓ Questions fréquentes</h2>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            L'application fonctionne-t-elle hors ligne ?
+            <span class="faq-icon">▼</span>
+          </div>
+          <div class="faq-answer">
+            Oui ! Gestion Locative est une PWA (Progressive Web App) qui fonctionne entièrement hors ligne une fois installée. Toutes vos données sont stockées localement sur votre appareil via IndexedDB.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            Mes données sont-elles envoyées sur internet ?
+            <span class="faq-icon">▼</span>
+          </div>
+          <div class="faq-answer">
+            Non, absolument pas. Toutes vos données restent sur votre appareil. Aucune information n'est envoyée vers des serveurs externes. Vous avez le contrôle total de vos données.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            Puis-je utiliser l'application sur plusieurs appareils ?
+            <span class="faq-icon">▼</span>
+          </div>
+          <div class="faq-answer">
+            Les données sont stockées localement sur chaque appareil. Pour synchroniser, exportez vos données depuis un appareil et importez-les sur l'autre via le fichier JSON. Une synchronisation automatique est prévue dans une future mise à jour.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            Quelle est la limite de stockage ?
+            <span class="faq-icon">▼</span>
+          </div>
+          <div class="faq-answer">
+            IndexedDB permet généralement de stocker plusieurs centaines de Mo à plusieurs Go selon le navigateur. Pour les fichiers (photos, PDF), la limite dépend de l'espace disque disponible sur votre ordinateur.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            Les baux générés sont-ils conformes à la loi ?
+            <span class="faq-icon">▼</span>
+          </div>
+          <div class="faq-answer">
+            Les modèles de baux sont conçus pour être conformes à la loi du 6 juillet 1989 et aux textes en vigueur. Cependant, nous recommandons de faire vérifier vos baux par un professionnel (avocat, notaire) pour s'assurer qu'ils correspondent à votre situation spécifique.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            Comment supprimer toutes mes données ?
+            <span class="faq-icon">▼</span>
+          </div>
+          <div class="faq-answer">
+            Allez dans Paramètres > Zone dangereuse > "Supprimer toutes les données". Cette action est irréversible, assurez-vous d'avoir fait une sauvegarde avant. Vous pouvez également vider les données du navigateur via les paramètres de celui-ci.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            L'application nécessite-t-elle une installation ?
+            <span class="faq-icon">▼</span>
+          </div>
+          <div class="faq-answer">
+            Non, vous pouvez l'utiliser directement dans votre navigateur. Cependant, vous pouvez l'installer comme application (bouton + dans la barre d'adresse) pour un accès plus rapide et une meilleure expérience utilisateur.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            Quels navigateurs sont supportés ?
+            <span class="faq-icon">▼</span>
+          </div>
+          <div class="faq-answer">
+            L'application fonctionne sur Chrome, Edge, Opera et Brave. Pour le stockage de fichiers, la File System Access API nécessite Chrome 86+, Edge 86+ ou Opera 72+. Firefox et Safari ont un support limité de certaines fonctionnalités.
+          </div>
+        </div>
+
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            Que faire en cas de bug ou de problème ?
+            <span class="faq-icon">▼</span>
+          </div>
+          <div class="faq-answer">
+            <ol>
+              <li>Rafraîchissez la page (Ctrl+F5 ou Cmd+Shift+R)</li>
+              <li>Videz le cache dans Paramètres</li>
+              <li>Vérifiez la console du navigateur (F12) pour les erreurs</li>
+              <li>Exportez vos données par précaution</li>
+              <li>Si le problème persiste, consultez la section Technique</li>
+            </ol>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Technique -->
+    <div id="techniques" class="tab-content">
+      
+      <div class="section">
+        <h2>🔧 Informations techniques</h2>
+
+        <h3>Technologies utilisées</h3>
+        <ul>
+          <li><strong>PWA (Progressive Web App) :</strong> Application web installable fonctionnant hors ligne</li>
+          <li><strong>IndexedDB :</strong> Base de données locale pour stocker vos informations</li>
+          <li><strong>File System Access API :</strong> Accès au système de fichiers local</li>
+          <li><strong>Service Worker :</strong> Mise en cache pour fonctionnement hors ligne</li>
+          <li><strong>PicoCSS :</strong> Framework CSS minimaliste et élégant</li>
+        </ul>
+
+        <h3>Compatibilité navigateurs</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Navigateur</th>
+              <th>Version minimale</th>
+              <th>Support complet</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Chrome</td>
+              <td>86+</td>
+              <td>✅ Oui</td>
+            </tr>
+            <tr>
+              <td>Edge</td>
+              <td>86+</td>
+              <td>✅ Oui</td>
+            </tr>
+            <tr>
+              <td>Opera</td>
+              <td>72+</td>
+              <td>✅ Oui</td>
+            </tr>
+            <tr>
+              <td>Brave</td>
+              <td>1.15+</td>
+              <td>✅ Oui</td>
+            </tr>
+            <tr>
+              <td>Firefox</td>
+              <td>N/A</td>
+              <td>⚠️ Partiel</td>
+            </tr>
+            <tr>
+              <td>Safari</td>
+              <td>N/A</td>
+              <td>⚠️ Partiel</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Raccourcis clavier</h3>
+        <ul>
+          <li><span class="kbd">Ctrl + F5</span> : Rafraîchir la page et vider le cache</li>
+          <li><span class="kbd">F12</span> : Ouvrir les outils de développement</li>
+          <li><span class="kbd">Ctrl + P</span> : Imprimer (dans la prévisualisation)</li>
+          <li><span class="kbd">Ctrl + S</span> : Sauvegarder (formulaires)</li>
+        </ul>
+
+        <h3>Limites de stockage</h3>
+        <div class="info-box">
+          <strong>📊 IndexedDB :</strong><br>
+          • Minimum garanti : 50 Mo<br>
+          • Maximum typique : 10% de l'espace disque disponible<br>
+          • Chrome/Edge : jusqu'à 60% de l'espace disque<br>
+          <br>
+          <strong>📁 Fichiers (File System API) :</strong><br>
+          • Limité uniquement par l'espace disque disponible<br>
+          • Les permissions doivent être accordées par l'utilisateur
+        </div>
+
+        <h3>Dépannage avancé</h3>
+        
+        <h4>Réinitialiser IndexedDB</h4>
+        <p>Depuis la console du navigateur (F12) :</p>
+        <div class="code-block">
+// Supprimer la base de données
+indexedDB.deleteDatabase('GestionLocativeDB');
+
+// Puis rechargez la page
+location.reload();
+        </div>
+
+        <h4>Vérifier le Service Worker</h4>
+        <div class="code-block">
+// Vérifier l'état du Service Worker
+navigator.serviceWorker.getRegistrations()
+  .then(registrations => console.log(registrations));
+
+// Désinscrire tous les Service Workers
+navigator.serviceWorker.getRegistrations()
+  .then(registrations => {
+    registrations.forEach(r => r.unregister());
+  });
+        </div>
+
+        <h4>Vider complètement le cache</h4>
+        <p>Méthode 1 : Via l'application</p>
+        <ol>
+          <li>Allez dans Paramètres</li>
+          <li>Cliquez sur "Vider le cache"</li>
+          <li>Rechargez la page</li>
+        </ol>
+
+        <p>Méthode 2 : Via le navigateur</p>
+        <ol>
+          <li>F12 > Application > Storage</li>
+          <li>Cliquez sur "Clear site data"</li>
+          <li>Confirmez et rechargez</li>
+        </ol>
+
+        <h3>Structure des données (JSON)</h3>
+        <p>Format d'export/import :</p>
+        <div class="code-block">
+{
+  "version": "2.1.0",
+  "dateExport": "2025-01-27T...",
+  "biens": [...],
+  "proprietaires": [...],
+  "locataires": [...],
+  "baux": [...],
+  "quittances": [...],
+  "etatsDesLieux": [...],
+  "liaisons": [...]
+}
+        </div>
+
+        <div class="warning-box">
+          <strong>⚠️ Développeurs :</strong><br>
+          L'application est open source. Vous pouvez consulter le code source et contribuer au projet. Respectez la licence lors de toute modification ou redistribution.
+        </div>
+
+      </div>
+
+      <div class="section">
+        <h2>🐛 Signaler un bug</h2>
+        <p>Si vous rencontrez un problème, veuillez noter :</p>
+        <ul>
+          <li>Votre navigateur et sa version</li>
+          <li>Les étapes pour reproduire le problème</li>
+          <li>Les messages d'erreur (console F12)</li>
+          <li>Des captures d'écran si pertinent</li>
+        </ul>
+        <div class="info-box">
+          <strong>💡 Astuce :</strong><br>
+          La plupart des problèmes se résolvent en vidant le cache et en rechargeant la page avec Ctrl+F5.
+        </div>
+      </div>
+
+    </div>
+
+    <div id="noResults" class="no-results" style="display: none;">
+      <div class="no-results-icon">🔍</div>
+      <h3>Aucun résultat trouvé</h3>
+      <p>Essayez avec d'autres mots-clés</p>
+    </div>
+
+    <!-- Section contact -->
+    <div class="contact-section">
+      <h2>Besoin d'aide supplémentaire ?</h2>
+      <p>Vous n'avez pas trouvé la réponse à votre question ?</p>
+      <p><strong>📧 Contact :</strong> support@gestion-locative.app</p>
+      <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 2rem;">
+        Version 2.1.0 • Dernière mise à jour : Janvier 2025
+      </p>
+    </div>
+
+  </div>
+
+  <div class="scrollTop" id="scrollTop" onclick="scrollToTop()">↑</div>
+
+  <script>
+    // Gestion des onglets
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+
+      document.getElementById(tabId).classList.add('active');
+      el.classList.add('active');
+
+      // Scroller vers le haut
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Gestion des FAQ
+    function toggleFaq(element) {
+      element.classList.toggle('open');
+    }
+
+    // Recherche
+    const searchInput = document.getElementById('searchInput');
+    const allSections = document.querySelectorAll('.section, .faq-item');
+    const noResults = document.getElementById('noResults');
+
+    searchInput.addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase().trim();
+
+      if (searchTerm === '') {
+        // Réafficher tout
+        allSections.forEach(section => section.style.display = '');
+        noResults.style.display = 'none';
+        return;
+      }
+
+      let hasResults = false;
+
+      allSections.forEach(section => {
+        const text = section.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+          section.style.display = '';
+          hasResults = true;
+        } else {
+          section.style.display = 'none';
+        }
+      });
+
+      // Afficher "aucun résultat" si nécessaire
+      if (!hasResults) {
+        noResults.style.display = 'block';
+      } else {
+        noResults.style.display = 'none';
+      }
+    });
+
+    // Bouton scroll to top
+    const scrollTopBtn = document.getElementById('scrollTop');
+
+    window.addEventListener('scroll', () => {
+      if (window.pageYOffset > 300) {
+        scrollTopBtn.classList.add('visible');
+      } else {
+        scrollTopBtn.classList.remove('visible');
+      }
+    });
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Afficher le nombre de FAQ au chargement
+    window.addEventListener('load', () => {
+      const faqCount = document.querySelectorAll('.faq-item').length;
+      console.log(`📚 ${faqCount} questions dans la FAQ`);
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,1400 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Générateur de Bail de Location</title>
+<link rel="icon" type="image/png" href="favicon.png">
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>  <!-- Optionnel pour tables -->
+
+  <style>
+    body {
+      max-width: 90%;
+      margin: 0 auto;
+      padding: 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+       max-width: 90%;
+      background: white;
+      padding: 0.5rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      margin-bottom: 2rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      transition: all 0.3s;
+    }
+
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid #e0e0e0;
+      /*flex-wrap: wrap;*/
+    }
+
+    .tab {
+      padding: 1rem 1.5rem;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-weight: 600;
+      color: #7f8c8d;
+      transition: all 0.3s;
+    }
+
+    .tab:hover {
+      color: #667eea;
+    }
+
+    .tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .section {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      border-left: 4px solid #667eea;
+    }
+
+    .section h2 {
+      color: #667eea;
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .form-group input[type="checkbox"] {
+      width: auto;
+      margin-right: 0.5rem;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .info-box {
+      background: #e3f2fd;
+      padding: 1rem;
+      border-radius: 6px;
+      border-left: 4px solid #2196f3;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+
+    .warning-box {
+      background: #fff3cd;
+      padding: 1rem;
+      border-radius: 6px;
+      border-left: 4px solid #ffc107;
+      margin: 1rem 0;
+    }
+
+    .bail-preview {
+      background: white;
+      padding: 3rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      margin-top: 2rem;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+      font-family: 'Times New Roman', serif;
+      line-height: 1.6;
+    }
+
+    .bail-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #2c3e50;
+    }
+
+    .bail-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+    }
+
+    .bail-subtitle {
+      font-size: 1rem;
+      color: #7f8c8d;
+    }
+
+    .bail-section {
+      margin-bottom: 2rem;
+    }
+
+    .bail-section h3 {
+      color: #2c3e50;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+
+    .bail-article {
+      margin: 0.3rem 0;
+      line-height: 1.2;
+      page-break-inside: avoid;
+    }
+
+    .bail-article strong {
+      color: #2c3e50;
+    }
+
+    .signature-section {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .signature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-top: 2rem;
+    }
+
+    .signature-box {
+      text-align: center;
+    }
+
+    .signature-box p {
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .signature-line {
+      border-bottom: 1px solid #2c3e50;
+      height: 60px;
+      margin-top: 0.5rem;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+    }
+
+    .notification.success {
+      background: #4caf50;
+      color: white;
+    }
+
+    .notification.error {
+      background: #f44336;
+      color: white;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    #scrollTopBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 999;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      opacity: 0;
+      visibility: hidden;
+      background: #667eea;
+      color: white;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    #scrollTopBtn.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #scrollTopBtn:hover {
+      transform: translateY(-5px);
+      background: #764ba2;
+    }
+
+    @media print {
+      body {
+        background: white !important;
+        padding: 0;
+        margin: 0;
+      }
+
+      @page {
+        margin: 15mm;
+        size: A4;
+      }
+      .no-print { display: none !important;
+      }
+.page-apercu { box-shadow: none; margin: 0; width: auto; min-height: auto; padding: 0; }
+      .back-link,
+      .tabs,
+      .tab,
+      .tab-content:not(#generer),
+      #generer > *:not(#bailPreview),
+      #scrollTopBtn,
+      .notification,
+      .action-buttons {
+        display: none !important;
+      }
+
+      .container {
+        box-shadow: none;
+        padding: 20px;
+        margin: 0;
+        background: white !important;
+      }
+
+      #generer {
+        display: block !important;
+      }
+
+      #bailPreview {
+        display: block !important;
+        box-shadow: none;
+        margin: 0;
+        padding: 20px;
+        background: white !important;
+      }
+
+      .bail-preview {
+        page-break-inside: avoid;
+      }
+
+      .bail-article {
+        page-break-inside: avoid;
+      }
+
+      h3 {
+        page-break-after: avoid;
+      }
+
+      * {
+        color: #000 !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <a href="menu.html" class="back-link">← Retour au menu</a>
+
+  ✏️ Mode édition du bail <span id="editBannerId"></span>
+</div>
+
+  <div class="container">
+
+    <div class="header">
+      <h1>Générateur de Bail de Location</h1>
+      <p>Créez des contrats de location conformes à la loi</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('generer', this)">Générer un bail</button>
+      <button class="tab" onclick="switchTab('historique', this)">Mes baux</button>
+    </div>
+
+    <!-- Onglet Générer -->
+    <div id="generer" class="tab-content active">
+
+      <div class="section">
+        <h2>1. Type de bail</h2>
+        <div class="form-group">
+          <label for="typeBail">Type de location *</label>
+          <select id="typeBail" required>
+            <option value="">Sélectionnez un type</option>
+            <option value="vide">Location vide (loi du 6 juillet 1989)</option>
+            <option value="meuble">Location meublée (loi du 6 juillet 1989)</option>
+            <option value="mixte">Location mixte (habitation et professionnel)</option>
+          </select>
+        </div>
+        <div class="info-box">
+          <strong>ℹ️ À savoir :</strong><br>
+          • Location vide : durée minimale 3 ans (6 ans si bailleur personne morale)<br>
+          • Location meublée : durée minimale 1 an (9 mois pour étudiants)<br>
+          • Location mixte : cumul usage habitation + professionnel
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>2. Informations du bien</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="bienSelect">Bien *</label>
+            <select id="bienSelect" required>
+              <option value="">Sélectionnez un bien</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>3. Informations du bailleur</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="proprietaireSelect">Propriétaire/Bailleur *</label>
+            <select id="proprietaireSelect" required>
+              <option value="">Sélectionnez un propriétaire</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>4. Informations du locataire</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="locataireSelect">Locataire *</label>
+            <select id="locataireSelect" required>
+              <option value="">Sélectionnez un locataire</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>5. Durée du bail</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="dateDebut">Date de début *</label>
+            <input type="date" id="dateDebut" required>
+          </div>
+          <div class="form-group">
+            <label for="duree">Durée (en années) *</label>
+            <select id="duree" required>
+              <option value="">Sélectionnez</option>
+              <option value="1">1 an (meublé)</option>
+              <option value="3">3 ans (vide - pers. physique)</option>
+              <option value="6">6 ans (vide - pers. morale)</option>
+              <option value="9">9 mois (étudiant)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>6. Conditions financières</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="loyerMensuel">Loyer mensuel hors charges (€) *</label>
+            <input type="number" id="loyerMensuel" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label for="charges">Provision pour charges (€) *</label>
+            <input type="number" id="charges" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label for="depotGarantie">Dépôt de garantie (€) *</label>
+            <input type="number" id="depotGarantie" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label for="jourPaiement">Jour de paiement du loyer</label>
+            <input type="number" id="jourPaiement" min="1" max="28" value="1">
+          </div>
+        </div>
+        <div class="info-box">
+          <strong>ℹ️ Montants légaux du dépôt de garantie :</strong><br>
+          • Location vide : maximum 1 mois de loyer hors charges<br>
+          • Location meublée : maximum 2 mois de loyer hors charges
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>7. Localisation</h2>
+        <div class="checkbox-group">
+          <input type="checkbox" id="zoneTendue">
+          <label for="zoneTendue">Logement situé en zone tendue (préavis réduit à 1 mois)</label>
+        </div>
+        <div class="info-box">
+          <strong>ℹ️ Zones tendues :</strong> Paris, Lyon, Marseille, et 1 150 communes où la demande de logements est supérieure à l'offre (décret n°2013-392 du 10 mai 2013).
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>8. Révision du loyer</h2>
+        <div class="checkbox-group">
+          <input type="checkbox" id="revisionLoyer" onchange="toggleRevision()">
+          <label for="revisionLoyer">Prévoir une révision annuelle du loyer</label>
+        </div>
+        <div id="revisionOptions" style="display:none; margin-top: 1rem;">
+          <div class="form-group">
+            <label for="indiceReference">Indice de référence</label>
+            <select id="indiceReference">
+              <option value="IRL">IRL (Indice de Référence des Loyers)</option>
+              <option value="ICC">ICC (Indice du Coût de la Construction)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="dateRevision">Date anniversaire de révision</label>
+            <input type="date" id="dateRevision">
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>9. Clauses optionnelles</h2>
+        <div class="checkbox-group">
+          <input type="checkbox" id="clauseResiliation">
+          <label for="clauseResiliation">Clause de résiliation facilitée pour le bailleur</label>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="clauseSolidaire">
+          <label for="clauseSolidaire">Clause de solidarité (colocataires)</label>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="clauseAnimaux" checked disabled>
+          <label for="clauseAnimaux">Note sur les animaux</label>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="clauseFumeur" checked disabled>
+          <label for="clauseFumeur">Note sur le tabac et les produits stupéfiants</label>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="clauseAssurance" checked>
+          <label for="clauseAssurance">Obligation d'assurance habitation</label>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="clauseTravaux">
+          <label for="clauseTravaux">Autorisation préalable pour travaux</label>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="clauseSousLocation" checked>
+          <label for="clauseSousLocation">Interdiction de sous-location</label>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>10. Diagnostics et annexes</h2>
+        <div class="checkbox-group">
+          <input type="checkbox" id="diagDPE" checked>
+          <label for="diagDPE">DPE (Diagnostic de Performance Énergétique)</label>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="diagAmiante" checked>
+          <label for="diagAmiante">Diagnostic Amiante</label>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="diagPlomb" checked>
+          <label for="diagPlomb">CREP (Constat de Risque d'Exposition au Plomb)</label>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="diagGaz">
+          <label for="diagGaz">Diagnostic Gaz (si installation > 15 ans)</label>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="diagElec">
+          <label for="diagElec">Diagnostic Électricité (si installation > 15 ans)</label>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="diagERP" checked>
+          <label for="diagERP">État des Risques et Pollutions (ERP)</label>
+        </div>
+        <div class="warning-box">
+          <strong>⚠️ Attention :</strong> Les diagnostics doivent être fournis obligatoirement selon la législation en vigueur.
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button onclick="genererBail()">📄 Générer le bail</button>
+      </div>
+
+      <div id="bailPreview" style="display:none;"></div>
+
+    </div>
+
+    <!-- Onglet Historique -->
+    <div id="historique" class="tab-content">
+      <div class="section">
+        <h2>Mes baux enregistrés</h2>
+        <div id="listeBaux"></div>
+      </div>
+    </div>
+ <a href="#" id="scrollTopBtn" title="Retour en haut">↑</a>
+  </div>
+
+  <!-- Bandeau mode édition (sera rempli par JS) -->
+<!-- Bandeau violet premium pour le mode édition -->
+<div id="editBanner" style="
+  display:none;
+  padding:0.75rem 1.25rem;
+  background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+  color:#fff;
+  font-size:0.95rem;
+  margin:1rem auto;
+  border-radius:6px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.15);
+  max-width:900px;
+  text-align:center;
+">
+
+<!-- Nouveau script bail (IndexedDB) -->
+<script type="module" id="script-bail">
+import {
+  initDB,
+  getBiens,
+  getProprietaires,
+  getLocataires,
+  getBaux,
+  addBail,
+  updateBail,
+  deleteBail
+} from "../js/db.js";
+
+let baux = [];
+let bailEnEdition = null;
+
+/* ---------------------------------------------------------
+   BANDEAU MODE ÉDITION (logique JS)
+--------------------------------------------------------- */
+function setEditBanner(bail) {
+  const banner = document.getElementById("editBanner");
+  const span = document.getElementById("editBannerId");
+
+  if (!banner || !span) return;
+
+  if (bail) {
+    span.textContent = `#${bail.id}`;
+    banner.style.display = "block";
+  } else {
+    banner.style.display = "none";
+  }
+}
+
+/* ---------------------------------------------------------
+   NOTIFICATIONS
+--------------------------------------------------------- */
+function showNotification(message, type = "success") {
+  const notification = document.createElement("div");
+  notification.className = `notification ${type}`;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  setTimeout(() => notification.remove(), 3000);
+}
+
+/* ---------------------------------------------------------
+   CHANGEMENT D’ONGLET
+--------------------------------------------------------- */
+function switchTab(tabId, el) {
+  document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+
+  document.getElementById(tabId).classList.add("active");
+  el.classList.add("active");
+
+  if (tabId === "historique") afficherHistorique();
+}
+
+/* ---------------------------------------------------------
+   OPTIONS DE RÉVISION LOYER
+--------------------------------------------------------- */
+function toggleRevision() {
+  const checked = document.getElementById("revisionLoyer").checked;
+  document.getElementById("revisionOptions").style.display = checked ? "block" : "none";
+}
+/* ---------------------------------------------------------
+   CHARGEMENT DES DONNÉES (IndexedDB)
+--------------------------------------------------------- */
+async function chargerDonnees() {
+  await initDB();
+
+  const biens = await getBiens();
+  const proprietaires = await getProprietaires();
+  const locataires = await getLocataires();
+
+  // Remplissage des biens
+  const bienSelect = document.getElementById("bienSelect");
+  bienSelect.innerHTML = '<option value="">Sélectionnez un bien</option>';
+  biens.forEach(bien => {
+    const option = document.createElement("option");
+    option.value = bien.id;
+    option.textContent = `${bien.typeBien} - ${bien.adresse}, ${bien.ville}`;
+    option.dataset.bien = JSON.stringify(bien);
+    bienSelect.appendChild(option);
+  });
+
+  // Remplissage des propriétaires
+  const proprietaireSelect = document.getElementById("proprietaireSelect");
+  proprietaireSelect.innerHTML = '<option value="">Sélectionnez un propriétaire</option>';
+  proprietaires.forEach(prop => {
+    const option = document.createElement("option");
+    option.value = prop.id;
+    option.textContent = `${prop.civilite} ${prop.nom} ${prop.prenom}`;
+    option.dataset.proprietaire = JSON.stringify(prop);
+    proprietaireSelect.appendChild(option);
+  });
+
+  // Remplissage des locataires
+  const locataireSelect = document.getElementById("locataireSelect");
+  locataireSelect.innerHTML = '<option value="">Sélectionnez un locataire</option>';
+  locataires.forEach(loc => {
+    const option = document.createElement("option");
+    option.value = loc.id;
+    option.textContent = `${loc.civilite} ${loc.nom} ${loc.prenom}`;
+    option.dataset.locataire = JSON.stringify(loc);
+    locataireSelect.appendChild(option);
+  });
+
+  // Chargement des baux existants
+  baux = await getBaux();
+}
+
+/* ---------------------------------------------------------
+   GÉNÉRATION DU BAIL (création ou mise à jour)
+--------------------------------------------------------- */
+function genererBail() {
+  const typeBail = document.getElementById("typeBail").value;
+  const bienSelect = document.getElementById("bienSelect");
+  const proprietaireSelect = document.getElementById("proprietaireSelect");
+  const locataireSelect = document.getElementById("locataireSelect");
+  const dateDebut = document.getElementById("dateDebut").value;
+  const duree = document.getElementById("duree").value;
+  const loyerMensuel = parseFloat(document.getElementById("loyerMensuel").value);
+  const charges = parseFloat(document.getElementById("charges").value);
+  const depotGarantie = parseFloat(document.getElementById("depotGarantie").value);
+
+  // Vérification des champs obligatoires
+  if (!typeBail || !bienSelect.value || !proprietaireSelect.value || !locataireSelect.value ||
+      !dateDebut || !duree || !loyerMensuel || !charges || !depotGarantie) {
+    showNotification("Veuillez remplir tous les champs obligatoires", "error");
+    return;
+  }
+
+  // Vérification du dépôt de garantie
+  const maxDepot = typeBail === "meuble" ? loyerMensuel * 2 : loyerMensuel;
+  if (depotGarantie > maxDepot) {
+    showNotification(
+      `Le dépôt de garantie ne doit pas dépasser ${maxDepot.toFixed(2)} € pour une ${typeBail === "meuble" ? "location meublée (2 mois)" : "location vide (1 mois)"}`,
+      "error"
+    );
+    return;
+  }
+
+  // Récupération des données sélectionnées
+  const bien = JSON.parse(bienSelect.options[bienSelect.selectedIndex].dataset.bien);
+  const proprietaire = JSON.parse(proprietaireSelect.options[proprietaireSelect.selectedIndex].dataset.proprietaire);
+  const locataire = JSON.parse(locataireSelect.options[locataireSelect.selectedIndex].dataset.locataire);
+
+  // Construction de l'objet bail
+  const bail = {
+    id: bailEnEdition ? bailEnEdition.id : "bail_" + Date.now(),
+    typeBail,
+    bien,
+    proprietaire,
+    locataire,
+    dateDebut,
+    duree,
+    loyerMensuel,
+    charges,
+    depotGarantie,
+    jourPaiement: document.getElementById("jourPaiement").value,
+    zoneTendue: document.getElementById("zoneTendue").checked,
+    revisionLoyer: document.getElementById("revisionLoyer").checked,
+    indiceReference: document.getElementById("indiceReference").value,
+    dateRevision: document.getElementById("dateRevision").value,
+    clauseResiliation: document.getElementById("clauseResiliation").checked,
+    clauseSolidaire: document.getElementById("clauseSolidaire").checked,
+    clauseAnimaux: document.getElementById("clauseAnimaux").checked,
+    clauseFumeur: document.getElementById("clauseFumeur").checked,
+    clauseAssurance: document.getElementById("clauseAssurance").checked,
+    clauseTravaux: document.getElementById("clauseTravaux").checked,
+    clauseSousLocation: document.getElementById("clauseSousLocation").checked,
+    diagDPE: document.getElementById("diagDPE").checked,
+    diagAmiante: document.getElementById("diagAmiante").checked,
+    diagPlomb: document.getElementById("diagPlomb").checked,
+    diagGaz: document.getElementById("diagGaz").checked,
+    diagElec: document.getElementById("diagElec").checked,
+    diagERP: document.getElementById("diagERP").checked,
+    dateCreation: bailEnEdition ? bailEnEdition.dateCreation : new Date().toISOString()
+  };
+
+  // Création ou mise à jour
+  if (bailEnEdition) {
+    mettreAJourBail(bail);
+  } else {
+    enregistrerNouveauBail(bail);
+  }
+}
+
+/* ---------------------------------------------------------
+   ENREGISTREMENT D’UN NOUVEAU BAIL
+--------------------------------------------------------- */
+async function enregistrerNouveauBail(bail) {
+  await addBail(bail);
+  baux = await getBaux();
+  showNotification("Bail généré avec succès !");
+  bailEnEdition = null;
+  setEditBanner(null);
+  afficherBail(bail);
+}
+
+/* ---------------------------------------------------------
+   MISE À JOUR D’UN BAIL EXISTANT
+--------------------------------------------------------- */
+async function mettreAJourBail(bail) {
+  await updateBail(bail);
+  baux = await getBaux();
+  showNotification("Bail mis à jour avec succès !");
+  bailEnEdition = null;
+  setEditBanner(null);
+  afficherBail(bail);
+}
+/* ---------------------------------------------------------
+   AFFICHAGE DU BAIL (APERÇU)
+--------------------------------------------------------- */
+function afficherBail(bail) {
+  const preview = document.getElementById("bailPreview");
+  preview.style.display = "block";
+
+  const typeBailText = {
+    "vide": "Location Vide",
+    "meuble": "Location Meublée",
+    "mixte": "Location Mixte (Habitation et Professionnel)"
+  };
+
+  // Calcul date de fin
+  const dateFin = new Date(bail.dateDebut);
+  if (bail.duree === "9") {
+    dateFin.setMonth(dateFin.getMonth() + 9);
+  } else {
+    dateFin.setFullYear(dateFin.getFullYear() + parseInt(bail.duree));
+  }
+
+  let articleNum = 1;
+
+  /* ---------------------------------------------------------
+     ICI TU COLLERAS TON GROS TEMPLATE DU BAIL
+     (dans la PARTIE 6)
+  --------------------------------------------------------- */
+ preview.innerHTML = `
+        <div class="bail-preview">
+          <div class="bail-header">
+            <div class="bail-title">CONTRAT DE BAIL</div>
+            <div class="bail-subtitle">${typeBailText[bail.typeBail]}</div>
+            <div class="bail-subtitle">Loi n° 89-462 du 6 juillet 1989</div>
+          </div>
+
+          <div class="bail-section">
+            <h3>ENTRE LES SOUSSIGNÉS :</h3>
+            <p><strong>LE BAILLEUR :</strong></p>
+            <p>${bail.proprietaire.civilite} ${bail.proprietaire.nom} ${bail.proprietaire.prenom}</p>
+            <p>${bail.proprietaire.adresse || ''}</p>
+            <p>${bail.proprietaire.codePostal || ''} ${bail.proprietaire.ville || ''}</p>
+            ${bail.proprietaire.email ? `<p>Email : ${bail.proprietaire.email}</p>` : ''}
+            ${bail.proprietaire.telephone ? `<p>Téléphone : ${bail.proprietaire.telephone}</p>` : ''}
+            
+            <p style="margin-top: 1.5rem;"><strong>D'UNE PART,</strong></p>
+            
+            <p style="margin-top: 1.5rem;"><strong>ET :</strong></p>
+            <p><strong>LE LOCATAIRE :</strong></p>
+            <p>${bail.locataire.civilite} ${bail.locataire.nom} ${bail.locataire.prenom}</p>
+            ${bail.locataire.email ? `<p>Email : ${bail.locataire.email}</p>` : ''}
+            ${bail.locataire.telephone ? `<p>Téléphone : ${bail.locataire.telephone}</p>` : ''}
+            
+            <p style="margin-top: 1.5rem;"><strong>D'AUTRE PART,</strong></p>
+          </div>
+
+          <div class="bail-section">
+            <h3>IL A ÉTÉ CONVENU ET ARRÊTÉ CE QUI SUIT :</h3>
+          </div>
+
+          <div class="bail-article">
+            <p><strong>ARTICLE ${articleNum++} - OBJET DU CONTRAT</strong></p>
+            <p>Le bailleur donne en location au locataire, qui accepte, le logement suivant :</p>
+            <p><strong>Type de bien :</strong> ${bail.bien.typeBien || 'Non spécifié'}</p>
+            <p><strong>Adresse :</strong> 
+              ${bail.bien.adresse}
+              ${bail.bien.complement ? ', ' + bail.bien.complement : ''}
+              , ${bail.bien.codePostal} ${bail.bien.ville}
+            </p>
+            ${bail.bien.superficie ? `<p><strong>Surface habitable :</strong> ${bail.bien.superficie} m²</p>` : ''}
+            ${bail.bien.nbPieces ? `<p><strong>Nombre de pièces :</strong> ${bail.bien.nbPieces}</p>` : ''}
+            ${bail.bien.etage ? `<p><strong>Étage :</strong> ${bail.bien.etage}</p>` : ''}
+            <p><strong>Ascenseur :</strong> ${bail.bien.ascenseur ? 'Présent' : 'Absent'}</p>
+            <p><strong>Cave :</strong> ${bail.bien.cave ? 'Présent' : 'Absent'}</p>
+            <p><strong>Balcon :</strong> ${bail.bien.balcon ? 'Présent' : 'Absent'}</p>
+            <p><strong>Terrasse :</strong> ${bail.bien.terrasse ? 'Présent' : 'Absent'}</p>
+            <p><strong>Parking :</strong> ${bail.bien.parking ? 'Présent' : 'Absent'}</p>
+            <p>Les locaux loués comprennent également l'usage des parties communes de l'immeuble et des équipements collectifs, conformément au règlement de copropriété.</p>
+            <p>Le logement est loué à usage exclusif d'habitation.</p>
+          </div>
+
+          <div class="bail-article">
+            <p><strong>ARTICLE ${articleNum++} - DURÉE DU BAIL</strong></p>
+            <p>Le présent bail est consenti et accepté pour une durée de 
+            <strong>${bail.duree === '9' ? '9 mois' : bail.duree + ' an(s)'}</strong>.</p>
+            <p><strong>Date de prise d'effet :</strong> 
+              ${new Date(bail.dateDebut).toLocaleDateString('fr-FR')}</p>
+            <p><strong>Date de fin :</strong> 
+              ${dateFin.toLocaleDateString('fr-FR')}</p>
+            ${bail.duree === '9'
+              ? `<p>Ce bail étudiant d'une durée de neuf mois n'est pas reconductible tacitement.</p>`
+              : `<p>À l'expiration de cette période, le bail sera reconduit tacitement pour une durée identique, sauf congé donné par l'une des parties dans les conditions prévues par la loi du 6 juillet 1989.</p>`
+            }
+          </div>
+
+          <div class="bail-article">
+            <p><strong>ARTICLE ${articleNum++} - LOYER ET CHARGES</strong></p>
+            <p>Le loyer mensuel hors charges est fixé à la somme de 
+              <strong>${bail.loyerMensuel.toFixed(2)} €</strong>.</p>
+            <p>La provision mensuelle pour charges récupérables est fixée à 
+              <strong>${bail.charges.toFixed(2)} €</strong>.</p>
+            <p>Le montant total mensuel, loyer et charges comprises, s'élève donc à 
+              <strong>${(bail.loyerMensuel + bail.charges).toFixed(2)} €</strong>.</p>
+            <p>Le loyer est payable le 
+              <strong>${bail.jourPaiement} de chaque mois</strong> 
+              par virement bancaire, chèque ou tout autre moyen convenu entre les parties.</p>
+          </div>
+
+          ${bail.revisionLoyer ? `
+            <div class="bail-article">
+              <p><strong>ARTICLE ${articleNum++} - RÉVISION DU LOYER</strong></p>
+              <p>Le loyer pourra être révisé chaque année à la 
+                <strong>date anniversaire du bail</strong>, en fonction de la variation de 
+                l'Indice de Référence des Loyers (IRL).</p>
+              <p>Ce bail a été signé le 
+                <strong>${new Date(bail.dateRevision).toLocaleDateString('fr-FR')}</strong>.</p>
+              <p>La révision ne pourra être appliquée que si elle est demandée dans l'année suivant cette date,
+                conformément aux dispositions légales en vigueur.</p>
+            </div>
+          ` : ''}
+
+          <div class="bail-article">
+            <p><strong>ARTICLE ${articleNum++} - DÉPÔT DE GARANTIE</strong></p>
+            <p>Le locataire versera au bailleur, à la signature du présent contrat, un dépôt de garantie d'un montant de 
+              <strong>${bail.depotGarantie.toFixed(2)} €</strong>.</p>
+            <p>Ce dépôt de garantie ne produit pas d'intérêts au bénéfice du locataire.</p>
+            <p>Il sera restitué dans un délai maximal de 
+              <strong>un mois</strong> lorsque l'état des lieux de sortie est conforme à celui d'entrée, 
+              ou de <strong>deux mois</strong> en cas de dégradations, d'impayés ou de retenues justifiées.</p>
+          </div>
+
+          ${bail.clauseAssurance ? `
+            <div class="bail-article">
+              <p><strong>ARTICLE ${articleNum++} - ASSURANCE</strong></p>
+              <p>Le locataire s'engage à souscrire une assurance couvrant les risques locatifs 
+                (incendie, dégâts des eaux, explosion) et à en fournir l'attestation lors de la 
+                remise des clés, puis chaque année à la demande du bailleur.</p>
+              <p>À défaut de présentation de cette attestation, le bailleur pourra, après mise en 
+                demeure restée sans effet, souscrire une assurance pour le compte du locataire, 
+                conformément à l'article 7 g) de la loi du 6 juillet 1989.</p>
+            </div>
+          ` : ''}
+
+          ${bail.clauseAnimaux ? `
+            <div class="bail-article">
+              <p><strong>ARTICLE ${articleNum++} - ANIMAUX</strong></p>
+              <p>Le locataire est libre de détenir des animaux familiers au sein du logement, 
+                conformément à l'article 10 de la loi du 9 juillet 1970 et à la loi du 6 juillet 1989.</p>
+              <p>Toutefois, cette liberté ne doit entraîner ni dégradations du logement, 
+                ni nuisances, ni troubles anormaux du voisinage. Le locataire demeure 
+                responsable des dommages causés par ses animaux.</p>
+              <p>La présence de chiens de première catégorie au sens de la loi du 6 janvier 1999 
+                (chiens d'attaque de type pit-bull, boerbull, tosa non inscrits au LOF) est 
+                interdite dans le logement et dans les parties communes de l'immeuble.</p>
+              <p>Les chiens de deuxième catégorie (chiens de garde ou de défense) sont autorisés 
+                sous réserve du strict respect des obligations légales :</p>
+              <ul>
+                <li>Détention d'un permis de détention valide.</li>
+                <li>Vaccination antirabique à jour.</li>
+                <li>Assurance responsabilité civile.</li>
+                <li>Port de la muselière et maintien en laisse dans les parties communes.</li>
+              </ul>
+              <p>Le locataire s'engage à respecter le règlement de copropriété concernant 
+                la présence d'animaux dans les parties communes.</p>
+            </div>
+          ` : ''}
+
+          ${bail.clauseFumeur ? `
+            <div class="bail-article">
+              <p><strong>ARTICLE ${articleNum++} - TABAC ET PRODUITS STUPÉFIANTS</strong></p>
+              <p>Il est strictement interdit de fumer dans les parties communes de l'immeuble,
+                conformément au règlement de copropriété et aux règles de sécurité.</p>
+              <p>L'usage, la détention ou la consommation de produits stupéfiants est interdit
+                dans le logement et toutes les parties communes, conformément à la législation en vigueur.</p>
+            </div>
+          ` : ''}
+
+          ${bail.clauseTravaux ? `
+            <div class="bail-article">
+              <p><strong>ARTICLE ${articleNum++} - TRAVAUX</strong></p>
+              <p>Le locataire ne pourra effectuer aucune modification, transformation ou amélioration 
+                des lieux loués sans l'accord écrit et préalable du bailleur.</p>
+              <p>Les travaux d'embellissement légers sont autorisés à condition qu'ils ne modifient 
+                ni la structure, ni la distribution, ni les équipements essentiels du logement.</p>
+              <p>Tout aménagement réalisé sans autorisation préalable pourra être remis en état 
+                aux frais du locataire lors de son départ.</p>
+              <p>Les petits aménagements tels que la pose de chevilles, de vis, de clous, 
+                ou l'utilisation d'adhésifs et de fixations murales sont tolérés dès lors 
+                qu'ils ne causent pas de dégradations importantes.</p>
+              <p><strong>Le locataire devra toutefois remettre en état les murs et surfaces 
+                (rebouchage, nettoyage, retrait des adhésifs, suppression des traces de colle) 
+                lors de son départ si ces installations laissent des marques ou altérations visibles.</strong></p>
+            </div>
+          ` : ''}
+
+          ${bail.clauseSousLocation ? `
+            <div class="bail-article">
+              <p><strong>ARTICLE ${articleNum++} - SOUS-LOCATION</strong></p>
+              <p>La sous-location totale ou partielle du logement est strictement interdite sans l'accord écrit et préalable du bailleur.</p>
+              <p>Toute sous-location non autorisée pourra entraîner la résiliation du bail aux torts exclusifs du locataire, conformément à l'article 8 de la loi du 6 juillet 1989.</p>
+              <p>En cas d'accord du bailleur, le prix de la sous-location ne pourra excéder le loyer principal, charges comprises.</p>
+            </div>
+          ` : ''}
+
+          <div class="bail-article">
+            <p><strong>ARTICLE ${articleNum++} - ÉTAT DES LIEUX</strong></p>
+            <p>Un état des lieux contradictoire sera établi lors de la remise des clés et lors de leur restitution. 
+              Il sera annexé au présent contrat.</p>
+            <p>L'état des lieux d'entrée et de sortie sera réalisé contradictoirement entre les parties ou leurs représentants. 
+              À défaut d'état des lieux d'entrée, le logement est réputé avoir été remis en bon état, 
+              conformément à l'article 3-2 de la loi du 6 juillet 1989.</p>
+            <p>Toute dégradation constatée lors de l'état des lieux de sortie, autre que l'usure normale, 
+              pourra donner lieu à retenue sur le dépôt de garantie.</p>
+            <p>Si le montant des réparations locatives ou des sommes dues par le locataire 
+              excède celui du dépôt de garantie, le surplus restera à la charge du locataire, 
+              qui devra en rembourser le bailleur sur présentation des justificatifs.</p>
+          </div>
+
+          <div class="bail-article">
+            <p><strong>ARTICLE ${articleNum++} - DIAGNOSTICS TECHNIQUES</strong></p>
+            <p>Les diagnostics suivants sont annexés au présent bail :</p>
+            <ul>
+              ${bail.diagDPE ? '<li>Diagnostic de Performance Énergétique (DPE)</li>' : ''}
+              ${bail.diagAmiante ? '<li>Diagnostic Amiante</li>' : ''}
+              ${bail.diagPlomb ? '<li>Constat de Risque d\'Exposition au Plomb (CREP)</li>' : ''}
+              ${bail.diagGaz ? '<li>Diagnostic Gaz</li>' : ''}
+              ${bail.diagElec ? '<li>Diagnostic Électricité</li>' : ''}
+              ${bail.diagERP ? '<li>État des Risques et Pollutions (ERP)</li>' : ''}
+            </ul>
+          </div>
+
+          ${bail.clauseResiliation ? `
+            <div class="bail-article">
+              <p><strong>ARTICLE ${articleNum++} - CONGÉ DONNÉ PAR LE BAILLEUR</strong></p>
+              <p>Le bailleur peut donner congé au locataire à l'échéance du bail pour l'un des motifs suivants :</p>
+              <ul>
+                <li>Reprise pour habiter le logement lui-même ou y loger un ascendant ou descendant</li>
+                <li>Vente du logement</li>
+                <li>Motif légitime et sérieux, notamment en cas de manquement du locataire à ses obligations</li>
+              </ul>
+              <p>Dans tous les cas, le bailleur doit respecter un préavis de <strong>six mois</strong>, 
+                conformément à l'article 15 de la loi du 6 juillet 1989.</p>
+            </div>
+
+            <div class="bail-article">
+              <p><strong>ARTICLE ${articleNum++} - CLAUSE RÉSOLUTOIRE</strong></p>
+              <p>Le présent bail pourra être résilié de plein droit en cas de :</p>
+              <ul>
+                <li>Non-paiement du loyer ou des charges</li>
+                <li>Absence de souscription ou de présentation de l'assurance des risques locatifs</li>
+                <li>Troubles du voisinage constatés par décision de justice</li>
+              </ul>
+              <p>La résiliation ne pourra intervenir qu'un mois après un commandement de payer 
+                ou de faire délivré par huissier et resté sans effet, conformément à l'article 24 
+                de la loi du 6 juillet 1989.</p>
+            </div>
+          ` : ''}
+
+          <div class="bail-article">
+            <p><strong>ARTICLE ${articleNum++} - PRÉAVIS DU LOCATAIRE</strong></p>
+            <p>Le locataire peut résilier le bail à tout moment, sous réserve de notifier son départ 
+              au bailleur et de respecter un délai de préavis de :</p>
+            <ul>
+              <li>${bail.typeBail === 'vide' ? '3 mois (location vide)' : '1 mois (location meublée)'}</li>
+              <li>1 mois en cas de mutation professionnelle, perte d'emploi, nouvel emploi 
+                consécutif à une perte d'emploi, obtention d'un premier emploi, 
+                bénéficiaire du RSA ou de l'AAH, ou attribution d'un logement social.</li>
+              ${bail.zoneTendue ? '<li>1 mois si le logement est situé en zone tendue, conformément au décret n°2013-392 du 10 mai 2013.</li>' : ''}
+            </ul>
+            <p>Le préavis court à compter de la réception de la notification par le bailleur 
+              (lettre recommandée, remise en main propre contre émargement ou acte d'huissier).</p>
+          </div>
+
+          <div class="bail-article">
+            <p><strong>ARTICLE ${articleNum++} - ENTRETIEN ET RÉPARATIONS</strong></p>
+            <p>Le locataire s'engage à :</p>
+            <ul>
+              <li>Entretenir les lieux loués et les équipements en bon état d'usage et de propreté</li>
+              <li>Assumer les réparations locatives définies par le décret n°87-712 du 26 août 1987</li>
+              <li>Effectuer les petits travaux d'entretien courant (remplacement d'ampoules, nettoyage, débouchage, entretien des joints, etc.)</li>
+              <li>Ne pas transformer les lieux sans l'autorisation écrite du bailleur</li>
+              <li>Laisser exécuter les travaux d'amélioration, de performance énergétique ou de maintien en état du logement</li>
+            </ul>
+            <p>Les grosses réparations, au sens de l'article 606 du Code civil, ainsi que les travaux 
+              nécessaires au maintien en état et à la décence du logement, restent à la charge du bailleur.</p>
+          </div>
+
+          <div class="bail-article">
+            <p><strong>ARTICLE ${articleNum++} - CHARGES LOCATIVES</strong></p>
+            <p>Les charges récupérables sont celles définies par le décret n°87-713 du 26 août 1987. 
+              Elles comprennent notamment les dépenses liées à l'entretien courant des parties communes, 
+              aux services collectifs et aux taxes locatives.</p>
+            <p>Une régularisation annuelle sera effectuée sur la base des dépenses réelles, 
+              sur présentation des justificatifs. Le locataire reste redevable de toute 
+              différence constatée lors de cette régularisation.</p>
+            <p>En cas de provision mensuelle, le montant pourra être ajusté en fonction 
+              des dépenses constatées ou prévisionnelles.</p>
+          </div>
+
+          ${bail.clauseSolidaire ? `
+            <div class="bail-article">
+              <p><strong>ARTICLE ${articleNum++} - CLAUSE DE SOLIDARITÉ</strong></p>
+              <p>Les locataires sont solidairement responsables du paiement du loyer, des charges 
+                et de l'exécution de l'ensemble des obligations résultant du présent bail.</p>
+              <p>En cas de départ de l'un des colocataires, la solidarité du locataire sortant 
+                et de sa caution persiste pendant un délai de <strong>six mois</strong> à compter 
+                de la date d'effet de son congé, sauf si un nouveau colocataire est accepté 
+                par le bailleur et signe un avenant au bail.</p>
+              <p>La solidarité prend fin à la restitution effective des clés par l'ensemble 
+                des colocataires encore présents.</p>
+            </div>
+          ` : ''}
+
+          <div class="bail-article">
+            <p><strong>ARTICLE ${articleNum++} - ÉLECTION DE DOMICILE</strong></p>
+            <p>Pour l'exécution du présent contrat, les parties élisent domicile à leurs 
+              adresses respectives indiquées en tête du présent acte.</p>
+            <p>Toute notification liée au bail (courriers recommandés, mises en demeure, 
+              congés, demandes ou informations) sera valablement effectuée à ces adresses, 
+              sauf changement dûment notifié par écrit à l'autre partie.</p>
+          </div>
+
+          <div class="signature-section">
+            <p style="text-align: center; margin-bottom: 2rem;">
+              Fait en deux exemplaires originaux<br>
+              À __________________, le __________________
+            </p>
+            
+            <div class="signature-grid">
+              <div class="signature-box">
+                <p>Le Bailleur</p>
+                <p>${bail.proprietaire.civilite} ${bail.proprietaire.nom} ${bail.proprietaire.prenom}</p>
+                <div class="signature-line"></div>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem;">Signature précédée de la mention "Lu et approuvé"</p>
+              </div>
+              <div class="signature-box">
+                <p>Le Locataire</p>
+                <p>${bail.locataire.civilite} ${bail.locataire.nom} ${bail.locataire.prenom}</p>
+                <div class="signature-line"></div>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem;">Signature précédée de la mention "Lu et approuvé"</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 3rem; padding: 1rem; background: #f8f9fa; border-radius: 6px; font-size: 0.85rem;">
+            <p style="margin: 0;"><strong>Rappel légal :</strong></p>
+            <p style="margin-top: 0.5rem;">Conformément à l'article 3 de la loi n° 89-462 du 6 juillet 1989, le contrat de location doit être accompagné d'un dossier de diagnostic technique comprenant les diagnostics obligatoires en fonction de la date de construction et de la localisation du bien.</p>
+          </div>
+
+          <div class="action-buttons">
+            <button onclick="imprimerBail()">🖨️ Imprimer</button>
+            <button class="secondary no-print" onclick="window.print()">
+  📥 Télécharger le bail en PDF
+</button>
+
+            <button onclick="fermerApercu()" class="secondary">Fermer</button>
+          </div>
+        </div>
+      `;
+  preview.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+/* ---------------------------------------------------------
+   FERMER L’APERÇU
+--------------------------------------------------------- */
+function fermerApercu() {
+  document.getElementById("bailPreview").style.display = "none";
+}
+
+/* ---------------------------------------------------------
+   IMPRESSION
+--------------------------------------------------------- */
+function imprimerBail() {
+  window.print();
+}
+
+/* ---------------------------------------------------------
+   EXPORT PDF
+--------------------------------------------------------- */
+function telechargerBail() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF("p", "mm", "a4");
+  const content = document.getElementById("bailContent");
+  if (!content) return;
+
+  html2canvas(content, { scale: 2 }).then(canvas => {
+    const imgData = canvas.toDataURL("image/png");
+    const imgWidth = 190;
+    const pageHeight = 297;
+    const imgHeight = canvas.height * imgWidth / canvas.width;
+    let heightLeft = imgHeight;
+    let position = 10;
+
+    doc.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    while (heightLeft > 0) {
+      doc.addPage();
+      position = heightLeft - imgHeight + 10;
+      doc.addImage(imgData, "PNG", 10, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    doc.save(`bail_${new Date().toLocaleDateString("fr-FR").replace(/\//g, "-")}.pdf`);
+  });
+}
+
+/* ---------------------------------------------------------
+   AFFICHAGE DE L’HISTORIQUE
+--------------------------------------------------------- */
+function afficherHistorique() {
+  const container = document.getElementById("listeBaux");
+
+  if (!baux || baux.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 3rem; color: #7f8c8d;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">📄</div>
+        <h3>Aucun bail enregistré</h3>
+        <p>Cliquez sur "Générer un bail" pour créer votre premier contrat</p>
+      </div>`;
+    return;
+  }
+
+  const typeBailText = {
+    "vide": "Location Vide",
+    "meuble": "Location Meublée",
+    "mixte": "Location Mixte"
+  };
+
+  container.innerHTML = baux.map((bail, index) => `
+    <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 1rem;">
+      <div style="display: flex; justify-content: space-between; align-items: start;">
+        <div>
+          <h3 style="margin: 0 0 0.5rem 0; color: #2c3e50;">${typeBailText[bail.typeBail]}</h3>
+          <p style="margin: 0.25rem 0; color: #7f8c8d;">
+            🏢 ${bail.bien.adresse}, ${bail.bien.codePostal} ${bail.bien.ville}
+          </p>
+          <p style="margin: 0.25rem 0; color: #7f8c8d;">
+            👤 ${bail.proprietaire.nom} → ${bail.locataire.nom}
+          </p>
+          <p style="margin: 0.25rem 0; color: #7f8c8d;">
+            📅 Du ${new Date(bail.dateDebut).toLocaleDateString("fr-FR")} - Durée: ${bail.duree === "9" ? "9 mois" : bail.duree + " an(s)"}
+          </p>
+          <p style="margin: 0.25rem 0; color: #7f8c8d;">
+            💰 ${(bail.loyerMensuel + bail.charges).toFixed(2)} € /mois (dont ${bail.charges.toFixed(2)} € de charges)
+          </p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button onclick="voirBail(${index})">Voir</button>
+          <button onclick="editerBail(${index})" class="secondary">Modifier</button>
+          <button onclick="supprimerBail(${index})" class="secondary">Supprimer</button>
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+/* ---------------------------------------------------------
+   VOIR UN BAIL
+--------------------------------------------------------- */
+function voirBail(index) {
+  const tabs = document.querySelectorAll(".tab");
+  const tabGenerer = Array.from(tabs).find(t => t.getAttribute("onclick")?.includes("generer"));
+  switchTab("generer", tabGenerer || tabs[0]);
+  setTimeout(() => afficherBail(baux[index]), 100);
+}
+/* ---------------------------------------------------------
+   REMPLIR LE FORMULAIRE AVEC UN BAIL EXISTANT
+--------------------------------------------------------- */
+function remplirFormulaireAvecBail(bail) {
+  document.getElementById("typeBail").value = bail.typeBail;
+  document.getElementById("dateDebut").value = bail.dateDebut;
+  document.getElementById("duree").value = bail.duree;
+  document.getElementById("loyerMensuel").value = bail.loyerMensuel;
+  document.getElementById("charges").value = bail.charges;
+  document.getElementById("depotGarantie").value = bail.depotGarantie;
+  document.getElementById("jourPaiement").value = bail.jourPaiement || 1;
+
+  document.getElementById("zoneTendue").checked = !!bail.zoneTendue;
+  document.getElementById("revisionLoyer").checked = !!bail.revisionLoyer;
+  document.getElementById("indiceReference").value = bail.indiceReference || "IRL";
+  document.getElementById("dateRevision").value = bail.dateRevision || "";
+
+  document.getElementById("clauseResiliation").checked = !!bail.clauseResiliation;
+  document.getElementById("clauseSolidaire").checked = !!bail.clauseSolidaire;
+  document.getElementById("clauseAnimaux").checked = !!bail.clauseAnimaux;
+  document.getElementById("clauseFumeur").checked = !!bail.clauseFumeur;
+  document.getElementById("clauseAssurance").checked = !!bail.clauseAssurance;
+  document.getElementById("clauseTravaux").checked = !!bail.clauseTravaux;
+  document.getElementById("clauseSousLocation").checked = !!bail.clauseSousLocation;
+
+  document.getElementById("diagDPE").checked = !!bail.diagDPE;
+  document.getElementById("diagAmiante").checked = !!bail.diagAmiante;
+  document.getElementById("diagPlomb").checked = !!bail.diagPlomb;
+  document.getElementById("diagGaz").checked = !!bail.diagGaz;
+  document.getElementById("diagElec").checked = !!bail.diagElec;
+  document.getElementById("diagERP").checked = !!bail.diagERP;
+
+  // Sélection automatique des options
+  if (bail.bien?.id) document.getElementById("bienSelect").value = bail.bien.id;
+  if (bail.proprietaire?.id) document.getElementById("proprietaireSelect").value = bail.proprietaire.id;
+  if (bail.locataire?.id) document.getElementById("locataireSelect").value = bail.locataire.id;
+
+  toggleRevision();
+}
+
+/* ---------------------------------------------------------
+   ÉDITION D’UN BAIL
+--------------------------------------------------------- */
+function editerBail(index) {
+  const bail = baux[index];
+  if (!bail) return;
+
+  if (!confirm(`Voulez-vous vraiment modifier le bail #${bail.id} ?`)) return;
+
+  bailEnEdition = bail;
+  setEditBanner(bail);
+
+  const tabs = document.querySelectorAll(".tab");
+  const tabGenerer = Array.from(tabs).find(t => t.getAttribute("onclick")?.includes("generer"));
+  switchTab("generer", tabGenerer || tabs[0]);
+
+  setTimeout(() => {
+    remplirFormulaireAvecBail(bail);
+    afficherBail(bail);
+  }, 100);
+}
+
+/* ---------------------------------------------------------
+   SUPPRESSION D’UN BAIL
+--------------------------------------------------------- */
+async function supprimerBail(index) {
+  const bail = baux[index];
+  if (!bail) return;
+
+  if (!confirm("Voulez-vous vraiment supprimer ce bail ?")) return;
+
+  await deleteBail(bail.id);
+  baux = await getBaux();
+  showNotification("Bail supprimé");
+  afficherHistorique();
+}
+
+/* ---------------------------------------------------------
+   EXPOSER LES FONCTIONS AU DOM
+--------------------------------------------------------- */
+window.switchTab = switchTab;
+window.toggleRevision = toggleRevision;
+window.genererBail = genererBail;
+window.fermerApercu = fermerApercu;
+window.imprimerBail = imprimerBail;
+window.telechargerBail = telechargerBail;
+window.voirBail = voirBail;
+window.editerBail = editerBail;
+window.supprimerBail = supprimerBail;
+
+/* ---------------------------------------------------------
+   CHARGEMENT INITIAL
+--------------------------------------------------------- */
+window.addEventListener("load", chargerDonnees);
+
+</script>
+
+<!-- html2canvas pour PDF -->
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+</body>
+</html>
+
+</body>
+</html>

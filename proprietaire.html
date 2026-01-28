@@ -1,0 +1,892 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Gestion des Propriétaires</title>
+  
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css" />
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="manifest" href="/manifest.json">
+  
+  <style>
+    body { 
+      max-width: 1400px; 
+      margin: 0 auto; 
+      padding: 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .container { 
+      background: white; 
+      padding: 2.5rem; 
+      border-radius: 16px; 
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      margin-bottom: 2rem;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    
+    h1 { 
+      color: #2c3e50; 
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid #e0e0e0;
+      /*flex-wrap: wrap;*/
+    }
+    
+    .tab {
+      padding: 1rem 2rem;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-weight: 600;
+      color: #7f8c8d;
+      transition: all 0.3s;
+    }
+    
+    .tab:hover {
+      color: #667eea;
+    }
+    
+    .tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .section {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      border-left: 4px solid #667eea;
+    }
+    
+    .section h2 {
+      color: #667eea;
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.3rem;
+      color: #2c3e50;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    
+    input, select, textarea {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      transition: border-color 0.3s;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .required::after {
+      content: " *";
+      color: #e74c3c;
+    }
+    
+    button {
+      padding: 0.8rem 2rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-danger {
+      background: #e74c3c;
+      color: white;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .btn-success {
+      background: #27ae60;
+      color: white;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .btn-success:hover {
+      background: #229954;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      transition: all 0.3s;
+    }
+    
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .proprietaire-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      border: 2px solid #e0e0e0;
+      transition: all 0.3s;
+    }
+    
+    .proprietaire-card:hover {
+      border-color: #667eea;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .proprietaire-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 1rem;
+    }
+    
+    .proprietaire-nom {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+    
+    .proprietaire-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .proprietaire-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.5rem;
+      color: #7f8c8d;
+      font-size: 0.9rem;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: #667eea;
+      color: white;
+      margin-top: 0.5rem;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #7f8c8d;
+    }
+    
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    
+    .document-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8f9fa;
+      padding: 0.8rem;
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .document-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .document-type {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    
+    .document-name {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+    }
+    
+    .document-date {
+      color: #95a5a6;
+      font-size: 0.8rem;
+      font-style: italic;
+    }
+    
+    .upload-section {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      border: 2px dashed #ddd;
+    }
+    
+    .upload-controls {
+      display: flex;
+      gap: 1rem;
+      align-items: end;
+      flex-wrap: wrap;
+    }
+    
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+    
+    .file-input-wrapper input[type=file] {
+      position: absolute;
+      left: -9999px;
+    }
+    
+    .file-input-label {
+      display: inline-block;
+      padding: 0.8rem 1.5rem;
+      background: white;
+      border: 2px solid #667eea;
+      color: #667eea;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    .file-input-label:hover {
+      background: #667eea;
+      color: white;
+    }
+    
+    .selected-file {
+      padding: 0.5rem 1rem;
+      background: #e3f2fd;
+      border-radius: 6px;
+      color: #1976d2;
+      font-size: 0.9rem;
+    }
+    
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      animation: slideIn 0.3s ease;
+      max-width: 300px;
+    }
+    
+    .notification.success {
+      background: #4caf50;
+      color: white;
+    }
+    
+    .notification.error {
+      background: #f44336;
+      color: white;
+    }
+    
+    .notification.warning {
+      background: #ff9800;
+      color: white;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    #scrollTopBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 48px;
+      height: 48px;
+      background: #667eea;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    #scrollTopBtn.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #scrollTopBtn:hover {
+      transform: scale(1.2);
+      background: #764ba2;
+    }
+    
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .tabs {
+        flex-direction: column;
+      }
+      
+      .upload-controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="/pages/menu.html" class="back-link">← Retour au menu</a>
+  
+  <div class="container">
+    <div class="header">
+      <h1>👤 Gestion des Propriétaires</h1>
+      <p style="color: #7f8c8d;">Gérez vos propriétaires de manière centralisée</p>
+    </div>
+    
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('liste', this)">📋 Liste</button>
+      <button class="tab" onclick="switchTab('ajouter', this)">➕ Ajouter</button>
+      <button class="tab" onclick="switchTab('admin', this)">📂 Administratif</button>
+    </div>
+    
+    <!-- Onglet Liste -->
+    <div id="tab-liste" class="tab-content active">
+      <div id="listeProprietaires"></div>
+    </div>
+
+    <!-- Onglet Ajouter -->
+    <div id="tab-ajouter" class="tab-content">
+      <form id="proprietaireForm">
+        <div class="section">
+          <h2>📋 Identité</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="required">Civilité</label>
+              <select id="civilite" required>
+                <option value="">-- Sélectionner --</option>
+                <option value="M.">M.</option>
+                <option value="Mme">Mme</option>
+                <option value="Mlle">Mlle</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label class="required">Nom</label>
+              <input type="text" id="nom" placeholder="Ex: Dupont" required />
+            </div>
+            
+            <div class="form-group">
+              <label class="required">Prénom</label>
+              <input type="text" id="prenom" placeholder="Ex: Jean" required />
+            </div>
+            
+            <div class="form-group">
+              <label>Date de naissance</label>
+              <input type="date" id="dateNaissance" />
+            </div>
+          </div>
+        </div>
+        
+        <div class="section">
+          <h2>📞 Coordonnées</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="required">Email</label>
+              <input type="email" id="email" placeholder="exemple@email.com" required />
+            </div>
+            
+            <div class="form-group">
+              <label class="required">Téléphone</label>
+              <input type="tel" id="telephone" placeholder="06 12 34 56 78" required />
+            </div>
+            
+            <div class="form-group">
+              <label>Téléphone secondaire</label>
+              <input type="tel" id="telephoneSecondaire" placeholder="01 23 45 67 89" />
+            </div>
+          </div>
+        </div>
+        
+        <div class="section">
+          <h2>🏠 Adresse</h2>
+          <div class="form-grid">
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label class="required">Numéro et nom de la rue</label>
+              <input type="text" id="adresse" placeholder="Ex: 15 rue de la République" required />
+            </div>
+            
+            <div class="form-group">
+              <label>Complément d'adresse</label>
+              <input type="text" id="complement" placeholder="Bâtiment, Étage..." />
+            </div>
+            
+            <div class="form-group">
+              <label class="required">Code postal</label>
+              <input type="text" id="codePostal" pattern="[0-9]{5}" placeholder="Ex: 75001" required />
+            </div>
+            
+            <div class="form-group">
+              <label class="required">Ville</label>
+              <input type="text" id="ville" placeholder="Ex: Paris" required />
+            </div>
+          </div>
+        </div>
+        
+        <div class="section">
+          <h2>💳 Informations Bancaires (optionnel)</h2>
+          <div class="form-grid">
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>IBAN</label>
+              <input type="text" id="iban" placeholder="FR76 XXXX XXXX XXXX XXXX XXXX XXX" />
+            </div>
+            
+            <div class="form-group">
+              <label>BIC</label>
+              <input type="text" id="bic" placeholder="XXXXXXXXXX" />
+            </div>
+          </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 2rem;">
+          <button type="button" class="btn-secondary" onclick="resetForm()">Réinitialiser</button>
+          <button type="submit" class="btn-primary">💾 Enregistrer</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Onglet Admin -->
+    <div id="tab-admin" class="tab-content">
+      <div id="listeDocs"></div>
+    </div>
+  </div>
+
+  <a href="#" id="scrollTopBtn" title="Retour en haut">↑</a>
+
+  <script type="module">
+    import { getProprietaires, addProprietaire, updateProprietaire, deleteProprietaire, initDB } from '/js/db.js';
+    import { showNotification } from '/js/app.js';
+    
+    // Variables globales pour l'upload
+    let currentUploadFile = null;
+    let currentProprioId = null;
+
+    // Gestion du scroll
+    window.addEventListener('scroll', function() {
+      const scrollBtn = document.getElementById('scrollTopBtn');
+      if (window.pageYOffset > 300) {
+        scrollBtn.classList.add('visible');
+      } else {
+        scrollBtn.classList.remove('visible');
+      }
+    });
+
+    document.getElementById("scrollTopBtn").addEventListener("click", function(e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Switch Tab
+    window.switchTab = function(tabName, element) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
+      element.classList.add('active');
+      document.getElementById('tab-' + tabName).classList.add('active');
+
+      if (tabName === 'liste') afficherListe();
+      if (tabName === 'admin') afficherDocs();
+    };
+
+    // Afficher la liste des propriétaires
+    async function afficherListe() {
+      try {
+        const proprietaires = await getProprietaires();
+        const liste = document.getElementById('listeProprietaires');
+        
+        if (proprietaires.length === 0) {
+          liste.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">👤</div>
+              <h3>Aucun propriétaire enregistré</h3>
+              <p>Cliquez sur l'onglet "Ajouter" pour créer votre premier propriétaire</p>
+            </div>
+          `;
+          return;
+        }
+        
+        liste.innerHTML = proprietaires.map(p => `
+          <div class="proprietaire-card">
+            <div class="proprietaire-header">
+              <div>
+                <div class="proprietaire-nom">${p.civilite} ${p.nom} ${p.prenom}</div>
+                ${(p.biensIds && p.biensIds.length > 0) ? `<span class="badge">${p.biensIds.length} bien(s)</span>` : ''}
+                ${(p.documents && p.documents.length > 0) ? `<span class="badge" style="background: #27ae60;">${p.documents.length} doc(s)</span>` : ''}
+              </div>
+              <div class="proprietaire-actions">
+                <button class="btn-danger" onclick="window.supprimerProprietaire('${p.id}')">
+                  🗑️ Supprimer
+                </button>
+              </div>
+            </div>
+            <div class="proprietaire-details">
+              <div>📧 ${p.email}</div>
+              <div>📱 ${p.telephone}</div>
+              <div>🏠 ${p.ville}, ${p.codePostal}</div>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Erreur affichage:', err);
+        showNotification('Erreur lors du chargement', 'error');
+      }
+    }
+
+    // Afficher les documents
+    async function afficherDocs() {
+      try {
+        const proprietaires = await getProprietaires();
+        const liste = document.getElementById('listeDocs');
+
+        if (proprietaires.length === 0) {
+          liste.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📂</div>
+              <h3>Aucun propriétaire</h3>
+              <p>Ajoutez un propriétaire dans l'onglet "Ajouter".</p>
+            </div>
+          `;
+          return;
+        }
+
+        liste.innerHTML = proprietaires.map(p => `
+          <div class="proprietaire-card">
+            <div class="proprietaire-header">
+              <div class="proprietaire-nom">${p.civilite} ${p.nom} ${p.prenom}</div>
+            </div>
+
+            <div style="margin-top: 1rem;">
+              <strong style="color: #2c3e50;">📄 Documents :</strong>
+              <div id="docs-${p.id}" style="margin-top: 0.5rem;">
+                ${afficherListeDocs(p)}
+              </div>
+            </div>
+
+            <div class="upload-section">
+              <label style="margin-bottom: 0.5rem; display: block; color: #667eea; font-weight: 600;">
+                ➕ Ajouter un document
+              </label>
+              <div class="upload-controls">
+                <div class="form-group" style="margin: 0; flex: 1; min-width: 200px;">
+                  <select id="typeDoc-${p.id}" style="margin: 0;">
+                    <option value="Pièce d'identité">Pièce d'identité</option>
+                    <option value="Titre de propriété">Titre de propriété</option>
+                    <option value="RIB">RIB</option>
+                    <option value="Justificatif de domicile">Justificatif de domicile</option>
+                    <option value="Attestation fiscale">Attestation fiscale</option>
+                    <option value="Autre">Autre</option>
+                  </select>
+                </div>
+
+                <div class="file-input-wrapper">
+                  <input type="file" id="fileInput-${p.id}" accept=".pdf,.jpg,.jpeg,.png" onchange="window.selectFile('${p.id}', this.files[0])">
+                  <label for="fileInput-${p.id}" class="file-input-label">
+                    📎 Choisir un fichier
+                  </label>
+                </div>
+
+                <div id="selectedFile-${p.id}" style="flex: 1;"></div>
+
+                <button class="btn-success" id="uploadBtn-${p.id}" style="display: none;" onclick="window.confirmerAjoutDoc('${p.id}')">
+                  ✅ Ajouter
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error('Erreur affichage docs:', err);
+        showNotification('Erreur lors du chargement', 'error');
+      }
+    }
+
+    // Afficher la liste des documents d'un propriétaire
+    function afficherListeDocs(p) {
+      if (!p.documents || p.documents.length === 0) {
+        return `<p style="color: #95a5a6; font-style: italic;">Aucun document</p>`;
+      }
+
+      return p.documents.map((doc, index) => {
+        const dateAjout = new Date(doc.dateAjout).toLocaleDateString('fr-FR');
+        return `
+          <div class="document-item">
+            <div class="document-info">
+              <span>📄</span>
+              <div>
+                <div>
+                  <span class="document-type">${doc.type}</span>
+                  <span class="document-name"> — ${doc.nom}</span>
+                </div>
+                <div class="document-date">Ajouté le ${dateAjout}</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn-success" onclick="window.telechargerDoc('${p.id}', ${index})" title="Télécharger">
+                📥
+              </button>
+              <button class="btn-danger" onclick="window.supprimerDoc('${p.id}', ${index})" title="Supprimer">
+                🗑️
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Sélectionner un fichier
+    window.selectFile = function(id, file) {
+      if (!file) return;
+
+      const maxSize = 5 * 1024 * 1024;
+      if (file.size > maxSize) {
+        showNotification('⚠️ Le fichier est trop volumineux (max 5MB)', 'warning');
+        return;
+      }
+
+      currentUploadFile = file;
+      currentProprioId = id;
+
+      const selectedFileDiv = document.getElementById(`selectedFile-${id}`);
+      selectedFileDiv.innerHTML = `
+        <div class="selected-file">
+          📎 ${file.name} (${(file.size / 1024).toFixed(2)} KB)
+        </div>
+      `;
+
+      document.getElementById(`uploadBtn-${id}`).style.display = 'inline-block';
+    };
+
+    // Confirmer l'ajout du document
+    window.confirmerAjoutDoc = async function(id) {
+      if (!currentUploadFile || currentProprioId !== id) {
+        showNotification('⚠️ Veuillez sélectionner un fichier', 'warning');
+        return;
+      }
+
+      const typeSelect = document.getElementById(`typeDoc-${id}`);
+      const type = typeSelect.value;
+
+      const reader = new FileReader();
+      reader.onload = async function() {
+        try {
+          const proprietaires = await getProprietaires();
+          let p = proprietaires.find(x => x.id === id);
+
+          if (!p.documents) p.documents = [];
+
+          p.documents.push({
+            nom: currentUploadFile.name,
+            type: type,
+            data: reader.result,
+            dateAjout: new Date().toISOString()
+          });
+
+          await updateProprietaire(p);
+          
+          showNotification('✅ Document ajouté avec succès');
+          
+          currentUploadFile = null;
+          currentProprioId = null;
+          
+          afficherDocs();
+        } catch (err) {
+          console.error('Erreur ajout doc:', err);
+          showNotification('Erreur lors de l\'ajout', 'error');
+        }
+      };
+
+      reader.readAsDataURL(currentUploadFile);
+    };
+
+    // Télécharger un document
+    window.telechargerDoc = async function(id, index) {
+      try {
+        const proprietaires = await getProprietaires();
+        let p = proprietaires.find(x => x.id === id);
+        
+        if (!p || !p.documents || !p.documents[index]) return;
+
+        const doc = p.documents[index];
+        const link = document.createElement('a');
+        link.href = doc.data;
+        link.download = doc.nom;
+        link.click();
+        
+        showNotification('📥 Téléchargement en cours...');
+      } catch (err) {
+        console.error('Erreur téléchargement:', err);
+      }
+    };
+
+    // Supprimer un document
+    window.supprimerDoc = async function(id, index) {
+      if (!confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) return;
+
+      try {
+        const proprietaires = await getProprietaires();
+        let p = proprietaires.find(x => x.id === id);
+
+        p.documents.splice(index, 1);
+
+        await updateProprietaire(p);
+        
+        showNotification('✅ Document supprimé');
+        afficherDocs();
+      } catch (err) {
+        console.error('Erreur suppression:', err);
+        showNotification('Erreur lors de la suppression', 'error');
+      }
+    };
+
+    // Supprimer un propriétaire
+    window.supprimerProprietaire = async function(id) {
+      if (!confirm('Êtes-vous sûr de vouloir supprimer ce propriétaire ?')) return;
+      
+      try {
+        await deleteProprietaire(id);
+        showNotification('✅ Propriétaire supprimé avec succès');
+        afficherListe();
+      } catch (err) {
+        console.error('Erreur suppression:', err);
+        showNotification('Erreur lors de la suppression', 'error');
+      }
+    };
+
+    // Réinitialiser le formulaire
+    window.resetForm = function() {
+      document.getElementById('proprietaireForm').reset();
+    };
+
+    // Soumettre le formulaire
+    document.getElementById('proprietaireForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      try {
+        const proprietaireData = {
+          civilite: document.getElementById('civilite').value,
+          nom: document.getElementById('nom').value,
+          prenom: document.getElementById('prenom').value,
+          dateNaissance: document.getElementById('dateNaissance').value,
+          email: document.getElementById('email').value,
+          telephone: document.getElementById('telephone').value,
+          telephoneSecondaire: document.getElementById('telephoneSecondaire').value,
+          adresse: document.getElementById('adresse').value,
+          complement: document.getElementById('complement').value,
+          codePostal: document.getElementById('codePostal').value,
+          ville: document.getElementById('ville').value,
+          iban: document.getElementById('iban').value,
+          bic: document.getElementById('bic').value
+        };
+        
+        await addProprietaire(proprietaireData);
+        showNotification('✅ Propriétaire enregistré avec succès !');
+        resetForm();
+        
+        // Basculer vers l'onglet liste
+        const firstTab = document.querySelectorAll('.tab')[0];
+        switchTab('liste', firstTab);
+      } catch (err) {
+        console.error('Erreur enregistrement:', err);
+        showNotification('Erreur lors de l\'enregistrement', 'error');
+      }
+    });
+    
+    // Charger la liste au démarrage
+    window.addEventListener('load', afficherListe);
+  </script>
+</body>
+</html>

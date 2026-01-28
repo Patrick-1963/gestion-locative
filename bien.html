@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Gestion des Biens Immobiliers</title>
+  
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css" />
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="manifest" href="/manifest.json">
+  
+  <style>
+    body { 
+      max-width: 1400px; 
+      margin: 0 auto; 
+      padding: 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    
+    .container { 
+      background: white; 
+      padding: 2.5rem; 
+      border-radius: 16px; 
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      margin-bottom: 2rem;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    
+    h1 { 
+      color: #2c3e50; 
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid #e0e0e0;
+      /*flex-wrap: wrap;*/
+    }
+    
+    .tab {
+      padding: 1rem 2rem;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-weight: 600;
+      color: #7f8c8d;
+      transition: all 0.3s;
+    }
+    
+    .tab:hover {
+      color: #667eea;
+    }
+    
+    .tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .section {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      border-left: 4px solid #667eea;
+    }
+    
+    .section h2 {
+      color: #667eea;
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+    }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.3rem;
+      color: #2c3e50;
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    
+    input, select, textarea {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      transition: border-color 0.3s;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .required::after {
+      content: " *";
+      color: #e74c3c;
+    }
+    
+    button {
+      padding: 0.8rem 2rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-danger {
+      background: #e74c3c;
+      color: white;
+    }
+    
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: white;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      transition: all 0.3s;
+    }
+    
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .bien-card {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      border: 2px solid #e0e0e0;
+      transition: all 0.3s;
+    }
+    
+    .bien-card:hover {
+      border-color: #667eea;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .bien-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 1rem;
+    }
+    
+    .bien-titre {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+    
+    .bien-ref {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      margin-top: 0.3rem;
+    }
+    
+    .bien-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.5rem;
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: #667eea;
+      color: white;
+      margin-right: 0.5rem;
+    }
+    
+    .badge-warning {
+      background: #f39c12;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: #7f8c8d;
+    }
+    
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    
+    .upload-zone {
+      border: 2px dashed #667eea;
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      background: #f8f9ff;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 1rem;
+    }
+    
+    .upload-zone:hover {
+      background: #e8ebff;
+      border-color: #5568d3;
+    }
+    
+    .upload-zone.dragover {
+      background: #d4dbff;
+      border-color: #4450b8;
+    }
+    
+    .document-item {
+      background: white;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 0.8rem;
+      border: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .document-info {
+      flex: 1;
+    }
+    
+    .document-name {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 0.3rem;
+    }
+    
+    .document-meta {
+      font-size: 0.85rem;
+      color: #7f8c8d;
+    }
+    
+    .document-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 10000;
+      animation: slideIn 0.3s ease;
+      max-width: 300px;
+    }
+    
+    .notification.success {
+      background: #4caf50;
+      color: white;
+    }
+    
+    .notification.error {
+      background: #f44336;
+      color: white;
+    }
+    
+    .notification.warning {
+      background: #ff9800;
+      color: white;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    #scrollTopBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 48px;
+      height: 48px;
+      background: #667eea;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    #scrollTopBtn.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    #scrollTopBtn:hover {
+      transform: scale(1.2);
+      background: #764ba2;
+    }
+    
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .tabs {
+        flex-direction: column;
+      }
+      
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="/pages/menu.html" class="back-link">← Retour au menu</a>
+  
+  <div class="container">
+    <div class="header">
+      <h1>🏢 Gestion des Biens Immobiliers</h1>
+      <p style="color: #7f8c8d;">Gérez votre patrimoine immobilier</p>
+    </div>
+    
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('liste', this)">📋 Liste</button>
+      <button class="tab" onclick="switchTab('ajouter', this)">➕ Ajouter</button>
+    </div>
+    
+    <!-- Onglet Liste -->
+    <div id="tab-liste" class="tab-content active">
+      <div id="listeBiens"></div>
+    </div>
+    
+    <!-- Onglet Ajouter -->
+    <div id="tab-ajouter" class="tab-content">
+      <form id="bienForm">
+        <div class="section">
+          <h2>📋 Identification</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="required">Type de bien</label>
+              <select id="typeBien" required>
+                <option value="">-- Sélectionner --</option>
+                <option value="appartement">Appartement</option>
+                <option value="maison">Maison</option>
+                <option value="studio">Studio</option>
+                <option value="duplex">Duplex</option>
+                <option value="loft">Loft</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label class="required">Référence du bien</label>
+              <input type="text" id="reference" placeholder="Ex: B2024-001" required />
+            </div>
+          </div>
+        </div>
+        
+        <div class="section">
+          <h2>📍 Adresse</h2>
+          <div class="form-grid">
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label class="required">Numéro et nom de la rue</label>
+              <input type="text" id="adresse" placeholder="Ex: 15 rue de la République" required />
+            </div>
+            
+            <div class="form-group">
+              <label>Complément d'adresse</label>
+              <input type="text" id="complement" placeholder="Bâtiment, Étage..." />
+            </div>
+            
+            <div class="form-group">
+              <label class="required">Code postal</label>
+              <input type="text" id="codePostal" pattern="[0-9]{5}" placeholder="Ex: 75001" required />
+            </div>
+            
+            <div class="form-group">
+              <label class="required">Ville</label>
+              <input type="text" id="ville" placeholder="Ex: Paris" required />
+            </div>
+          </div>
+        </div>
+        
+        <div class="section">
+          <h2>📏 Caractéristiques</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="required">Surface (m²)</label>
+              <input type="number" id="surface" step="0.01" min="0" placeholder="Ex: 45.50" required />
+            </div>
+            
+            <div class="form-group">
+              <label class="required">Nombre de pièces</label>
+              <input type="number" id="nbPieces" min="1" placeholder="Ex: 3" required />
+            </div>
+            
+            <div class="form-group">
+              <label>Nombre de chambres</label>
+              <input type="number" id="nbChambres" min="0" placeholder="Ex: 2" />
+            </div>
+            
+            <div class="form-group">
+              <label>Étage</label>
+              <input type="text" id="etage" placeholder="Ex: 2ème, RDC" />
+            </div>
+          </div>
+        </div>
+        
+        <div class="section">
+          <h2>🔧 Équipements</h2>
+          <div class="form-grid">
+            <label><input type="checkbox" id="ascenseur" /> Ascenseur</label>
+            <label><input type="checkbox" id="balcon" /> Balcon</label>
+            <label><input type="checkbox" id="terrasse" /> Terrasse</label>
+            <label><input type="checkbox" id="parking" /> Parking</label>
+            <label><input type="checkbox" id="cave" /> Cave</label>
+            <label><input type="checkbox" id="meuble" /> Meublé</label>
+          </div>
+        </div>
+        
+        <div class="section">
+          <h2>📄 Documents du bien</h2>
+          <p style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 1rem;">
+            Ajoutez tous les documents importants : acte de propriété, DPE, diagnostics obligatoires, etc.
+          </p>
+          
+          <div class="upload-zone" onclick="document.getElementById('documentInput').click()" ondrop="handleDocDrop(event)" ondragover="handleDocDragOver(event)" ondragleave="handleDocDragLeave(event)">
+            <div style="font-size: 3rem; margin-bottom: 0.5rem;">📎</div>
+            <div style="font-weight: 600; margin-bottom: 0.5rem;">Cliquez pour ajouter des documents</div>
+            <div style="font-size: 0.85rem; color: #7f8c8d;">ou glissez-déposez vos fichiers ici</div>
+            <div style="font-size: 0.75rem; color: #95a5a6; margin-top: 0.5rem;">PDF, DOCX, JPG, PNG - Max 10 Mo par fichier</div>
+          </div>
+          <input type="file" id="documentInput" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" multiple style="display: none;" onchange="ajouterDocuments(event)" />
+          
+          <div id="listeDocuments"></div>
+        </div>
+        
+        <div class="section">
+          <h2>📝 Observations</h2>
+          <div class="form-group">
+            <textarea id="observations" placeholder="Remarques complémentaires..."></textarea>
+          </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 2rem;">
+          <button type="button" class="btn-secondary" onclick="resetForm()">Réinitialiser</button>
+          <button type="submit" class="btn-primary">💾 Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <a href="#" id="scrollTopBtn" title="Retour en haut">↑</a>
+
+  <script type="module">
+    import { getBiens, addBien, deleteBien } from '/js/db.js';
+    import { showNotification, generateId } from '/js/app.js';
+    
+    let documents = [];
+    
+    // Gestion du scroll
+    window.addEventListener('scroll', function() {
+      const scrollBtn = document.getElementById('scrollTopBtn');
+      if (window.pageYOffset > 300) {
+        scrollBtn.classList.add('visible');
+      } else {
+        scrollBtn.classList.remove('visible');
+      }
+    });
+    
+    document.getElementById("scrollTopBtn").addEventListener("click", function(e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    
+    // Switch Tab
+    window.switchTab = function(tabName, element) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      
+      element.classList.add('active');
+      document.getElementById('tab-' + tabName).classList.add('active');
+      
+      if (tabName === 'liste') {
+        afficherListe();
+      }
+    };
+    
+    // Gestion drag & drop
+    window.handleDocDragOver = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.classList.add('dragover');
+    };
+    
+    window.handleDocDragLeave = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.classList.remove('dragover');
+    };
+    
+    window.handleDocDrop = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.currentTarget.classList.remove('dragover');
+      
+      const files = e.dataTransfer.files;
+      ajouterDocuments({ target: { files } });
+    };
+    
+    window.ajouterDocuments = function(event) {
+      const files = event.target.files;
+      
+      for (let file of files) {
+        if (file.size > 10 * 1024 * 1024) {
+          showNotification('Le fichier ' + file.name + ' dépasse 10 Mo', 'warning');
+          continue;
+        }
+        
+        const allowedTypes = ['application/pdf', 'application/msword', 
+                             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                             'image/jpeg', 'image/png', 'image/jpg'];
+        
+        if (!allowedTypes.includes(file.type)) {
+          showNotification('Type de fichier non supporté : ' + file.name, 'warning');
+          continue;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const typeDoc = prompt(
+            'Type de document pour "' + file.name + '" :\n\n' +
+            '1. Acte de propriété\n' +
+            '2. DPE\n' +
+            '3. Diagnostic amiante\n' +
+            '4. Diagnostic plomb\n' +
+            '5. Diagnostic termites\n' +
+            '6. Diagnostic électricité\n' +
+            '7. Diagnostic gaz\n' +
+            '8. État des risques\n' +
+            '9. Autre\n\n' +
+            'Tapez le numéro ou le nom :',
+            '1'
+          );
+          
+          const types = {
+            '1': 'Acte de propriété', '2': 'DPE', '3': 'Diagnostic amiante',
+            '4': 'Diagnostic plomb', '5': 'Diagnostic termites',
+            '6': 'Diagnostic électricité', '7': 'Diagnostic gaz',
+            '8': 'État des risques', '9': 'Autre'
+          };
+          
+          const typeDocLabel = types[typeDoc] || (typeDoc && typeDoc.trim()) || 'Autre';
+          
+          documents.push({
+            nom: file.name,
+            type: typeDocLabel,
+            taille: file.size,
+            dateAjout: new Date().toISOString(),
+            data: e.target.result,
+            mimeType: file.type
+          });
+          
+          afficherDocuments();
+        };
+        reader.readAsDataURL(file);
+      }
+      
+      document.getElementById('documentInput').value = '';
+    };
+    
+    function afficherDocuments() {
+      const container = document.getElementById('listeDocuments');
+      
+      if (documents.length === 0) {
+        container.innerHTML = '<p style="color: #7f8c8d; font-style: italic;">Aucun document ajouté</p>';
+        return;
+      }
+      
+      container.innerHTML = documents.map((doc, index) => {
+        const tailleMo = (doc.taille / (1024 * 1024)).toFixed(2);
+        const tailleKo = (doc.taille / 1024).toFixed(1);
+        const tailleAffichee = doc.taille < 1024 * 1024 ? tailleKo + ' Ko' : tailleMo + ' Mo';
+        
+        const iconType = doc.mimeType.includes('pdf') ? '📕' : 
+                        doc.mimeType.includes('image') ? '🖼️' : '📄';
+        
+        return `
+          <div class="document-item">
+            <div class="document-info">
+              <div class="document-name">${iconType} ${doc.nom}</div>
+              <div class="document-meta">
+                <strong>${doc.type}</strong> • ${tailleAffichee} • 
+                ${new Date(doc.dateAjout).toLocaleDateString('fr-FR')}
+              </div>
+            </div>
+            <div class="document-actions">
+              <button type="button" class="btn-secondary" onclick="window.telechargerDocument(${index})" style="padding: 0.5rem 1rem;">
+                📥
+              </button>
+              <button type="button" class="btn-danger" onclick="window.supprimerDocument(${index})" style="padding: 0.5rem 1rem;">
+                🗑️
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    window.telechargerDocument = function(index) {
+      const doc = documents[index];
+      const a = document.createElement('a');
+      a.href = doc.data;
+      a.download = doc.nom;
+      a.click();
+    };
+    
+    window.supprimerDocument = function(index) {
+      if (confirm('Supprimer ce document ?')) {
+        documents.splice(index, 1);
+        afficherDocuments();
+        showNotification('Document supprimé');
+      }
+    };
+    
+    async function afficherListe() {
+      try {
+        const biens = await getBiens();
+        const liste = document.getElementById('listeBiens');
+        
+        if (biens.length === 0) {
+          liste.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">🏢</div>
+              <h3>Aucun bien enregistré</h3>
+              <p>Cliquez sur l'onglet "Ajouter" pour créer votre premier bien</p>
+            </div>
+          `;
+          return;
+        }
+        
+        liste.innerHTML = biens.map(b => {
+          const nbProprietaires = (b.proprietairesIds || []).length;
+          const nbDocuments = (b.documents || []).length;
+          return `
+            <div class="bien-card">
+              <div class="bien-header">
+                <div>
+                  <div class="bien-titre">${b.typeBien.charAt(0).toUpperCase() + b.typeBien.slice(1)} - ${b.adresse}</div>
+                  <div class="bien-ref">Réf: ${b.reference}</div>
+                  <div style="margin-top: 0.5rem;">
+                    ${nbProprietaires > 0 ? 
+                      `<span class="badge">${nbProprietaires} propriétaire(s)</span>` : 
+                      `<span class="badge badge-warning">⚠️ Aucun propriétaire</span>`
+                    }
+                    ${nbDocuments > 0 ? 
+                      `<span class="badge" style="background: #3498db;">${nbDocuments} document(s)</span>` : 
+                      ''
+                    }
+                  </div>
+                </div>
+                <button class="btn-danger" onclick="window.supprimerBien('${b.id}')" style="padding: 0.5rem 1rem;">
+                  🗑️ Supprimer
+                </button>
+              </div>
+              <div class="bien-details">
+                <div>📏 ${b.surface} m²</div>
+                <div>🚪 ${b.nbPieces} pièce(s)</div>
+                <div>🏙️ ${b.ville}, ${b.codePostal}</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error('Erreur affichage liste:', err);
+        showNotification('Erreur lors du chargement des biens', 'error');
+      }
+    }
+    
+    window.supprimerBien = async function(id) {
+      if (!confirm('Supprimer ce bien ?')) return;
+      
+      try {
+        await deleteBien(id);
+        showNotification('Bien supprimé avec succès');
+        afficherListe();
+      } catch (err) {
+        console.error('Erreur suppression:', err);
+        showNotification('Erreur lors de la suppression', 'error');
+      }
+    };
+    
+    window.resetForm = function() {
+      document.getElementById('bienForm').reset();
+      documents = [];
+      afficherDocuments();
+    };
+    
+    document.getElementById('bienForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      try {
+        const bienData = {
+          typeBien: document.getElementById('typeBien').value,
+          reference: document.getElementById('reference').value,
+          adresse: document.getElementById('adresse').value,
+          complement: document.getElementById('complement').value,
+          codePostal: document.getElementById('codePostal').value,
+          ville: document.getElementById('ville').value,
+          surface: parseFloat(document.getElementById('surface').value),
+          nbPieces: parseInt(document.getElementById('nbPieces').value),
+          nbChambres: parseInt(document.getElementById('nbChambres').value) || 0,
+          etage: document.getElementById('etage').value,
+          ascenseur: document.getElementById('ascenseur').checked,
+          balcon: document.getElementById('balcon').checked,
+          terrasse: document.getElementById('terrasse').checked,
+          parking: document.getElementById('parking').checked,
+          cave: document.getElementById('cave').checked,
+          meuble: document.getElementById('meuble').checked,
+          observations: document.getElementById('observations').value,
+          documents: documents,
+          proprietairesIds: []
+        };
+        
+        await addBien(bienData);
+        
+        showNotification('Bien enregistré avec succès !');
+        resetForm();
+        
+        // Basculer vers l'onglet liste
+        const firstTab = document.querySelectorAll('.tab')[0];
+        switchTab('liste', firstTab);
+      } catch (err) {
+        console.error('Erreur enregistrement:', err);
+        showNotification('Erreur lors de l\'enregistrement', 'error');
+      }
+    });
+    
+    // Charger la liste au démarrage
+    window.addEventListener('load', function() {
+      afficherListe();
+      afficherDocuments();
+    });
+  </script>
+</body>
+</html>
