@@ -481,7 +481,7 @@
   </style>
 </head>
 <body>
-  <a href="/pages/menu.html" class="back-link">← Retour au menu</a>
+  <a href="/gestion-locative/menu.html" class="back-link">← Retour au menu</a>
   
   <div class="container">
     <div class="header">
@@ -726,7 +726,7 @@
       </div>
       
       <div style="text-align: center; margin-top: 2rem;">
-        <button class="btn-secondary" onclick="window.location.href='/pages/menu.html'">Annuler</button>
+        <button class="btn-secondary" onclick="window.location.href='/gestion-locative/menu.html'">Annuler</button>
         <button class="btn-primary" onclick="enregistrerEtatDesLieux()">💾 Enregistrer l'État des Lieux</button>
       </div>
     </div>
@@ -1514,7 +1514,7 @@
         
         await addEtatDesLieux(etatDesLieux);
         showNotification('✅ État des lieux enregistré avec succès !');
-        window.location.href = '/pages/menu.html';
+        window.location.href = '/gestion-locative/menu.html';
       } catch (err) {
         console.error('Erreur enregistrement:', err);
         showNotification('Erreur lors de l\'enregistrement', 'error');
@@ -1522,4 +1522,5 @@
     };
   </script>
 </body>
+
 </html>
