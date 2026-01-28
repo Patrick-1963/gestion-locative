@@ -15,11 +15,11 @@ const URLS_TO_CACHE = [
   "/gestion-locative/bail.html",
   "/gestion-locative/quittance.html",
   "/gestion-locative/liaison-bien-proprietaire.html",
-  "/js/app.js",
-  "/js/db.js",
-  "/js/storage.js",
-  "/manifest.json",
-  "/favicon.png"
+  "/gestion-locative/js/app.js",
+  "/gestion-locative/js/db.js",
+  "/gestion-locative/js/storage.js",
+  "/gestion-locative/manifest.json",
+  "/gestion-locative/favicon.png"
 ];
 
 /**
