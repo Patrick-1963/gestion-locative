@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Liaison Bien - Propriétaire</title>
   <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css" />
-  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="icon" type="image/png" href="favicon.png">
   <link rel="manifest" href="manifest.json">
 
   <style>
@@ -277,9 +277,9 @@
   <a href="#" id="scrollTopBtn" title="Retour en haut">↑</a>
 
   <script type="module">
-    import { getBiens, updateBien, initDB } from '/js/db.js';
-    import { getProprietaires, updateProprietaire } from '/js/db.js';
-    import { showNotification } from '/js/app.js';
+    import { getBiens, updateBien, initDB } from './js/db.js';
+    import { getProprietaires, updateProprietaire } from './js/db.js';
+    import { showNotification } from './js/app.js';
     
     let bienSelectionne = null;
     let proprietairesSelectionnes = [];
@@ -539,4 +539,5 @@
 </body>
 
 </html>
+
 
