@@ -90,26 +90,23 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
-  
-  // Ignorer les requêtes non-GET
-  if (request.method !== "GET") {
+
+  // Intercepter toutes les requêtes GET HTTP (obligatoire pour PWABuilder)
+  if (request.method !== "GET" || !url.protocol.startsWith("http")) {
+    event.respondWith(fetch(request));
     return;
   }
-  
-  // Ignorer les requêtes Chrome extensions et autres protocoles
-  if (!url.protocol.startsWith("http")) {
-    return;
-  }
-  
-  // Stratégie différente selon le type de ressource
-  if (request.headers.get("accept").includes("text/html")) {
-    // Pour les pages HTML: Network First, puis Cache
+
+  // HTML → Network First
+  if (request.headers.get("accept")?.includes("text/html")) {
     event.respondWith(networkFirstStrategy(request));
-  } else {
-    // Pour les assets (CSS, JS, images): Cache First, puis Network
-    event.respondWith(cacheFirstStrategy(request));
+    return;
   }
+
+  // Assets → Cache First
+  event.respondWith(cacheFirstStrategy(request));
 });
+
 
 /**
  * Stratégie Network First
