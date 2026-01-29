@@ -469,8 +469,53 @@
   });
 </script>
 <script type="module" src="https://patrick-1963.github.io/gestion-locative/js/app.js"></script>
+  <!-- ========================= -->
+<!-- MODALE D’IMPORT DES DONNÉES -->
+<!-- ========================= -->
+<div id="modalImport" class="modal">
+  <div class="modal-content">
+    <h3>📤 Import des données</h3>
+
+    <div id="importStats">
+      <!-- Les stats seront injectées ici -->
+    </div>
+
+    <div class="modal-actions">
+      <button onclick="importerAvecOption('fusionner')" class="action-btn action-btn-success">Fusionner</button>
+      <button onclick="importerAvecOption('remplacer')" class="action-btn action-btn-warning">Remplacer</button>
+      <button onclick="fermerModalImport()" class="action-btn action-btn-secondary">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+  }
+  .modal.active { display: flex; }
+  .modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+  }
+  .modal-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+  }
+</style>
+
 </body>
 </html>
+
 
 
 
