@@ -934,59 +934,11 @@
       }, 100);
     };
   </script>
-  <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-<script>
-    async function exportToWord() {
-        const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell } = docx;
-
-        const table = document.querySelector("table");
-        const rows = table.querySelectorAll("tr");
-        const tableData = [];
-
-        rows.forEach((row) => {
-            const cells = row.querySelectorAll("td, th");
-            const rowData = [];
-            cells.forEach(cell => rowData.push(cell.innerText));
-            tableData.push(rowData);
-        });
-
-        const doc = new Document({
-            sections: [{
-                children: [
-                    new Paragraph({
-                        children: [
-                            new TextRun({
-                                text: "Liste des États des Lieux",
-                                bold: true,
-                                size: 24,
-                            }),
-                        ],
-                    }),
-                    new Table({
-                        rows: tableData.map(row =>
-                            new TableRow({
-                                children: row.map(cell =>
-                                    new TableCell({
-                                        children: [new Paragraph(cell)],
-                                    })
-                                ),
-                            })
-                        ),
-                    }),
-                ],
-            }],
-        });
-
-        const blob = await Packer.toBlob(doc);
-        saveAs(blob, "liste-etats-lieux.docx");
-    }
-</script>
-<button onclick="exportToWord()" class="primary">Exporter en Word (.docx)</button>
-
+  
 </body>
 
 </html>
+
 
 
 
