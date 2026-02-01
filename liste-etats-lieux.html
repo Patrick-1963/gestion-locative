@@ -1,17 +1,16 @@
+<!doctype html>
+<html lang="fr">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Liste des États des Lieux</title>
-
-  <!-- Librairies Word -->
-  <script src="https://unpkg.com/docx@7.8.2/build/docx.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
-  <!-- Manifest + Favicon -->
-  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css" />
   <link rel="icon" type="image/png" href="favicon.png">
-    <style>
+  <link rel="manifest" href="manifest.json">
+
+  <style>
     body { 
       max-width: 1600px; 
       margin: 0 auto; 
@@ -429,205 +428,517 @@
     }
   </style>
 </head>
-
 <body>
-
-<a href="/gestion-locative/menu.html">← Retour au menu</a>
-
-<h1>Liste des États des Lieux</h1>
-
-<button onclick="window.location.href='/pages/etat-lieux.html'">Créer un nouvel état des lieux</button>
-
-<!-- Filtres -->
-<div>
-  <label>Type</label>
-  <select id="filterType" onchange="appliquerFiltres()">
-    <option value="">Tous</option>
-    <option value="entree">Entrée</option>
-    <option value="sortie">Sortie</option>
-  </select>
-
-  <label>Bien</label>
-  <select id="filterBien" onchange="appliquerFiltres()">
-    <option value="">Tous les biens</option>
-  </select>
-
-  <label>Recherche</label>
-  <input type="text" id="filterRecherche" placeholder="Rechercher..." oninput="appliquerFiltres()">
-</div>
-
-<!-- Liste -->
-<div id="listeEDL"></div>
-
-<!-- Modal -->
-<div id="modalDetails" style="display:none;">
-  <div>
-    <h2 id="modalTitre"></h2>
-    <div id="modalContenu"></div>
-
-    <button onclick="fermerModal()">Fermer</button>
-    <button onclick="imprimerEDL()">Imprimer</button>
-    <button onclick="exportToWord()">Exporter en Word</button>
-  </div>
-</div>
-
-<!-- SCRIPT PRINCIPAL (MODULE) -->
-<script type="module">
-import { getEtatsDesLieux, deleteEtatDesLieux, initDB } from './js/db.js';
-import { getBiens, getProprietaires, getLocataires } from './js/db.js';
-import { showNotification } from './js/app.js';
-
-let etatsDesLieux = [];
-let biens = [];
-let proprietaires = [];
-let locataires = [];
-
-document.addEventListener('DOMContentLoaded', async () => {
-  await initDB();
-  await chargerDonnees();
-  await chargerFilterBiens();
-  await afficherListe();
-});
-
-async function chargerDonnees() {
-  etatsDesLieux = await getEtatsDesLieux();
-  biens = await getBiens();
-  proprietaires = await getProprietaires();
-  locataires = await getLocataires();
-}
-
-async function chargerFilterBiens() {
-  const select = document.getElementById('filterBien');
-  biens.forEach(b => {
-    const opt = document.createElement('option');
-    opt.value = b.id;
-    opt.textContent = `${b.reference || 'Sans ref'} - ${b.adresse}`;
-    select.appendChild(opt);
-  });
-}
-
-window.appliquerFiltres = function() {
-  const type = filterType.value;
-  const bien = filterBien.value;
-  const recherche = filterRecherche.value.toLowerCase();
-
-  let list = [...etatsDesLieux];
-
-  if (type) list = list.filter(e => e.type === type);
-  if (bien) list = list.filter(e => e.bienId === bien);
-
-  if (recherche) {
-    list = list.filter(e => {
-      const b = biens.find(x => x.id === e.bienId);
-      const txt = b ? `${b.reference} ${b.adresse} ${b.ville}`.toLowerCase() : "";
-      return txt.includes(recherche);
-    });
-  }
-
-  afficherListe(list);
-};
-
-async function afficherListe(list = etatsDesLieux) {
-  const container = document.getElementById('listeEDL');
-
-  if (list.length === 0) {
-    container.innerHTML = "<p>Aucun état des lieux</p>";
-    return;
-  }
-
-  list.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-  container.innerHTML = list.map(edl => {
-    const bien = biens.find(b => b.id === edl.bienId);
-    return `
-      <div>
-        <h3>${bien ? bien.reference : "Bien inconnu"}</h3>
-        <p>${new Date(edl.date).toLocaleDateString("fr-FR")}</p>
-        <button onclick="afficherDetails('${edl.id}')">Voir détails</button>
-        <button onclick="exporterPDF('${edl.id}')">PDF</button>
-        <button onclick="supprimerEDL('${edl.id}')">Supprimer</button>
+  <a href="/gestion-locative/menu.html" class="back-link">← Retour au menu</a>
+  
+  <div class="container">
+    <div class="header">
+      <h1>📋 Liste des États des Lieux</h1>
+      <p style="color: #7f8c8d;">Consultez et gérez tous vos états des lieux</p>
+    </div>
+    
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <button class="btn-success" onclick="window.location.href='/pages/etat-lieux.html'">
+        ➕ Créer un nouvel état des lieux
+      </button>
+    </div>
+    
+    <div class="filters">
+      <h3 style="margin-bottom: 1rem;">🔍 Filtres</h3>
+      <div class="filter-grid">
+        <div>
+          <label>Type</label>
+          <select id="filterType" onchange="appliquerFiltres()">
+            <option value="">Tous</option>
+            <option value="entree">Entrée</option>
+            <option value="sortie">Sortie</option>
+          </select>
+        </div>
+        <div>
+          <label>Bien</label>
+          <select id="filterBien" onchange="appliquerFiltres()">
+            <option value="">Tous les biens</option>
+          </select>
+        </div>
+        <div>
+          <label>Recherche</label>
+          <input type="text" id="filterRecherche" placeholder="Rechercher..." oninput="appliquerFiltres()" />
+        </div>
       </div>
-    `;
-  }).join('');
+    </div>
+    
+    <div id="listeEDL"></div>
+  </div>
+  
+  <!-- Modal Détails -->
+  <div id="modalDetails" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitre">Détails de l'État des Lieux</h2>
+        <button class="modal-close" onclick="fermerModal()">×</button>
+      </div>
+      <div id="modalContenu"></div>
+      <div style="text-align: center; margin-top: 2rem;" class="no-print">
+        <button class="btn-secondary" onclick="fermerModal()">Fermer</button>
+        <button class="btn-primary" onclick="imprimerEDL()">🖨️ Imprimer</button>
+        
+      </div>
+    </div>
+  </div>
+
+  <a href="#" id="scrollTopBtn" title="Retour en haut">↑</a>
+
+  <script type="module">
+    import { getEtatsDesLieux, deleteEtatDesLieux, initDB } from './js/db.js';
+    import { getBiens, getProprietaires, getLocataires } from './js/db.js';
+    import { showNotification } from './js/app.js';
+    
+    let etatsDesLieux = [];
+    let biens = [];
+    let proprietaires = [];
+    let locataires = [];
+    
+    // Gestion du scroll
+    window.addEventListener('scroll', function() {
+      const scrollBtn = document.getElementById('scrollTopBtn');
+      if (window.pageYOffset > 300) {
+        scrollBtn.classList.add('visible');
+      } else {
+        scrollBtn.classList.remove('visible');
+      }
+    });
+
+    document.getElementById("scrollTopBtn").addEventListener("click", function(e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    
+    document.addEventListener('DOMContentLoaded', async function() {
+      await initDB();
+      await chargerDonnees();
+      await chargerFilterBiens();
+      await afficherListe();
+    });
+    
+    async function chargerDonnees() {
+      try {
+        etatsDesLieux = await getEtatsDesLieux();
+        biens = await getBiens();
+        proprietaires = await getProprietaires();
+        locataires = await getLocataires();
+      } catch (err) {
+        console.error('Erreur chargement données:', err);
+        showNotification('Erreur lors du chargement', 'error');
+      }
+    }
+    
+    async function chargerFilterBiens() {
+      const select = document.getElementById('filterBien');
+      biens.forEach(b => {
+        const option = document.createElement('option');
+        option.value = b.id;
+        option.textContent = `${b.reference || 'Sans ref'} - ${b.adresse}`;
+        select.appendChild(option);
+      });
+    }
+    
+    window.appliquerFiltres = async function() {
+      const filterType = document.getElementById('filterType').value;
+      const filterBien = document.getElementById('filterBien').value;
+      const filterRecherche = document.getElementById('filterRecherche').value.toLowerCase();
+      
+      let edlFiltres = [...etatsDesLieux];
+      
+      if (filterType) {
+        edlFiltres = edlFiltres.filter(e => e.type === filterType);
+      }
+      
+      if (filterBien) {
+        edlFiltres = edlFiltres.filter(e => e.bienId === filterBien);
+      }
+      
+      if (filterRecherche) {
+        edlFiltres = edlFiltres.filter(e => {
+          const bien = biens.find(b => b.id === e.bienId);
+          const bienText = bien ? `${bien.reference} ${bien.adresse} ${bien.ville}`.toLowerCase() : '';
+          return bienText.includes(filterRecherche);
+        });
+      }
+      
+      afficherListe(edlFiltres);
+    };
+    
+    async function afficherListe(edlAfficher = etatsDesLieux) {
+      const container = document.getElementById('listeEDL');
+      
+      if (edlAfficher.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <h3>Aucun état des lieux enregistré</h3>
+            <p>Créez votre premier état des lieux en cliquant sur le bouton ci-dessus</p>
+          </div>
+        `;
+        return;
+      }
+      
+      // Trier par date décroissante
+      edlAfficher.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      container.innerHTML = edlAfficher.map(edl => {
+        const bien = biens.find(b => b.id === edl.bienId);
+        const locataire = locataires.find(l => l.bienId === edl.bienId);
+        
+        const nbPieces = edl.pieces ? edl.pieces.length : 0;
+        const nbElements = edl.pieces ? edl.pieces.reduce((acc, p) => acc + (p.elements ? p.elements.length : 0), 0) : 0;
+        const nbCles = edl.cles ? edl.cles.length : 0;
+        const nbEquipements = edl.equipements ? edl.equipements.length : 0;
+        
+        // Compter les photos
+        let nbPhotos = edl.photosGenerales ? edl.photosGenerales.length : 0;
+        if (edl.pieces) {
+          edl.pieces.forEach(p => {
+            if (p.elements) {
+              p.elements.forEach(e => {
+                if (e.photos) nbPhotos += e.photos.length;
+              });
+            }
+          });
+        }
+        
+        return `
+          <div class="edl-card">
+            <div class="edl-header">
+              <div>
+                <div class="edl-titre">
+                  ${bien ? `${bien.reference || 'Sans ref'} - ${bien.adresse}` : 'Bien inconnu'}
+                </div>
+                <div style="color: #7f8c8d; margin-top: 0.3rem;">
+                  📅 ${new Date(edl.date).toLocaleDateString('fr-FR')}
+                  ${edl.heureDebut ? ` • 🕐 ${edl.heureDebut}` : ''}
+                  ${edl.heureFin ? ` - ${edl.heureFin}` : ''}
+                </div>
+              </div>
+              <span class="edl-type type-${edl.type}">
+                ${edl.type === 'entree' ? '📥 Entrée' : '📤 Sortie'}
+              </span>
+            </div>
+            
+            <div class="edl-info">
+              ${bien ? `
+                <div class="info-item">
+                  <span class="info-label">Bien :</span><br>
+                  ${bien.typeBien || 'Bien'} • ${bien.surface || '?'} m² • ${bien.ville}
+                </div>
+              ` : ''}
+              
+              ${locataire ? `
+                <div class="info-item">
+                  <span class="info-label">Locataire :</span><br>
+                  ${locataire.civilite} ${locataire.nom} ${locataire.prenom}
+                </div>
+              ` : ''}
+            </div>
+            
+            <div class="edl-stats">
+              <span class="stat-badge">🏠 ${nbPieces} pièce(s)</span>
+              <span class="stat-badge">📝 ${nbElements} élément(s)</span>
+              <span class="stat-badge">🔑 ${nbCles} clé(s)</span>
+              <span class="stat-badge">🔧 ${nbEquipements} équipement(s)</span>
+              <span class="stat-badge">📸 ${nbPhotos} photo(s)</span>
+              ${edl.signatureBailleur && edl.signatureLocataire 
+  ? '<span class="stat-badge" style="background: #d4edda; color: #155724;">✅ Signé</span>'
+  : '<span class="stat-badge" style="background: #fff3cd; color: #856404;">⚠️ Non signé</span>'
 }
 
-window.afficherDetails = function(edlId) {
-  const edl = etatsDesLieux.find(e => e.id === edlId);
-  if (!edl) return;
-
-  window.edlCourant = edl; // IMPORTANT POUR L’EXPORT WORD
-
-  const bien = biens.find(b => b.id === edl.bienId);
-
-  document.getElementById("modalTitre").textContent =
-    `État des lieux - ${bien ? bien.reference : ""}`;
-
-  document.getElementById("modalContenu").innerHTML = `
-    <p>Date : ${new Date(edl.date).toLocaleDateString("fr-FR")}</p>
-    <p>Type : ${edl.type}</p>
-    <p>Observations : ${edl.observationsGenerales || "Aucune"}</p>
-  `;
-
-  document.getElementById("modalDetails").style.display = "block";
-};
-
-window.fermerModal = function() {
-  document.getElementById("modalDetails").style.display = "none";
-};
-
-window.supprimerEDL = async function(id) {
-  if (!confirm("Supprimer cet EDL ?")) return;
-  await deleteEtatDesLieux(id);
-  await chargerDonnees();
-  appliquerFiltres();
-};
-
-window.exporterPDF = function(id) {
-  afficherDetails(id);
-  setTimeout(() => window.print(), 300);
-};
-</script>
-
-<!-- SCRIPT EXPORT WORD -->
-<script>
-async function exportToWord() {
-  if (!window.edlCourant) {
-    alert("Aucun EDL chargé");
-    return;
-  }
-
-  const edl = window.edlCourant;
-  const { Document, Packer, Paragraph, TextRun } = window.docx;
-
-  const sections = [];
-
-  sections.push(new Paragraph({
-    children: [new TextRun({ text: "État des lieux", bold: true, size: 32 })],
-    spacing: { after: 300 }
-  }));
-
-  sections.push(new Paragraph(`Date : ${new Date(edl.date).toLocaleDateString("fr-FR")}`));
-  sections.push(new Paragraph(`Type : ${edl.type}`));
-
-  if (edl.observationsGenerales) {
-    sections.push(new Paragraph({
-      children: [new TextRun({ text: "Observations", bold: true, size: 26 })],
-      spacing: { before: 200, after: 100 }
-    }));
-    sections.push(new Paragraph(edl.observationsGenerales));
-  }
-
-  const doc = new Document({
-    sections: [{ children: sections }]
-  });
-
-  const blob = await Packer.toBlob(doc);
-  saveAs(blob, `EDL-${edl.date}.docx`);
-}
-</script>
-
+            </div>
+            
+            <div class="edl-actions">
+              <button class="btn-info" onclick="window.afficherDetails('${edl.id}')">
+                👁️ Voir détails
+              </button>
+              <button class="btn-primary" onclick="window.exporterPDF('${edl.id}')">
+                📄 Exporter PDF
+              </button>
+              <button class="btn-danger" onclick="window.supprimerEDL('${edl.id}')">
+                🗑️ Supprimer
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    window.afficherDetails = function(edlId) {
+      const edl = etatsDesLieux.find(e => e.id === edlId);
+      if (!edl) return;
+      
+      const bien = biens.find(b => b.id === edl.bienId);
+      const locataire = locataires.find(l => l.bienId === edl.bienId);
+      const proprios = bien && bien.proprietairesIds ? 
+        bien.proprietairesIds.map(pId => proprietaires.find(p => p.id === pId)).filter(p => p) : [];
+      
+      let html = `
+        <div class="detail-section">
+          <h3>📋 Informations Générales</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+            <div>
+              <strong>Type :</strong> ${edl.type === 'entree' ? 'État des lieux d\'entrée' : 'État des lieux de sortie'}<br>
+              <strong>Date :</strong> ${new Date(edl.date).toLocaleDateString('fr-FR')}<br>
+              ${edl.heureDebut ? `<strong>Heure :</strong> ${edl.heureDebut}${edl.heureFin ? ` - ${edl.heureFin}` : ''}<br>` : ''}
+            </div>
+            ${bien ? `
+              <div>
+                <strong>Bien :</strong><br>
+                ${bien.reference || 'Sans ref'} - ${bien.typeBien || 'Bien'}<br>
+                ${bien.adresse}, ${bien.codePostal} ${bien.ville}<br>
+                ${bien.surface || '?'} m² • ${bien.nbPieces || '?'} pièce(s)
+              </div>
+            ` : ''}
+          </div>
+        </div>
+        
+        <div class="detail-section">
+          <h3>👥 Présents</h3>
+          ${proprios.length > 0 ? `
+            <div><strong>Propriétaire(s) :</strong><br>
+            ${proprios.map(p => `${p.civilite} ${p.nom} ${p.prenom} - ${p.telephone}`).join('<br>')}</div>
+          ` : ''}
+          ${locataire ? `
+            <div style="margin-top: 0.5rem;"><strong>Locataire :</strong><br>
+            ${locataire.civilite} ${locataire.nom} ${locataire.prenom} - ${locataire.telephone}
+            ${locataire.coLocataires && locataire.coLocataires.length > 0 ? `<br><strong>Co-locataire(s) :</strong><br>${locataire.coLocataires.map(c => `${c.civilite} ${c.nom} ${c.prenom}`).join('<br>')}` : ''}
+            </div>
+          ` : ''}
+          ${edl.autresPresents ? `<div style="margin-top: 0.5rem;"><strong>Autres :</strong><br>${edl.autresPresents}</div>` : ''}
+        </div>
+      `;
+      
+      // Compteurs
+      if (edl.compteurs) {
+        html += '<div class="detail-section"><h3>⚡ Relevés de Compteurs</h3>';
+        
+        if (edl.compteurs.electricite && edl.compteurs.electricite.numero) {
+          html += `<div style="margin-bottom: 0.5rem;">
+            <strong>💡 Électricité :</strong> N° ${edl.compteurs.electricite.numero}`;
+          if (edl.compteurs.electricite.type === 'double') {
+            html += ` • HP: ${edl.compteurs.electricite.indexHP} kWh • HC: ${edl.compteurs.electricite.indexHC} kWh`;
+          } else {
+            html += ` • Index: ${edl.compteurs.electricite.index} kWh`;
+          }
+          html += '</div>';
+        }
+        
+        if (edl.compteurs.gaz && edl.compteurs.gaz.numero) {
+          html += `<div style="margin-bottom: 0.5rem;"><strong>🔥 Gaz :</strong> N° ${edl.compteurs.gaz.numero} • Index: ${edl.compteurs.gaz.index} m³</div>`;
+        }
+        
+        if (edl.compteurs.eau && edl.compteurs.eau.numero) {
+          html += `<div style="margin-bottom: 0.5rem;"><strong>💧 Eau froide :</strong> N° ${edl.compteurs.eau.numero} • Index: ${edl.compteurs.eau.index} m³</div>`;
+        }
+        
+        if (edl.compteurs.eauChaude && edl.compteurs.eauChaude.numero) {
+          html += `<div style="margin-bottom: 0.5rem;"><strong>🌡️ Eau chaude :</strong> N° ${edl.compteurs.eauChaude.numero} • Index: ${edl.compteurs.eauChaude.index} m³</div>`;
+        }
+        
+        html += '</div>';
+      }
+      
+      // Pièces
+      if (edl.pieces && edl.pieces.length > 0) {
+        html += '<div class="detail-section"><h3>🏠 Pièces et Éléments</h3>';
+        edl.pieces.forEach(piece => {
+          const nomPiece = piece.nom || piece.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+          html += `<div class="piece-detail">
+            <div class="piece-detail-header">${nomPiece} ${piece.surface ? `(${piece.surface} m²)` : ''}</div>`;
+          
+          if (piece.elements && piece.elements.length > 0) {
+            piece.elements.forEach(elem => {
+              html += `<div class="element-detail">
+                <strong>${elem.type.replace(/_/g, ' ')}</strong>
+                ${elem.quantite > 1 ? ` (x${elem.quantite})` : ''}
+                <span class="etat-badge etat-${elem.etat}">
+                  ${elem.etat === 'bon' ? '✅ Bon' : elem.etat === 'moyen' ? '⚠️ Moyen' : '❌ Mauvais'}
+                </span>
+                ${elem.description ? `<br><span style="color: #7f8c8d;">${elem.description}</span>` : ''}
+                ${elem.observations ? `<br><span style="color: #856404; font-size: 0.85rem;">Obs: ${elem.observations}</span>` : ''}
+                ${elem.photos && elem.photos.length > 0 ? `
+                  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.5rem; margin-top: 0.5rem;">
+                    ${elem.photos.map(photo => `
+                      <img src="${photo.data}" alt="${photo.nom}" style="width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; cursor: pointer;" onclick="window.agrandirPhoto('${photo.data}')" />
+                    `).join('')}
+                  </div>
+                ` : ''}
+              </div>`;
+            });
+          } else {
+            html += '<p style="color: #7f8c8d; font-style: italic;">Aucun élément</p>';
+          }
+          
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+      
+      // Clés
+      if (edl.cles && edl.cles.length > 0) {
+        html += '<div class="detail-section"><h3>🔑 Clés et Accès</h3>';
+        edl.cles.forEach(cle => {
+          html += `<div style="margin-bottom: 0.5rem;">
+            • <strong>${cle.type}</strong> ${cle.quantite > 1 ? `(x${cle.quantite})` : ''}
+            ${cle.description ? ` - ${cle.description}` : ''}
+            ${cle.numero ? ` - N° ${cle.numero}` : ''}
+          </div>`;
+        });
+        html += '</div>';
+      }
+      
+      // Équipements
+      if (edl.equipements && edl.equipements.length > 0) {
+        html += '<div class="detail-section"><h3>🔧 Équipements</h3>';
+        edl.equipements.forEach(equip => {
+          html += `<div style="margin-bottom: 0.8rem;">
+            • <strong>${equip.nom}</strong>
+            ${equip.marque || equip.modele ? ` (${equip.marque} ${equip.modele})` : ''}
+            <span class="etat-badge etat-${equip.etat}">
+              ${equip.etat === 'bon' ? '✅ Bon' : equip.etat === 'moyen' ? '⚠️ Moyen' : '❌ Mauvais'}
+            </span>
+            ${equip.observations ? `<br><span style="color: #7f8c8d; font-size: 0.9rem;">${equip.observations}</span>` : ''}
+          </div>`;
+        });
+        html += '</div>';
+      }
+      
+      // Observations générales
+      if (edl.observationsGenerales) {
+        html += `<div class="detail-section">
+          <h3>📝 Observations Générales</h3>
+          <p style="white-space: pre-wrap;">${edl.observationsGenerales}</p>
+        </div>`;
+      }
+      
+      // Photos générales
+      if (edl.photosGenerales && edl.photosGenerales.length > 0) {
+        html += '<div class="detail-section"><h3>📸 Photos Générales</h3>';
+        
+        const parCategorie = {};
+        edl.photosGenerales.forEach(photo => {
+          if (!parCategorie[photo.categorie]) {
+            parCategorie[photo.categorie] = [];
+          }
+          parCategorie[photo.categorie].push(photo);
+        });
+        
+        Object.keys(parCategorie).forEach(categorie => {
+          html += `<h4 style="margin-top: 1rem; color: #667eea;">${categorie}</h4>`;
+          html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.5rem; margin-top: 0.5rem;">';
+          parCategorie[categorie].forEach(photo => {
+            html += `<img src="${photo.data}" alt="${photo.nom}" style="width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; cursor: pointer;" onclick="window.agrandirPhoto('${photo.data}')" />`;
+          });
+          html += '</div>';
+        });
+        
+        html += '</div>';
+      }
+      
+      // Signatures
+      html += `<div class="detail-section">
+        <h3>✏️ Signatures</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+          <div>
+            ${edl.signatureBailleur ? '✅' : '❌'} Bailleur (ou représentant)
+          </div>
+          <div>
+            ${edl.signatureLocataire ? '✅' : '❌'} Locataire
+          </div>
+        </div>
+      </div>`;
+      
+      document.getElementById('modalContenu').innerHTML = html;
+      document.getElementById('modalTitre').textContent = `État des Lieux - ${bien ? bien.reference : 'Détails'}`;
+      document.getElementById('modalDetails').classList.add('active');
+    };
+    
+    window.fermerModal = function() {
+      document.getElementById('modalDetails').classList.remove('active');
+    };
+    
+    window.exporterPDF = function(edlId) {
+      window.afficherDetails(edlId);
+      
+      setTimeout(() => {
+        const scrollY = window.scrollY;
+        const modal = document.querySelector('.modal-content');
+        if (modal) {
+          modal.style.maxHeight = 'none';
+          modal.style.overflow = 'visible';
+        }
+        
+        window.print();
+        
+        setTimeout(() => {
+          if (modal) {
+            modal.style.maxHeight = '95vh';
+            modal.style.overflow = 'auto';
+          }
+          window.scrollTo(0, scrollY);
+        }, 100);
+      }, 300);
+    };
+    
+    window.supprimerEDL = async function(edlId) {
+      if (!confirm('Êtes-vous sûr de vouloir supprimer cet état des lieux ? Cette action est irréversible.')) {
+        return;
+      }
+      
+      try {
+        await deleteEtatDesLieux(edlId);
+        showNotification('✅ État des lieux supprimé');
+        await chargerDonnees();
+        await appliquerFiltres();
+      } catch (err) {
+        console.error('Erreur suppression:', err);
+        showNotification('Erreur lors de la suppression', 'error');
+      }
+    };
+    
+    window.agrandirPhoto = function(data) {
+      const modal = document.createElement('div');
+      modal.className = 'modal active';
+      modal.onclick = () => modal.remove();
+      modal.innerHTML = `
+        <div style="max-width: 90%; max-height: 90%; position: relative;">
+          <img src="${data}" style="max-width: 100%; max-height: 90vh; border-radius: 8px;" />
+          <button class="modal-close" style="position: absolute; top: 10px; right: 10px;">×</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    };
+    
+    window.imprimerEDL = function() {
+      const modal = document.querySelector('.modal-content');
+      const scrollY = window.scrollY;
+      
+      if (modal) {
+        modal.style.maxHeight = 'none';
+        modal.style.overflow = 'visible';
+      }
+      
+      window.print();
+      
+      setTimeout(() => {
+        if (modal) {
+          modal.style.maxHeight = '95vh';
+          modal.style.overflow = 'auto';
+        }
+        window.scrollTo(0, scrollY);
+      }, 100);
+    };
+  </script>
 </body>
+
 </html>
+
 
 
 
