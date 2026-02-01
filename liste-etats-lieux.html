@@ -7,6 +7,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Liste des États des Lieux</title>
   <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css" />
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="manifest" href="manifest.json">
 
   <style>
     body { 
@@ -246,19 +248,14 @@
       background: #e74c3c;
       color: white;
       border: none;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      font-size: 1.5rem;
       cursor: pointer;
-      padding: 0;
-      line-height: 1;
-    }
-    
-    .modal-actions {
+      font-size: 1.5rem;
       display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
     }
     
     .detail-section {
@@ -270,9 +267,8 @@
     }
     
     .detail-section h3 {
-      margin-top: 0;
+      color: #667eea;
       margin-bottom: 1rem;
-      color: #2c3e50;
       font-size: 1.2rem;
     }
     
@@ -285,12 +281,11 @@
     }
     
     .piece-detail-header {
-      font-size: 1.1rem;
       font-weight: 700;
-      color: #667eea;
+      color: #2c3e50;
       margin-bottom: 0.8rem;
       padding-bottom: 0.5rem;
-      border-bottom: 2px solid #e0e0e0;
+      border-bottom: 1px solid #e0e0e0;
     }
     
     .element-detail {
@@ -298,13 +293,14 @@
       padding: 0.8rem;
       border-radius: 4px;
       margin-bottom: 0.5rem;
-      border-left: 3px solid #3498db;
+      border-left: 3px solid #667eea;
+      font-size: 0.9rem;
     }
     
     .etat-badge {
-      padding: 0.3rem 0.8rem;
-      border-radius: 12px;
-      font-size: 0.8rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 15px;
+      font-size: 0.75rem;
       font-weight: 600;
       margin-left: 0.5rem;
     }
@@ -323,80 +319,136 @@
       background: #f8d7da;
       color: #721c24;
     }
-    
-    .notification {
+
+    #scrollTopBtn {
       position: fixed;
-      top: 20px;
+      bottom: 20px;
       right: 20px;
-      background: #27ae60;
+      width: 48px;
+      height: 48px;
+      background: #667eea;
       color: white;
-      padding: 1rem 1.5rem;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      z-index: 2000;
-      animation: slideIn 0.3s ease-out;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      cursor: pointer;
     }
     
-    .notification.error {
-      background: #e74c3c;
+    #scrollTopBtn.visible {
+      opacity: 1;
+      visibility: visible;
     }
-    
-    @keyframes slideIn {
-      from {
-        transform: translateX(400px);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
+
+    #scrollTopBtn:hover {
+      transform: scale(1.2);
+      background: #764ba2;
     }
     
     @media print {
       body {
-        background: white;
-        padding: 0;
+        background: white !important;
       }
       
-      .container {
-        box-shadow: none;
-        padding: 0;
-      }
-      
-      .back-link, .filters, .edl-actions, .modal-actions, .modal-close {
+      .back-link, .filters, .edl-actions, .modal-close, 
+      .btn-secondary, .btn-primary, .no-print {
         display: none !important;
       }
       
       .modal {
-        position: static;
-        background: white;
+        display: block !important;
+        position: static !important;
+        background: white !important;
       }
       
       .modal-content {
-        max-width: 100%;
-        max-height: none;
-        padding: 0;
-        margin: 0;
+        max-width: 100% !important;
+        max-height: none !important;
+        overflow: visible !important;
+        padding: 1rem !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+      }
+      
+      .modal-header {
+        border-bottom: 2px solid #000 !important;
+        page-break-after: avoid !important;
+      }
+      
+      .detail-section {
+        page-break-inside: avoid !important;
+        margin-bottom: 1rem !important;
+      }
+      
+      .piece-detail {
+        page-break-inside: avoid !important;
+      }
+      
+      .element-detail {
+        page-break-inside: avoid !important;
+      }
+      
+      img {
+        max-width: 150px !important;
+        page-break-inside: avoid !important;
+      }
+      
+      * {
+        overflow: visible !important;
+      }
+      
+      @page {
+        margin: 1.5cm;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .filter-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .edl-info {
+        grid-template-columns: 1fr;
+      }
+      
+      .edl-actions {
+        flex-direction: column;
+      }
+      
+      button {
+        width: 100%;
       }
     }
   </style>
 </head>
-
 <body>
-  <a href="index.html" class="back-link">← Retour au menu</a>
+  <a href="/gestion-locative/menu.html" class="back-link">← Retour au menu</a>
   
   <div class="container">
     <div class="header">
       <h1>📋 Liste des États des Lieux</h1>
-      <p style="color: #7f8c8d; margin: 0;">Gérez et consultez tous vos états des lieux</p>
+      <p style="color: #7f8c8d;">Consultez et gérez tous vos états des lieux</p>
+    </div>
+    
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <button class="btn-success" onclick="window.location.href='/pages/etat-lieux.html'">
+        ➕ Créer un nouvel état des lieux
+      </button>
     </div>
     
     <div class="filters">
-      <h3 style="margin-top: 0; margin-bottom: 1rem; color: #2c3e50;">🔍 Filtres</h3>
+      <h3 style="margin-bottom: 1rem;">🔍 Filtres</h3>
       <div class="filter-grid">
         <div>
           <label>Type</label>
-          <select id="filtreType">
+          <select id="filterType" onchange="appliquerFiltres()">
             <option value="">Tous</option>
             <option value="entree">Entrée</option>
             <option value="sortie">Sortie</option>
@@ -404,15 +456,13 @@
         </div>
         <div>
           <label>Bien</label>
-          <select id="filtreBien">
+          <select id="filterBien" onchange="appliquerFiltres()">
             <option value="">Tous les biens</option>
           </select>
         </div>
         <div>
-          <label>Année</label>
-          <select id="filtreAnnee">
-            <option value="">Toutes</option>
-          </select>
+          <label>Recherche</label>
+          <input type="text" id="filterRecherche" placeholder="Rechercher..." oninput="appliquerFiltres()" />
         </div>
       </div>
     </div>
@@ -420,225 +470,198 @@
     <div id="listeEDL"></div>
   </div>
   
+  <!-- Modal Détails -->
   <div id="modalDetails" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 id="modalTitre" style="margin: 0;">État des Lieux</h2>
+        <h2 id="modalTitre">Détails de l'État des Lieux</h2>
         <button class="modal-close" onclick="fermerModal()">×</button>
       </div>
-      
-      <div class="modal-actions">
-        <button class="btn-info" onclick="imprimerEDL()">🖨️ Imprimer</button>
-        <button class="btn-success" onclick="exporterWord()">📄 Exporter Word</button>
-      </div>
-      
       <div id="modalContenu"></div>
+      <div style="text-align: center; margin-top: 2rem;" class="no-print">
+        <button class="btn-secondary" onclick="fermerModal()">Fermer</button>
+        <button class="btn-primary" onclick="imprimerEDL()">🖨️ Imprimer</button>
+      </div>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.min.js"></script>
-  <script>
+  <a href="#" id="scrollTopBtn" title="Retour en haut">↑</a>
+
+  <script type="module">
+    import { getEtatsDesLieux, deleteEtatDesLieux, initDB } from './js/db.js';
+    import { getBiens, getProprietaires, getLocataires } from './js/db.js';
+    import { showNotification } from './js/app.js';
+    
     let etatsDesLieux = [];
     let biens = [];
     let proprietaires = [];
     let locataires = [];
-    let currentEdlId = null;
     
-    // Simulation du localStorage pour les tests
-    const storage = {
-      getItem: (key) => localStorage.getItem(key),
-      setItem: (key, value) => localStorage.setItem(key, value)
-    };
+    // Gestion du scroll
+    window.addEventListener('scroll', function() {
+      const scrollBtn = document.getElementById('scrollTopBtn');
+      if (window.pageYOffset > 300) {
+        scrollBtn.classList.add('visible');
+      } else {
+        scrollBtn.classList.remove('visible');
+      }
+    });
+
+    document.getElementById("scrollTopBtn").addEventListener("click", function(e) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
     
-    async function getAllBiens() {
-      const data = storage.getItem('biens');
-      return data ? JSON.parse(data) : [];
-    }
-    
-    async function getAllProprietaires() {
-      const data = storage.getItem('proprietaires');
-      return data ? JSON.parse(data) : [];
-    }
-    
-    async function getAllLocataires() {
-      const data = storage.getItem('locataires');
-      return data ? JSON.parse(data) : [];
-    }
-    
-    async function getAllEtatsDesLieux() {
-      const data = storage.getItem('etatsDesLieux');
-      return data ? JSON.parse(data) : [];
-    }
-    
-    async function deleteEtatDesLieux(id) {
-      const edls = await getAllEtatsDesLieux();
-      const filtered = edls.filter(e => e.id !== id);
-      storage.setItem('etatsDesLieux', JSON.stringify(filtered));
-    }
-    
-    function showNotification(message, type = 'success') {
-      const notif = document.createElement('div');
-      notif.className = `notification ${type}`;
-      notif.textContent = message;
-      document.body.appendChild(notif);
-      setTimeout(() => notif.remove(), 3000);
-    }
+    document.addEventListener('DOMContentLoaded', async function() {
+      await initDB();
+      await chargerDonnees();
+      await chargerFilterBiens();
+      await afficherListe();
+    });
     
     async function chargerDonnees() {
       try {
-        etatsDesLieux = await getAllEtatsDesLieux();
-        biens = await getAllBiens();
-        proprietaires = await getAllProprietaires();
-        locataires = await getAllLocataires();
-        
-        console.log('Données chargées:', {
-          etatsDesLieux: etatsDesLieux.length,
-          biens: biens.length,
-          proprietaires: proprietaires.length,
-          locataires: locataires.length
+        etatsDesLieux = await getEtatsDesLieux();
+        biens = await getBiens();
+        proprietaires = await getProprietaires();
+        locataires = await getLocataires();
+      } catch (err) {
+        console.error('Erreur chargement données:', err);
+        showNotification('Erreur lors du chargement', 'error');
+      }
+    }
+    
+    async function chargerFilterBiens() {
+      const select = document.getElementById('filterBien');
+      biens.forEach(b => {
+        const option = document.createElement('option');
+        option.value = b.id;
+        option.textContent = `${b.reference || 'Sans ref'} - ${b.adresse}`;
+        select.appendChild(option);
+      });
+    }
+    
+    window.appliquerFiltres = async function() {
+      const filterType = document.getElementById('filterType').value;
+      const filterBien = document.getElementById('filterBien').value;
+      const filterRecherche = document.getElementById('filterRecherche').value.toLowerCase();
+      
+      let edlFiltres = [...etatsDesLieux];
+      
+      if (filterType) {
+        edlFiltres = edlFiltres.filter(e => e.type === filterType);
+      }
+      
+      if (filterBien) {
+        edlFiltres = edlFiltres.filter(e => e.bienId === filterBien);
+      }
+      
+      if (filterRecherche) {
+        edlFiltres = edlFiltres.filter(e => {
+          const bien = biens.find(b => b.id === e.bienId);
+          const bienText = bien ? `${bien.reference} ${bien.adresse} ${bien.ville}`.toLowerCase() : '';
+          return bienText.includes(filterRecherche);
         });
-        
-        // Vérifier si des données existent
-        if (etatsDesLieux.length === 0) {
-          console.warn('⚠️ Aucun état des lieux trouvé dans le localStorage');
-        }
-        if (biens.length === 0) {
-          console.warn('⚠️ Aucun bien trouvé dans le localStorage');
-        }
-        
-        // Remplir les filtres
-        const filtreBien = document.getElementById('filtreBien');
-        if (filtreBien) {
-          filtreBien.innerHTML = '<option value="">Tous les biens</option>';
-          biens.forEach(bien => {
-            const option = document.createElement('option');
-            option.value = bien.id;
-            option.textContent = `${bien.reference || 'Sans ref'} - ${bien.adresse}`;
-            filtreBien.appendChild(option);
-          });
-        }
-        
-        const filtreAnnee = document.getElementById('filtreAnnee');
-        if (filtreAnnee) {
-          const annees = [...new Set(etatsDesLieux
-            .filter(e => e.dateCreation)
-            .map(e => new Date(e.dateCreation).getFullYear()))]
-            .sort((a,b) => b-a);
-          filtreAnnee.innerHTML = '<option value="">Toutes</option>';
-          annees.forEach(annee => {
-            const option = document.createElement('option');
-            option.value = annee;
-            option.textContent = annee;
-            filtreAnnee.appendChild(option);
-          });
-        }
-      } catch (error) {
-        console.error('❌ Erreur lors du chargement des données:', error);
-        showNotification('Erreur lors du chargement des données', 'error');
       }
-    }
+      
+      afficherListe(edlFiltres);
+    };
     
-    function appliquerFiltres() {
-      const filtreType = document.getElementById('filtreType').value;
-      const filtreBien = document.getElementById('filtreBien').value;
-      const filtreAnnee = document.getElementById('filtreAnnee').value;
-      
-      let edlsFiltres = [...etatsDesLieux];
-      
-      if (filtreType) {
-        edlsFiltres = edlsFiltres.filter(e => e.type === filtreType);
-      }
-      
-      if (filtreBien) {
-        edlsFiltres = edlsFiltres.filter(e => e.bienId === filtreBien);
-      }
-      
-      if (filtreAnnee) {
-        edlsFiltres = edlsFiltres.filter(e => new Date(e.dateCreation).getFullYear() === parseInt(filtreAnnee));
-      }
-      
-      afficherListe(edlsFiltres);
-    }
-    
-    function afficherListe(edls) {
+    async function afficherListe(edlAfficher = etatsDesLieux) {
       const container = document.getElementById('listeEDL');
       
-      if (!edls || edls.length === 0) {
+      if (edlAfficher.length === 0) {
         container.innerHTML = `
           <div class="empty-state">
             <div class="empty-state-icon">📋</div>
-            <h3>Aucun état des lieux</h3>
-            <p>Aucun état des lieux ne correspond à vos critères.</p>
+            <h3>Aucun état des lieux enregistré</h3>
+            <p>Créez votre premier état des lieux en cliquant sur le bouton ci-dessus</p>
           </div>
         `;
         return;
       }
       
-      // Trier par date (plus récent en premier)
-      const edlsTriees = [...edls].sort((a, b) => {
-        const dateA = a.dateCreation ? new Date(a.dateCreation) : new Date(0);
-        const dateB = b.dateCreation ? new Date(b.dateCreation) : new Date(0);
-        return dateB - dateA;
-      });
+      // Trier par date décroissante
+      edlAfficher.sort((a, b) => new Date(b.date) - new Date(a.date));
       
-      container.innerHTML = edlsTriees.map(edl => {
+      container.innerHTML = edlAfficher.map(edl => {
         const bien = biens.find(b => b.id === edl.bienId);
-        const proprios = (edl.proprietaireIds && Array.isArray(edl.proprietaireIds)) ? 
-          edl.proprietaireIds.map(id => proprietaires.find(p => p.id === id)).filter(Boolean) : [];
-        const locataire = edl.locataireId ? locataires.find(l => l.id === edl.locataireId) : null;
+        const locataire = locataires.find(l => l.bienId === edl.bienId);
         
-        const nbPieces = (edl.pieces && Array.isArray(edl.pieces)) ? edl.pieces.length : 0;
-        const nbElements = (edl.pieces && Array.isArray(edl.pieces)) ? 
-          edl.pieces.reduce((sum, p) => sum + ((p.elements && Array.isArray(p.elements)) ? p.elements.length : 0), 0) : 0;
-        const nbPhotos = ((edl.photosGenerales && Array.isArray(edl.photosGenerales)) ? edl.photosGenerales.length : 0) + 
-                         ((edl.pieces && Array.isArray(edl.pieces)) ? 
-                           edl.pieces.reduce((sum, p) => 
-                             sum + ((p.elements && Array.isArray(p.elements)) ? 
-                               p.elements.reduce((s, e) => s + ((e.photos && Array.isArray(e.photos)) ? e.photos.length : 0), 0) : 0), 0) : 0);
+        const nbPieces = edl.pieces ? edl.pieces.length : 0;
+        const nbElements = edl.pieces ? edl.pieces.reduce((acc, p) => acc + (p.elements ? p.elements.length : 0), 0) : 0;
+        const nbCles = edl.cles ? edl.cles.length : 0;
+        const nbEquipements = edl.equipements ? edl.equipements.length : 0;
         
-        const dateEDL = edl.dateEDL ? new Date(edl.dateEDL).toLocaleDateString('fr-FR') : 'Date inconnue';
-        const dateCreation = edl.dateCreation ? new Date(edl.dateCreation).toLocaleDateString('fr-FR') : 'Date inconnue';
+        // Compter les photos
+        let nbPhotos = edl.photosGenerales ? edl.photosGenerales.length : 0;
+        if (edl.pieces) {
+          edl.pieces.forEach(p => {
+            if (p.elements) {
+              p.elements.forEach(e => {
+                if (e.photos) nbPhotos += e.photos.length;
+              });
+            }
+          });
+        }
         
         return `
           <div class="edl-card">
             <div class="edl-header">
-              <div class="edl-titre">${bien ? bien.reference || 'Sans référence' : 'Bien non trouvé'}</div>
-              <div class="edl-type type-${edl.type}">
-                ${edl.type === 'entree' ? '🔑 Entrée' : '🚪 Sortie'}
+              <div>
+                <div class="edl-titre">
+                  ${bien ? `${bien.reference || 'Sans ref'} - ${bien.adresse}` : 'Bien inconnu'}
+                </div>
+                <div style="color: #7f8c8d; margin-top: 0.3rem;">
+                  📅 ${new Date(edl.date).toLocaleDateString('fr-FR')}
+                  ${edl.heureDebut ? ` • 🕐 ${edl.heureDebut}` : ''}
+                  ${edl.heureFin ? ` - ${edl.heureFin}` : ''}
+                </div>
               </div>
+              <span class="edl-type type-${edl.type}">
+                ${edl.type === 'entree' ? '📥 Entrée' : '📤 Sortie'}
+              </span>
             </div>
             
             <div class="edl-info">
-              <div class="info-item">
-                <span class="info-label">📅 Date :</span> ${dateEDL}
-              </div>
               ${bien ? `
                 <div class="info-item">
-                  <span class="info-label">🏠 Adresse :</span> ${bien.adresse}, ${bien.codePostal} ${bien.ville}
+                  <span class="info-label">Bien :</span><br>
+                  ${bien.typeBien || 'Bien'} • ${bien.surface || '?'} m² • ${bien.ville}
                 </div>
               ` : ''}
+              
               ${locataire ? `
                 <div class="info-item">
-                  <span class="info-label">👤 Locataire :</span> ${locataire.nom} ${locataire.prenom}
+                  <span class="info-label">Locataire :</span><br>
+                  ${locataire.civilite} ${locataire.nom} ${locataire.prenom}
                 </div>
               ` : ''}
-              <div class="info-item">
-                <span class="info-label">📝 Créé le :</span> ${dateCreation}
-              </div>
             </div>
             
             <div class="edl-stats">
               <span class="stat-badge">🏠 ${nbPieces} pièce(s)</span>
-              <span class="stat-badge">📦 ${nbElements} élément(s)</span>
+              <span class="stat-badge">📝 ${nbElements} élément(s)</span>
+              <span class="stat-badge">🔑 ${nbCles} clé(s)</span>
+              <span class="stat-badge">🔧 ${nbEquipements} équipement(s)</span>
               <span class="stat-badge">📸 ${nbPhotos} photo(s)</span>
-              <span class="stat-badge">${edl.signatureBailleur && edl.signatureLocataire ? '✅ Signé' : '⏳ Non signé'}</span>
+              ${edl.signatureBailleur && edl.signatureLocataire 
+  ? '<span class="stat-badge" style="background: #d4edda; color: #155724;">✅ Signé</span>'
+  : '<span class="stat-badge" style="background: #fff3cd; color: #856404;">⚠️ Non signé</span>'
+}
+
             </div>
             
             <div class="edl-actions">
-              <button class="btn-primary" onclick="afficherDetails('${edl.id}')">👁️ Voir détails</button>
-              <button class="btn-info" onclick="exporterPDF('${edl.id}')">📄 PDF</button>
-              <button class="btn-success" onclick="exporterWordFromList('${edl.id}')">📝 Word</button>
-              <button class="btn-danger" onclick="supprimerEDL('${edl.id}')">🗑️ Supprimer</button>
+              <button class="btn-info" onclick="window.afficherDetails('${edl.id}')">
+                👁️ Voir détails
+              </button>
+              <button class="btn-primary" onclick="window.exporterPDF('${edl.id}')">
+                📄 Exporter PDF
+              </button>
+              <button class="btn-danger" onclick="window.supprimerEDL('${edl.id}')">
+                🗑️ Supprimer
+              </button>
             </div>
           </div>
         `;
@@ -646,25 +669,22 @@
     }
     
     window.afficherDetails = function(edlId) {
-      currentEdlId = edlId;
       const edl = etatsDesLieux.find(e => e.id === edlId);
       if (!edl) return;
       
       const bien = biens.find(b => b.id === edl.bienId);
-      const proprios = edl.proprietaireIds ? edl.proprietaireIds.map(id => proprietaires.find(p => p.id === id)).filter(Boolean) : [];
-      const locataire = locataires.find(l => l.id === edl.locataireId);
+      const locataire = locataires.find(l => l.bienId === edl.bienId);
+      const proprios = bien && bien.proprietairesIds ? 
+        bien.proprietairesIds.map(pId => proprietaires.find(p => p.id === pId)).filter(p => p) : [];
       
       let html = `
         <div class="detail-section">
-          <h3>ℹ️ Informations Générales</h3>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+          <h3>📋 Informations Générales</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
             <div>
-              <strong>Type :</strong><br>
-              <span class="edl-type type-${edl.type}">${edl.type === 'entree' ? '🔑 État des lieux d\'Entrée' : '🚪 État des lieux de Sortie'}</span>
-            </div>
-            <div>
-              <strong>Date de l'état des lieux :</strong><br>
-              ${new Date(edl.dateEDL).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              <strong>Type :</strong> ${edl.type === 'entree' ? 'État des lieux d\'entrée' : 'État des lieux de sortie'}<br>
+              <strong>Date :</strong> ${new Date(edl.date).toLocaleDateString('fr-FR')}<br>
+              ${edl.heureDebut ? `<strong>Heure :</strong> ${edl.heureDebut}${edl.heureFin ? ` - ${edl.heureFin}` : ''}<br>` : ''}
             </div>
             ${bien ? `
               <div>
@@ -840,7 +860,6 @@
     
     window.fermerModal = function() {
       document.getElementById('modalDetails').classList.remove('active');
-      currentEdlId = null;
     };
     
     window.exporterPDF = function(edlId) {
@@ -914,882 +933,11 @@
         window.scrollTo(0, scrollY);
       }, 100);
     };
-    
-    // Fonction d'export Word depuis la liste
-    window.exporterWordFromList = async function(edlId) {
-      try {
-        showNotification('⏳ Génération du document Word...', 'info');
-        await genererDocumentWord(edlId);
-      } catch (err) {
-        console.error('Erreur export Word:', err);
-        showNotification('❌ Erreur lors de l\'export Word', 'error');
-      }
-    };
-    
-    // Fonction d'export Word depuis le modal
-    window.exporterWord = async function() {
-      if (!currentEdlId) {
-        showNotification('❌ Aucun état des lieux sélectionné', 'error');
-        return;
-      }
-      
-      try {
-        showNotification('⏳ Génération du document Word...', 'info');
-        await genererDocumentWord(currentEdlId);
-      } catch (err) {
-        console.error('Erreur export Word:', err);
-        showNotification('❌ Erreur lors de l\'export Word', 'error');
-      }
-    };
-    
-    // Fonction principale de génération du document Word
-    async function genererDocumentWord(edlId) {
-      const edl = etatsDesLieux.find(e => e.id === edlId);
-      if (!edl) {
-        showNotification('❌ État des lieux non trouvé', 'error');
-        return;
-      }
-      
-      const bien = biens.find(b => b.id === edl.bienId);
-      const proprios = edl.proprietaireIds ? edl.proprietaireIds.map(id => proprietaires.find(p => p.id === id)).filter(Boolean) : [];
-      const locataire = locataires.find(l => l.id === edl.locataireId);
-      
-      const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, 
-              AlignmentType, HeadingLevel, BorderStyle, WidthType, ShadingType,
-              ImageRun, PageBreak } = docx;
-      
-      // Styles de bordures
-      const border = {
-        style: BorderStyle.SINGLE,
-        size: 1,
-        color: "CCCCCC"
-      };
-      const borders = {
-        top: border,
-        bottom: border,
-        left: border,
-        right: border
-      };
-      
-      // Contenu du document
-      const children = [];
-      
-      // En-tête
-      children.push(
-        new Paragraph({
-          children: [new TextRun({
-            text: edl.type === 'entree' ? "ÉTAT DES LIEUX D'ENTRÉE" : "ÉTAT DES LIEUX DE SORTIE",
-            bold: true,
-            size: 32
-          })],
-          heading: HeadingLevel.HEADING_1,
-          alignment: AlignmentType.CENTER,
-          spacing: { after: 400 }
-        })
-      );
-      
-      // Informations générales
-      children.push(
-        new Paragraph({
-          children: [new TextRun({ text: "Informations Générales", bold: true, size: 28 })],
-          heading: HeadingLevel.HEADING_2,
-          spacing: { before: 300, after: 200 }
-        })
-      );
-      
-      const infosRows = [];
-      
-      // Date
-      infosRows.push(
-        new TableRow({
-          children: [
-            new TableCell({
-              borders,
-              width: { size: 4000, type: WidthType.DXA },
-              shading: { fill: "E8F4F8", type: ShadingType.CLEAR },
-              margins: { top: 100, bottom: 100, left: 150, right: 150 },
-              children: [new Paragraph({ children: [new TextRun({ text: "Date de l'état des lieux", bold: true })] })]
-            }),
-            new TableCell({
-              borders,
-              width: { size: 5360, type: WidthType.DXA },
-              margins: { top: 100, bottom: 100, left: 150, right: 150 },
-              children: [new Paragraph({ 
-                children: [new TextRun(new Date(edl.dateEDL).toLocaleDateString('fr-FR', { 
-                  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-                }))] 
-              })]
-            })
-          ]
-        })
-      );
-      
-      // Bien
-      if (bien) {
-        infosRows.push(
-          new TableRow({
-            children: [
-              new TableCell({
-                borders,
-                width: { size: 4000, type: WidthType.DXA },
-                shading: { fill: "E8F4F8", type: ShadingType.CLEAR },
-                margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                children: [new Paragraph({ children: [new TextRun({ text: "Bien concerné", bold: true })] })]
-              }),
-              new TableCell({
-                borders,
-                width: { size: 5360, type: WidthType.DXA },
-                margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                children: [
-                  new Paragraph({ children: [new TextRun({ text: `${bien.reference || 'Sans référence'} - ${bien.typeBien || 'Bien'}`, bold: true })] }),
-                  new Paragraph({ children: [new TextRun(`${bien.adresse}, ${bien.codePostal} ${bien.ville}`)] }),
-                  new Paragraph({ children: [new TextRun(`Surface: ${bien.surface || '?'} m² • ${bien.nbPieces || '?'} pièce(s)`)] })
-                ]
-              })
-            ]
-          })
-        );
-      }
-      
-      children.push(
-        new Table({
-          width: { size: 100, type: WidthType.PERCENTAGE },
-          columnWidths: [4000, 5360],
-          rows: infosRows
-        })
-      );
-      
-      // Présents
-      children.push(
-        new Paragraph({
-          children: [new TextRun({ text: "Personnes Présentes", bold: true, size: 28 })],
-          heading: HeadingLevel.HEADING_2,
-          spacing: { before: 400, after: 200 }
-        })
-      );
-      
-      const presentsRows = [];
-      
-      // Propriétaires
-      if (proprios.length > 0) {
-        presentsRows.push(
-          new TableRow({
-            children: [
-              new TableCell({
-                borders,
-                width: { size: 4000, type: WidthType.DXA },
-                shading: { fill: "E8F4F8", type: ShadingType.CLEAR },
-                margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                children: [new Paragraph({ children: [new TextRun({ text: "Propriétaire(s)", bold: true })] })]
-              }),
-              new TableCell({
-                borders,
-                width: { size: 5360, type: WidthType.DXA },
-                margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                children: proprios.map(p => 
-                  new Paragraph({ 
-                    children: [new TextRun(`${p.civilite} ${p.nom} ${p.prenom} - ${p.telephone}`)] 
-                  })
-                )
-              })
-            ]
-          })
-        );
-      }
-      
-      // Locataire
-      if (locataire) {
-        const locataireContent = [
-          new Paragraph({ 
-            children: [new TextRun(`${locataire.civilite} ${locataire.nom} ${locataire.prenom} - ${locataire.telephone}`)] 
-          })
-        ];
-        
-        if (locataire.coLocataires && locataire.coLocataires.length > 0) {
-          locataireContent.push(
-            new Paragraph({ 
-              children: [new TextRun({ text: "Co-locataire(s):", bold: true })],
-              spacing: { before: 100 }
-            })
-          );
-          locataire.coLocataires.forEach(c => {
-            locataireContent.push(
-              new Paragraph({ children: [new TextRun(`${c.civilite} ${c.nom} ${c.prenom}`)] })
-            );
-          });
-        }
-        
-        presentsRows.push(
-          new TableRow({
-            children: [
-              new TableCell({
-                borders,
-                width: { size: 4000, type: WidthType.DXA },
-                shading: { fill: "E8F4F8", type: ShadingType.CLEAR },
-                margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                children: [new Paragraph({ children: [new TextRun({ text: "Locataire", bold: true })] })]
-              }),
-              new TableCell({
-                borders,
-                width: { size: 5360, type: WidthType.DXA },
-                margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                children: locataireContent
-              })
-            ]
-          })
-        );
-      }
-      
-      // Autres présents
-      if (edl.autresPresents) {
-        presentsRows.push(
-          new TableRow({
-            children: [
-              new TableCell({
-                borders,
-                width: { size: 4000, type: WidthType.DXA },
-                shading: { fill: "E8F4F8", type: ShadingType.CLEAR },
-                margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                children: [new Paragraph({ children: [new TextRun({ text: "Autres présents", bold: true })] })]
-              }),
-              new TableCell({
-                borders,
-                width: { size: 5360, type: WidthType.DXA },
-                margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                children: [new Paragraph({ children: [new TextRun(edl.autresPresents)] })]
-              })
-            ]
-          })
-        );
-      }
-      
-      if (presentsRows.length > 0) {
-        children.push(
-          new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            columnWidths: [4000, 5360],
-            rows: presentsRows
-          })
-        );
-      }
-      
-      // Compteurs
-      if (edl.compteurs) {
-        const compteurRows = [];
-        
-        if (edl.compteurs.electricite && edl.compteurs.electricite.numero) {
-          let elecValue = `N° ${edl.compteurs.electricite.numero}`;
-          if (edl.compteurs.electricite.type === 'double') {
-            elecValue += ` • HP: ${edl.compteurs.electricite.indexHP} kWh • HC: ${edl.compteurs.electricite.indexHC} kWh`;
-          } else {
-            elecValue += ` • Index: ${edl.compteurs.electricite.index} kWh`;
-          }
-          
-          compteurRows.push(
-            new TableRow({
-              children: [
-                new TableCell({
-                  borders,
-                  width: { size: 4000, type: WidthType.DXA },
-                  shading: { fill: "E8F4F8", type: ShadingType.CLEAR },
-                  margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                  children: [new Paragraph({ children: [new TextRun({ text: "Électricité", bold: true })] })]
-                }),
-                new TableCell({
-                  borders,
-                  width: { size: 5360, type: WidthType.DXA },
-                  margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                  children: [new Paragraph({ children: [new TextRun(elecValue)] })]
-                })
-              ]
-            })
-          );
-        }
-        
-        if (edl.compteurs.gaz && edl.compteurs.gaz.numero) {
-          compteurRows.push(
-            new TableRow({
-              children: [
-                new TableCell({
-                  borders,
-                  width: { size: 4000, type: WidthType.DXA },
-                  shading: { fill: "E8F4F8", type: ShadingType.CLEAR },
-                  margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                  children: [new Paragraph({ children: [new TextRun({ text: "Gaz", bold: true })] })]
-                }),
-                new TableCell({
-                  borders,
-                  width: { size: 5360, type: WidthType.DXA },
-                  margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                  children: [new Paragraph({ children: [new TextRun(`N° ${edl.compteurs.gaz.numero} • Index: ${edl.compteurs.gaz.index} m³`)] })]
-                })
-              ]
-            })
-          );
-        }
-        
-        if (edl.compteurs.eau && edl.compteurs.eau.numero) {
-          compteurRows.push(
-            new TableRow({
-              children: [
-                new TableCell({
-                  borders,
-                  width: { size: 4000, type: WidthType.DXA },
-                  shading: { fill: "E8F4F8", type: ShadingType.CLEAR },
-                  margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                  children: [new Paragraph({ children: [new TextRun({ text: "Eau froide", bold: true })] })]
-                }),
-                new TableCell({
-                  borders,
-                  width: { size: 5360, type: WidthType.DXA },
-                  margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                  children: [new Paragraph({ children: [new TextRun(`N° ${edl.compteurs.eau.numero} • Index: ${edl.compteurs.eau.index} m³`)] })]
-                })
-              ]
-            })
-          );
-        }
-        
-        if (edl.compteurs.eauChaude && edl.compteurs.eauChaude.numero) {
-          compteurRows.push(
-            new TableRow({
-              children: [
-                new TableCell({
-                  borders,
-                  width: { size: 4000, type: WidthType.DXA },
-                  shading: { fill: "E8F4F8", type: ShadingType.CLEAR },
-                  margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                  children: [new Paragraph({ children: [new TextRun({ text: "Eau chaude", bold: true })] })]
-                }),
-                new TableCell({
-                  borders,
-                  width: { size: 5360, type: WidthType.DXA },
-                  margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                  children: [new Paragraph({ children: [new TextRun(`N° ${edl.compteurs.eauChaude.numero} • Index: ${edl.compteurs.eauChaude.index} m³`)] })]
-                })
-              ]
-            })
-          );
-        }
-        
-        if (compteurRows.length > 0) {
-          children.push(
-            new Paragraph({
-              children: [new TextRun({ text: "Relevés de Compteurs", bold: true, size: 28 })],
-              heading: HeadingLevel.HEADING_2,
-              spacing: { before: 400, after: 200 }
-            }),
-            new Table({
-              width: { size: 100, type: WidthType.PERCENTAGE },
-              columnWidths: [4000, 5360],
-              rows: compteurRows
-            })
-          );
-        }
-      }
-      
-      // Pièces et éléments
-      if (edl.pieces && edl.pieces.length > 0) {
-        children.push(
-          new Paragraph({
-            children: [new TextRun({ text: "Pièces et Éléments", bold: true, size: 28 })],
-            heading: HeadingLevel.HEADING_2,
-            spacing: { before: 400, after: 200 }
-          })
-        );
-        
-        edl.pieces.forEach((piece, index) => {
-          const nomPiece = piece.nom || piece.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-          
-          if (index > 0) {
-            children.push(new Paragraph({ children: [new PageBreak()] }));
-          }
-          
-          children.push(
-            new Paragraph({
-              children: [new TextRun({ 
-                text: `${nomPiece} ${piece.surface ? `(${piece.surface} m²)` : ''}`,
-                bold: true,
-                size: 26
-              })],
-              spacing: { before: 300, after: 200 }
-            })
-          );
-          
-          if (piece.elements && piece.elements.length > 0) {
-            const elementRows = [
-              new TableRow({
-                children: [
-                  new TableCell({
-                    borders,
-                    width: { size: 3500, type: WidthType.DXA },
-                    shading: { fill: "4A90E2", type: ShadingType.CLEAR },
-                    margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                    children: [new Paragraph({ 
-                      children: [new TextRun({ text: "Élément", bold: true, color: "FFFFFF" })] 
-                    })]
-                  }),
-                  new TableCell({
-                    borders,
-                    width: { size: 1500, type: WidthType.DXA },
-                    shading: { fill: "4A90E2", type: ShadingType.CLEAR },
-                    margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                    children: [new Paragraph({ 
-                      children: [new TextRun({ text: "État", bold: true, color: "FFFFFF" })] 
-                    })]
-                  }),
-                  new TableCell({
-                    borders,
-                    width: { size: 4360, type: WidthType.DXA },
-                    shading: { fill: "4A90E2", type: ShadingType.CLEAR },
-                    margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                    children: [new Paragraph({ 
-                      children: [new TextRun({ text: "Observations", bold: true, color: "FFFFFF" })] 
-                    })]
-                  })
-                ]
-              })
-            ];
-            
-            piece.elements.forEach(elem => {
-              const elementName = elem.type.replace(/_/g, ' ');
-              const elementQte = elem.quantite > 1 ? ` (x${elem.quantite})` : '';
-              const etatText = elem.etat === 'bon' ? 'Bon' : elem.etat === 'moyen' ? 'Moyen' : 'Mauvais';
-              const etatColor = elem.etat === 'bon' ? 'D4EDDA' : elem.etat === 'moyen' ? 'FFF3CD' : 'F8D7DA';
-              
-              const obsContent = [];
-              if (elem.description) {
-                obsContent.push(new Paragraph({ children: [new TextRun(elem.description)] }));
-              }
-              if (elem.observations) {
-                obsContent.push(new Paragraph({ 
-                  children: [new TextRun({ text: `Obs: ${elem.observations}`, italics: true })],
-                  spacing: { before: 50 }
-                }));
-              }
-              if (obsContent.length === 0) {
-                obsContent.push(new Paragraph({ children: [new TextRun('-')] }));
-              }
-              
-              elementRows.push(
-                new TableRow({
-                  children: [
-                    new TableCell({
-                      borders,
-                      width: { size: 3500, type: WidthType.DXA },
-                      margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                      children: [new Paragraph({ 
-                        children: [new TextRun({ text: elementName + elementQte, bold: true })] 
-                      })]
-                    }),
-                    new TableCell({
-                      borders,
-                      width: { size: 1500, type: WidthType.DXA },
-                      shading: { fill: etatColor, type: ShadingType.CLEAR },
-                      margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                      children: [new Paragraph({ 
-                        children: [new TextRun({ text: etatText, bold: true })] 
-                      })]
-                    }),
-                    new TableCell({
-                      borders,
-                      width: { size: 4360, type: WidthType.DXA },
-                      margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                      children: obsContent
-                    })
-                  ]
-                })
-              );
-            });
-            
-            children.push(
-              new Table({
-                width: { size: 100, type: WidthType.PERCENTAGE },
-                columnWidths: [3500, 1500, 4360],
-                rows: elementRows
-              })
-            );
-          } else {
-            children.push(
-              new Paragraph({ 
-                children: [new TextRun({ text: "Aucun élément renseigné", italics: true })],
-                spacing: { after: 200 }
-              })
-            );
-          }
-        });
-      }
-      
-      // Nouvelle page pour clés et équipements
-      children.push(new Paragraph({ children: [new PageBreak()] }));
-      
-      // Clés
-      if (edl.cles && edl.cles.length > 0) {
-        children.push(
-          new Paragraph({
-            children: [new TextRun({ text: "Clés et Accès", bold: true, size: 28 })],
-            heading: HeadingLevel.HEADING_2,
-            spacing: { before: 300, after: 200 }
-          })
-        );
-        
-        const cleRows = [
-          new TableRow({
-            children: [
-              new TableCell({
-                borders,
-                width: { size: 3000, type: WidthType.DXA },
-                shading: { fill: "4A90E2", type: ShadingType.CLEAR },
-                margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                children: [new Paragraph({ 
-                  children: [new TextRun({ text: "Type", bold: true, color: "FFFFFF" })] 
-                })]
-              }),
-              new TableCell({
-                borders,
-                width: { size: 1500, type: WidthType.DXA },
-                shading: { fill: "4A90E2", type: ShadingType.CLEAR },
-                margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                children: [new Paragraph({ 
-                  children: [new TextRun({ text: "Quantité", bold: true, color: "FFFFFF" })] 
-                })]
-              }),
-              new TableCell({
-                borders,
-                width: { size: 4860, type: WidthType.DXA },
-                shading: { fill: "4A90E2", type: ShadingType.CLEAR },
-                margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                children: [new Paragraph({ 
-                  children: [new TextRun({ text: "Description", bold: true, color: "FFFFFF" })] 
-                })]
-              })
-            ]
-          })
-        ];
-        
-        edl.cles.forEach(cle => {
-          const descContent = [];
-          if (cle.description) descContent.push(cle.description);
-          if (cle.numero) descContent.push(`N° ${cle.numero}`);
-          
-          cleRows.push(
-            new TableRow({
-              children: [
-                new TableCell({
-                  borders,
-                  width: { size: 3000, type: WidthType.DXA },
-                  margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                  children: [new Paragraph({ children: [new TextRun({ text: cle.type, bold: true })] })]
-                }),
-                new TableCell({
-                  borders,
-                  width: { size: 1500, type: WidthType.DXA },
-                  margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                  children: [new Paragraph({ 
-                    children: [new TextRun(cle.quantite.toString())],
-                    alignment: AlignmentType.CENTER
-                  })]
-                }),
-                new TableCell({
-                  borders,
-                  width: { size: 4860, type: WidthType.DXA },
-                  margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                  children: [new Paragraph({ 
-                    children: [new TextRun(descContent.join(' - ') || '-')] 
-                  })]
-                })
-              ]
-            })
-          );
-        });
-        
-        children.push(
-          new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            columnWidths: [3000, 1500, 4860],
-            rows: cleRows
-          })
-        );
-      }
-      
-      // Équipements
-      if (edl.equipements && edl.equipements.length > 0) {
-        children.push(
-          new Paragraph({
-            children: [new TextRun({ text: "Équipements", bold: true, size: 28 })],
-            heading: HeadingLevel.HEADING_2,
-            spacing: { before: 400, after: 200 }
-          })
-        );
-        
-        const equipRows = [
-          new TableRow({
-            children: [
-              new TableCell({
-                borders,
-                width: { size: 3000, type: WidthType.DXA },
-                shading: { fill: "4A90E2", type: ShadingType.CLEAR },
-                margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                children: [new Paragraph({ 
-                  children: [new TextRun({ text: "Équipement", bold: true, color: "FFFFFF" })] 
-                })]
-              }),
-              new TableCell({
-                borders,
-                width: { size: 1500, type: WidthType.DXA },
-                shading: { fill: "4A90E2", type: ShadingType.CLEAR },
-                margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                children: [new Paragraph({ 
-                  children: [new TextRun({ text: "État", bold: true, color: "FFFFFF" })] 
-                })]
-              }),
-              new TableCell({
-                borders,
-                width: { size: 4860, type: WidthType.DXA },
-                shading: { fill: "4A90E2", type: ShadingType.CLEAR },
-                margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                children: [new Paragraph({ 
-                  children: [new TextRun({ text: "Observations", bold: true, color: "FFFFFF" })] 
-                })]
-              })
-            ]
-          })
-        ];
-        
-        edl.equipements.forEach(equip => {
-          const equipName = equip.nom;
-          const equipDetails = [];
-          if (equip.marque) equipDetails.push(equip.marque);
-          if (equip.modele) equipDetails.push(equip.modele);
-          const equipFullName = equipDetails.length > 0 ? `${equipName} (${equipDetails.join(' ')})` : equipName;
-          
-          const etatText = equip.etat === 'bon' ? 'Bon' : equip.etat === 'moyen' ? 'Moyen' : 'Mauvais';
-          const etatColor = equip.etat === 'bon' ? 'D4EDDA' : equip.etat === 'moyen' ? 'FFF3CD' : 'F8D7DA';
-          
-          equipRows.push(
-            new TableRow({
-              children: [
-                new TableCell({
-                  borders,
-                  width: { size: 3000, type: WidthType.DXA },
-                  margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                  children: [new Paragraph({ children: [new TextRun({ text: equipFullName, bold: true })] })]
-                }),
-                new TableCell({
-                  borders,
-                  width: { size: 1500, type: WidthType.DXA },
-                  shading: { fill: etatColor, type: ShadingType.CLEAR },
-                  margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                  children: [new Paragraph({ 
-                    children: [new TextRun({ text: etatText, bold: true })],
-                    alignment: AlignmentType.CENTER
-                  })]
-                }),
-                new TableCell({
-                  borders,
-                  width: { size: 4860, type: WidthType.DXA },
-                  margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                  children: [new Paragraph({ 
-                    children: [new TextRun(equip.observations || '-')] 
-                  })]
-                })
-              ]
-            })
-          );
-        });
-        
-        children.push(
-          new Table({
-            width: { size: 100, type: WidthType.PERCENTAGE },
-            columnWidths: [3000, 1500, 4860],
-            rows: equipRows
-          })
-        );
-      }
-      
-      // Observations générales
-      if (edl.observationsGenerales) {
-        children.push(
-          new Paragraph({
-            children: [new TextRun({ text: "Observations Générales", bold: true, size: 28 })],
-            heading: HeadingLevel.HEADING_2,
-            spacing: { before: 400, after: 200 }
-          }),
-          new Paragraph({
-            children: [new TextRun(edl.observationsGenerales)],
-            spacing: { after: 200 }
-          })
-        );
-      }
-      
-      // Signatures
-      children.push(
-        new Paragraph({ children: [new PageBreak()] }),
-        new Paragraph({
-          children: [new TextRun({ text: "Signatures", bold: true, size: 28 })],
-          heading: HeadingLevel.HEADING_2,
-          spacing: { before: 300, after: 300 }
-        })
-      );
-      
-      const signatureRows = [
-        new TableRow({
-          children: [
-            new TableCell({
-              borders,
-              width: { size: 4680, type: WidthType.DXA },
-              margins: { top: 100, bottom: 100, left: 150, right: 150 },
-              children: [
-                new Paragraph({ 
-                  children: [new TextRun({ text: "Bailleur (ou représentant)", bold: true })],
-                  spacing: { after: 800 }
-                }),
-                new Paragraph({ 
-                  children: [new TextRun(edl.signatureBailleur ? "✓ Signé" : "☐ Non signé")],
-                  spacing: { after: 200 }
-                }),
-                new Paragraph({ 
-                  children: [new TextRun("Signature : ")],
-                  spacing: { before: 400 }
-                })
-              ]
-            }),
-            new TableCell({
-              borders,
-              width: { size: 4680, type: WidthType.DXA },
-              margins: { top: 100, bottom: 100, left: 150, right: 150 },
-              children: [
-                new Paragraph({ 
-                  children: [new TextRun({ text: "Locataire", bold: true })],
-                  spacing: { after: 800 }
-                }),
-                new Paragraph({ 
-                  children: [new TextRun(edl.signatureLocataire ? "✓ Signé" : "☐ Non signé")],
-                  spacing: { after: 200 }
-                }),
-                new Paragraph({ 
-                  children: [new TextRun("Signature : ")],
-                  spacing: { before: 400 }
-                })
-              ]
-            })
-          ]
-        })
-      ];
-      
-      children.push(
-        new Table({
-          width: { size: 100, type: WidthType.PERCENTAGE },
-          columnWidths: [4680, 4680],
-          rows: signatureRows
-        })
-      );
-      
-      // Créer le document
-      const doc = new Document({
-        styles: {
-          default: {
-            document: {
-              run: {
-                font: "Arial",
-                size: 22
-              }
-            }
-          },
-          paragraphStyles: [
-            {
-              id: "Heading1",
-              name: "Heading 1",
-              basedOn: "Normal",
-              next: "Normal",
-              quickFormat: true,
-              run: {
-                size: 32,
-                bold: true,
-                font: "Arial",
-                color: "2C3E50"
-              },
-              paragraph: {
-                spacing: { before: 240, after: 240 },
-                outlineLevel: 0
-              }
-            },
-            {
-              id: "Heading2",
-              name: "Heading 2",
-              basedOn: "Normal",
-              next: "Normal",
-              quickFormat: true,
-              run: {
-                size: 28,
-                bold: true,
-                font: "Arial",
-                color: "667EEA"
-              },
-              paragraph: {
-                spacing: { before: 240, after: 180 },
-                outlineLevel: 1
-              }
-            }
-          ]
-        },
-        sections: [{
-          properties: {
-            page: {
-              size: {
-                width: 12240,
-                height: 15840
-              },
-              margin: {
-                top: 1440,
-                right: 1440,
-                bottom: 1440,
-                left: 1440
-              }
-            }
-          },
-          children: children
-        }]
-      });
-      
-      // Générer et télécharger
-      const blob = await Packer.toBlob(doc);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      
-      const fileName = `EDL_${edl.type}_${bien ? bien.reference?.replace(/[^a-zA-Z0-9]/g, '_') : 'bien'}_${new Date(edl.dateEDL).toISOString().split('T')[0]}.docx`;
-      link.download = fileName;
-      
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
-      showNotification('✅ Document Word généré avec succès !');
-    }
-    
-    // Initialisation
-    document.addEventListener('DOMContentLoaded', async () => {
-      await chargerDonnees();
-      await appliquerFiltres();
-      
-      // Événements des filtres
-      document.getElementById('filtreType').addEventListener('change', appliquerFiltres);
-      document.getElementById('filtreBien').addEventListener('change', appliquerFiltres);
-      document.getElementById('filtreAnnee').addEventListener('change', appliquerFiltres);
-      
-      // Fermer le modal en cliquant à l'extérieur
-      document.getElementById('modalDetails').addEventListener('click', (e) => {
-        if (e.target.id === 'modalDetails') {
-          fermerModal();
-        }
-      });
-    });
   </script>
 </body>
 
 </html>
+
 
 
 
