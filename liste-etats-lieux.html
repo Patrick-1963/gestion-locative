@@ -7,8 +7,6 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Liste des États des Lieux</title>
   <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css" />
-  <link rel="icon" type="image/png" href="favicon.png">
-  <link rel="manifest" href="manifest.json">
 
   <style>
     body { 
@@ -500,30 +498,42 @@
           locataires: locataires.length
         });
         
+        // Vérifier si des données existent
+        if (etatsDesLieux.length === 0) {
+          console.warn('⚠️ Aucun état des lieux trouvé dans le localStorage');
+        }
+        if (biens.length === 0) {
+          console.warn('⚠️ Aucun bien trouvé dans le localStorage');
+        }
+        
         // Remplir les filtres
         const filtreBien = document.getElementById('filtreBien');
-        filtreBien.innerHTML = '<option value="">Tous les biens</option>';
-        biens.forEach(bien => {
-          const option = document.createElement('option');
-          option.value = bien.id;
-          option.textContent = `${bien.reference || 'Sans ref'} - ${bien.adresse}`;
-          filtreBien.appendChild(option);
-        });
+        if (filtreBien) {
+          filtreBien.innerHTML = '<option value="">Tous les biens</option>';
+          biens.forEach(bien => {
+            const option = document.createElement('option');
+            option.value = bien.id;
+            option.textContent = `${bien.reference || 'Sans ref'} - ${bien.adresse}`;
+            filtreBien.appendChild(option);
+          });
+        }
         
         const filtreAnnee = document.getElementById('filtreAnnee');
-        const annees = [...new Set(etatsDesLieux
-          .filter(e => e.dateCreation)
-          .map(e => new Date(e.dateCreation).getFullYear()))]
-          .sort((a,b) => b-a);
-        filtreAnnee.innerHTML = '<option value="">Toutes</option>';
-        annees.forEach(annee => {
-          const option = document.createElement('option');
-          option.value = annee;
-          option.textContent = annee;
-          filtreAnnee.appendChild(option);
-        });
+        if (filtreAnnee) {
+          const annees = [...new Set(etatsDesLieux
+            .filter(e => e.dateCreation)
+            .map(e => new Date(e.dateCreation).getFullYear()))]
+            .sort((a,b) => b-a);
+          filtreAnnee.innerHTML = '<option value="">Toutes</option>';
+          annees.forEach(annee => {
+            const option = document.createElement('option');
+            option.value = annee;
+            option.textContent = annee;
+            filtreAnnee.appendChild(option);
+          });
+        }
       } catch (error) {
-        console.error('Erreur lors du chargement des données:', error);
+        console.error('❌ Erreur lors du chargement des données:', error);
         showNotification('Erreur lors du chargement des données', 'error');
       }
     }
@@ -1780,6 +1790,7 @@
 </body>
 
 </html>
+
 
 
 
