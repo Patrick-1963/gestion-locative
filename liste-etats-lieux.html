@@ -429,7 +429,6 @@
   </style>
 <script src="https://unpkg.com/docx@7.8.2/build/docx.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
 </head>
 <body>
   <a href="/gestion-locative/menu.html" class="back-link">← Retour au menu</a>
@@ -484,10 +483,7 @@
       <div style="text-align: center; margin-top: 2rem;" class="no-print">
         <button class="btn-secondary" onclick="fermerModal()">Fermer</button>
         <button class="btn-primary" onclick="imprimerEDL()">🖨️ Imprimer</button>
-        <button class="btn-primary" onclick="exportToWord()">🖨️ Exporter en Word (.docx)</button>
-
-       
-
+       <button class="btn-primary" onclick="exportToWord()">🖨️ Exporter en Word (.docx)</button>
       </div>
     </div>
   </div>
@@ -943,7 +939,8 @@
     </script>
   <script>
     async function exportToWord() {
-        const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType } = docx;
+        const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell } = window.docx;
+
 
         // Récupérer les données du tableau
         const table = document.querySelector("table");
@@ -995,6 +992,7 @@
 </body>
 
 </html>
+
 
 
 
