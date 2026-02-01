@@ -427,8 +427,9 @@
       }
     }
   </style>
-<script src="https://unpkg.com/docx@7.8.2/build/docx.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+ <!-- Librairies Word -->
+  <script src="https://unpkg.com/docx@7.8.2/build/docx.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
 <body>
   <a href="/gestion-locative/menu.html" class="back-link">← Retour au menu</a>
@@ -937,61 +938,14 @@
       }, 100);
     };
     </script>
-  <script>
-    async function exportToWord() {
-        const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell } = window.docx;
+ <!-- Librairies Word -->
 
-
-        // Récupérer les données du tableau
-        const table = document.querySelector("table");
-        const rows = table.querySelectorAll("tr");
-        const tableData = [];
-
-        rows.forEach((row, rowIndex) => {
-            const cells = row.querySelectorAll("td, th");
-            const rowData = [];
-            cells.forEach(cell => rowData.push(cell.innerText));
-            tableData.push(rowData);
-        });
-
-        // Créer un document Word
-        const doc = new Document({
-            sections: [{
-                children: [
-                    new Paragraph({
-                        children: [
-                            new TextRun({
-                                text: "Liste des États des Lieux",
-                                bold: true,
-                                size: 24,
-                            }),
-                        ],
-                    }),
-                    new Table({
-                        rows: tableData.map(row =>
-                            new TableRow({
-                                children: row.map(cell =>
-                                    new TableCell({
-                                        children: [new Paragraph(cell)],
-                                    })
-                                ),
-                            })
-                        ),
-                    }),
-                ],
-            }],
-        });
-
-        // Générer et télécharger le fichier
-        const blob = await Packer.toBlob(doc);
-        saveAs(blob, "liste-etats-lieux.docx");
-    }
-</script>
 
 
 </body>
 
 </html>
+
 
 
 
