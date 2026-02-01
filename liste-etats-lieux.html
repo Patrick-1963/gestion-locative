@@ -487,30 +487,45 @@
     }
     
     async function chargerDonnees() {
-      etatsDesLieux = await getAllEtatsDesLieux();
-      biens = await getAllBiens();
-      proprietaires = await getAllProprietaires();
-      locataires = await getAllLocataires();
-      
-      // Remplir les filtres
-      const filtreBien = document.getElementById('filtreBien');
-      filtreBien.innerHTML = '<option value="">Tous les biens</option>';
-      biens.forEach(bien => {
-        const option = document.createElement('option');
-        option.value = bien.id;
-        option.textContent = `${bien.reference || 'Sans ref'} - ${bien.adresse}`;
-        filtreBien.appendChild(option);
-      });
-      
-      const filtreAnnee = document.getElementById('filtreAnnee');
-      const annees = [...new Set(etatsDesLieux.map(e => new Date(e.dateCreation).getFullYear()))].sort((a,b) => b-a);
-      filtreAnnee.innerHTML = '<option value="">Toutes</option>';
-      annees.forEach(annee => {
-        const option = document.createElement('option');
-        option.value = annee;
-        option.textContent = annee;
-        filtreAnnee.appendChild(option);
-      });
+      try {
+        etatsDesLieux = await getAllEtatsDesLieux();
+        biens = await getAllBiens();
+        proprietaires = await getAllProprietaires();
+        locataires = await getAllLocataires();
+        
+        console.log('Données chargées:', {
+          etatsDesLieux: etatsDesLieux.length,
+          biens: biens.length,
+          proprietaires: proprietaires.length,
+          locataires: locataires.length
+        });
+        
+        // Remplir les filtres
+        const filtreBien = document.getElementById('filtreBien');
+        filtreBien.innerHTML = '<option value="">Tous les biens</option>';
+        biens.forEach(bien => {
+          const option = document.createElement('option');
+          option.value = bien.id;
+          option.textContent = `${bien.reference || 'Sans ref'} - ${bien.adresse}`;
+          filtreBien.appendChild(option);
+        });
+        
+        const filtreAnnee = document.getElementById('filtreAnnee');
+        const annees = [...new Set(etatsDesLieux
+          .filter(e => e.dateCreation)
+          .map(e => new Date(e.dateCreation).getFullYear()))]
+          .sort((a,b) => b-a);
+        filtreAnnee.innerHTML = '<option value="">Toutes</option>';
+        annees.forEach(annee => {
+          const option = document.createElement('option');
+          option.value = annee;
+          option.textContent = annee;
+          filtreAnnee.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Erreur lors du chargement des données:', error);
+        showNotification('Erreur lors du chargement des données', 'error');
+      }
     }
     
     function appliquerFiltres() {
@@ -538,7 +553,7 @@
     function afficherListe(edls) {
       const container = document.getElementById('listeEDL');
       
-      if (edls.length === 0) {
+      if (!edls || edls.length === 0) {
         container.innerHTML = `
           <div class="empty-state">
             <div class="empty-state-icon">📋</div>
@@ -550,17 +565,29 @@
       }
       
       // Trier par date (plus récent en premier)
-      edls.sort((a, b) => new Date(b.dateCreation) - new Date(a.dateCreation));
+      const edlsTriees = [...edls].sort((a, b) => {
+        const dateA = a.dateCreation ? new Date(a.dateCreation) : new Date(0);
+        const dateB = b.dateCreation ? new Date(b.dateCreation) : new Date(0);
+        return dateB - dateA;
+      });
       
-      container.innerHTML = edls.map(edl => {
+      container.innerHTML = edlsTriees.map(edl => {
         const bien = biens.find(b => b.id === edl.bienId);
-        const proprios = edl.proprietaireIds ? edl.proprietaireIds.map(id => proprietaires.find(p => p.id === id)).filter(Boolean) : [];
-        const locataire = locataires.find(l => l.id === edl.locataireId);
+        const proprios = (edl.proprietaireIds && Array.isArray(edl.proprietaireIds)) ? 
+          edl.proprietaireIds.map(id => proprietaires.find(p => p.id === id)).filter(Boolean) : [];
+        const locataire = edl.locataireId ? locataires.find(l => l.id === edl.locataireId) : null;
         
-        const nbPieces = edl.pieces ? edl.pieces.length : 0;
-        const nbElements = edl.pieces ? edl.pieces.reduce((sum, p) => sum + (p.elements ? p.elements.length : 0), 0) : 0;
-        const nbPhotos = (edl.photosGenerales ? edl.photosGenerales.length : 0) + 
-                         (edl.pieces ? edl.pieces.reduce((sum, p) => sum + (p.elements ? p.elements.reduce((s, e) => s + (e.photos ? e.photos.length : 0), 0) : 0), 0) : 0);
+        const nbPieces = (edl.pieces && Array.isArray(edl.pieces)) ? edl.pieces.length : 0;
+        const nbElements = (edl.pieces && Array.isArray(edl.pieces)) ? 
+          edl.pieces.reduce((sum, p) => sum + ((p.elements && Array.isArray(p.elements)) ? p.elements.length : 0), 0) : 0;
+        const nbPhotos = ((edl.photosGenerales && Array.isArray(edl.photosGenerales)) ? edl.photosGenerales.length : 0) + 
+                         ((edl.pieces && Array.isArray(edl.pieces)) ? 
+                           edl.pieces.reduce((sum, p) => 
+                             sum + ((p.elements && Array.isArray(p.elements)) ? 
+                               p.elements.reduce((s, e) => s + ((e.photos && Array.isArray(e.photos)) ? e.photos.length : 0), 0) : 0), 0) : 0);
+        
+        const dateEDL = edl.dateEDL ? new Date(edl.dateEDL).toLocaleDateString('fr-FR') : 'Date inconnue';
+        const dateCreation = edl.dateCreation ? new Date(edl.dateCreation).toLocaleDateString('fr-FR') : 'Date inconnue';
         
         return `
           <div class="edl-card">
@@ -573,7 +600,7 @@
             
             <div class="edl-info">
               <div class="info-item">
-                <span class="info-label">📅 Date :</span> ${new Date(edl.dateEDL).toLocaleDateString('fr-FR')}
+                <span class="info-label">📅 Date :</span> ${dateEDL}
               </div>
               ${bien ? `
                 <div class="info-item">
@@ -586,7 +613,7 @@
                 </div>
               ` : ''}
               <div class="info-item">
-                <span class="info-label">📝 Créé le :</span> ${new Date(edl.dateCreation).toLocaleDateString('fr-FR')}
+                <span class="info-label">📝 Créé le :</span> ${dateCreation}
               </div>
             </div>
             
@@ -1753,6 +1780,7 @@
 </body>
 
 </html>
+
 
 
 
