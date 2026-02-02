@@ -98,12 +98,26 @@
       border-radius: 6px;
       margin-bottom: 1rem;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .history-item:hover {
+      transform: translateX(5px);
     }
 
     .loading {
       text-align: center;
       padding: 2rem;
       color: #7f8c8d;
+    }
+
+    .error {
+      background: #e74c3c;
+      color: white;
+      padding: 1rem;
+      border-radius: 6px;
+      margin: 1rem 0;
     }
   </style>
 </head>
@@ -158,8 +172,14 @@
 </div>
 
 <script type="module">
-  // Import des fonctions depuis db.js dans le dossier js/
-  import { getLocataires, getBaux, getCautions, addCaution } from './js/db.js';
+  // Import des fonctions depuis db.js
+  import { 
+    openDB, 
+    getLocataires, 
+    getBaux, 
+    getCautions, 
+    addCaution 
+  } from './js/db.js';
 
   let cautions = [];
   let baux = [];
@@ -168,11 +188,15 @@
   // Charger les données depuis IndexedDB
   async function chargerDonnees() {
     try {
+      console.log('🔄 Initialisation de la base de données...');
+      await openDB();
+      
       console.log('🔄 Chargement des données...');
       
-      locataires = getLocataires();
-      baux = getBaux();
-      cautions = getCautions();
+      // Toutes les fonctions sont asynchrones !
+      locataires = await getLocataires();
+      baux = await getBaux();
+      cautions = await getCautions();
       
       console.log('✅ Données chargées:', {
         locataires: locataires.length,
@@ -184,7 +208,8 @@
       afficherHistorique();
     } catch (error) {
       console.error('❌ Erreur lors du chargement des données:', error);
-      alert('Erreur lors du chargement des données. Vérifiez la console.');
+      document.getElementById('historiqueCautions').innerHTML = 
+        '<div class="error">Erreur: ' + error.message + '</div>';
     }
   }
 
@@ -204,6 +229,7 @@
         opt.textContent = `${l.prenom || ''} ${l.nom || ''}`.trim();
         locSelect.appendChild(opt);
       });
+      console.log(`✅ ${locataires.length} locataire(s) chargé(s)`);
     }
 
     // Charger les baux
@@ -216,17 +242,18 @@
         const opt = document.createElement('option');
         opt.value = b.id;
         
-        // Affichage adapté selon la structure de vos baux
+        // Affichage adapté selon la structure
         const adresse = b.bien?.adresse || b.adresse || 'Adresse non définie';
         const locataireName = b.locataire?.nom || b.locataireNom || 'Locataire inconnu';
         opt.textContent = `${adresse} (${locataireName})`;
         
         bailSelect.appendChild(opt);
       });
+      console.log(`✅ ${baux.length} bail/baux chargé(s)`);
     }
   }
 
-  window.genererCaution = function() {
+  window.genererCaution = async function() {
     const garant = {
       nom: document.getElementById('garantNom').value.trim(),
       prenom: document.getElementById('garantPrenom').value.trim(),
@@ -261,11 +288,11 @@
     };
 
     try {
-      // Sauvegarder dans IndexedDB/localStorage
-      addCaution(caution);
+      // Sauvegarder dans IndexedDB (fonction asynchrone !)
+      await addCaution(caution);
       
       // Recharger les cautions
-      cautions = getCautions();
+      cautions = await getCautions();
 
       console.log('✅ Caution créée:', caution);
 
@@ -279,10 +306,12 @@
       document.getElementById('garantEmail').value = '';
       document.getElementById('garantTel').value = '';
       document.getElementById('montantGaranti').value = '';
+      document.getElementById('locataireSelect').value = '';
+      document.getElementById('bailSelect').value = '';
       
     } catch (error) {
-      console.error('❌ Erreur lors de la création de la caution:', error);
-      alert('Erreur lors de la création de la caution.');
+      console.error('❌ Erreur:', error);
+      alert('Erreur lors de la création: ' + error.message);
     }
   }
 
@@ -290,7 +319,6 @@
     const div = document.getElementById('cautionPreview');
     div.style.display = 'block';
 
-    // Gestion sécurisée des propriétés du bail
     const bienAdresse = caution.bail?.bien?.adresse || caution.bail?.adresse || 'Adresse non définie';
     const bienCP = caution.bail?.bien?.codePostal || caution.bail?.codePostal || '';
     const bienVille = caution.bail?.bien?.ville || caution.bail?.ville || '';
@@ -332,7 +360,6 @@
       </div>
     `;
     
-    // Scroll vers l'aperçu
     div.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
@@ -347,7 +374,7 @@
     container.innerHTML = cautions
       .sort((a, b) => new Date(b.dateCreation) - new Date(a.dateCreation))
       .map(c => `
-        <div class="history-item">
+        <div class="history-item" onclick="afficherCautionExistante('${c.id}')">
           <strong>${c.garant.prenom || ''} ${c.garant.nom || ''}</strong> 
           → ${c.locataire.prenom || ''} ${c.locataire.nom || ''}
           <br>
@@ -356,12 +383,20 @@
       `).join('');
   }
 
-  // Initialisation au chargement de la page
+  window.afficherCautionExistante = function(cautionId) {
+    const caution = cautions.find(c => c.id === cautionId);
+    if (caution) {
+      afficherCaution(caution);
+    }
+  }
+
+  // Initialisation
   chargerDonnees();
 </script>
 
 </body>
 </html>
+
 
 
 
