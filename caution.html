@@ -194,6 +194,7 @@
     getBaux, 
     getCautions, 
     addCaution 
+    deleteCaution
   } from './js/db.js';
 
   let cautions = [];
@@ -404,6 +405,23 @@
       afficherCaution(caution);
     }
   }
+  
+
+
+window.supprimerCaution = async function(id) {
+  if (!confirm("Supprimer définitivement cette caution ?")) return;
+
+  try {
+    await deleteCaution(id);
+    cautions = await getCautions();
+    afficherHistorique();
+    document.getElementById('cautionPreview').style.display = 'none';
+    console.log("🗑️ Caution supprimée :", id);
+  } catch (error) {
+    console.error("❌ Erreur suppression :", error);
+    alert("Erreur lors de la suppression : " + error.message);
+  }
+};
 
   // Initialisation
   chargerDonnees();
@@ -411,6 +429,7 @@
 
 </body>
 </html>
+
 
 
 
