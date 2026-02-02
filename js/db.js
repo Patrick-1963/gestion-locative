@@ -668,3 +668,18 @@ export function updateCaution(data) {
 export function deleteCaution(id) {
   return remove("cautions", id);
 }
+// ========================================
+// SUPPRIMER CAUTIONS
+// ========================================
+export async function deleteCaution(id) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction('cautions', 'readwrite');
+    const store = tx.objectStore('cautions');
+    const request = store.delete(id);
+
+    request.onsuccess = () => resolve(true);
+    request.onerror = () => reject(request.error);
+  });
+}
+
