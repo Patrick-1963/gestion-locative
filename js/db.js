@@ -638,6 +638,8 @@ export async function getDatabaseSize() {
 }
 // Fonctions à ajouter dans votre fichier db.js existant
 
+// Fonctions à ajouter dans votre fichier db.js existant
+
 /* -----------------------------------------------
    CAUTIONS
 ------------------------------------------------- */
