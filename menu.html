@@ -271,6 +271,14 @@
         <p>Générer et consulter les baux de location</p>
         <span class="stat" id="stat-baux">📊 Chargement...</span>
       </a>
+
+      <a href="caution.html" class="menu-card">
+  <div class="card-icon">📝</div>
+  <h2>Caution Solidaire</h2>
+  <p>Créer et gérer les actes de cautionnement</p>
+  <span class="stat" id="stat-cautions">📊 Chargement...</span>
+</a>
+
     </div>
 
     <div class="footer">
@@ -467,6 +475,16 @@
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
+
+const cautions = JSON.parse(localStorage.getItem('cautions') || '[]');
+
+const statCautions = document.getElementById('stat-cautions');
+if (statCautions) {
+  statCautions.textContent = `📊 ${cautions.length} acte${cautions.length > 1 ? 's' : ''}`;
+  statCautions.classList.add(cautions.length > 0 ? 'has-items' : 'zero-items');
+}
+
+  
 </script>
 <script type="module" src="https://patrick-1963.github.io/gestion-locative/js/app.js"></script>
   <!-- ========================= -->
@@ -515,6 +533,7 @@
 
 </body>
 </html>
+
 
 
 
