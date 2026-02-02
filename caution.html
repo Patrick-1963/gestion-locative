@@ -138,10 +138,23 @@
   <div id="historiqueCautions"></div>
 </div>
 
-<script>
-  let cautions = JSON.parse(localStorage.getItem('cautions') || '[]');
-  let baux = JSON.parse(localStorage.getItem('baux') || '[]');
-  let locataires = JSON.parse(localStorage.getItem('locataires') || '[]');
+<script type="module">
+  // Import des fonctions depuis db.js
+  import { getLocataires, getBaux, getCautions, addCaution } from './db.js';
+
+  let cautions = [];
+  let baux = [];
+  let locataires = [];
+
+  // Charger les données depuis IndexedDB
+  async function chargerDonnees() {
+    locataires = await getLocataires();
+    baux = await getBaux();
+    cautions = await getCautions();
+    
+    chargerListes();
+    afficherHistorique();
+  }
 
   function chargerListes() {
     const locSelect = document.getElementById('locataireSelect');
@@ -151,7 +164,7 @@
     locataires.forEach(l => {
       const opt = document.createElement('option');
       opt.value = l.id;
-      opt.textContent = `${l.civilite} ${l.nom} ${l.prenom}`;
+      opt.textContent = `${l.prenom} ${l.nom}`;
       locSelect.appendChild(opt);
     });
 
@@ -159,12 +172,15 @@
     baux.forEach(b => {
       const opt = document.createElement('option');
       opt.value = b.id;
-      opt.textContent = `${b.bien.adresse} (${b.locataire.nom})`;
+      // Affichage adapté selon la structure de vos baux
+      const adresse = b.bien?.adresse || b.adresse || 'Adresse non définie';
+      const locataireName = b.locataire?.nom || b.locataireNom || '';
+      opt.textContent = `${adresse} (${locataireName})`;
       bailSelect.appendChild(opt);
     });
   }
 
-  function genererCaution() {
+  window.genererCaution = async function() {
     const garant = {
       nom: document.getElementById('garantNom').value,
       prenom: document.getElementById('garantPrenom').value,
@@ -186,7 +202,6 @@
     const bail = baux.find(b => b.id == bailId);
 
     const caution = {
-      id: "caution_" + Date.now(),
       garant,
       locataire,
       bail,
@@ -194,8 +209,11 @@
       dateCreation: new Date().toISOString()
     };
 
-    cautions.push(caution);
-    localStorage.setItem('cautions', JSON.stringify(cautions));
+    // Sauvegarder dans IndexedDB
+    await addCaution(caution);
+
+    // Recharger les cautions
+    cautions = await getCautions();
 
     afficherCaution(caution);
     afficherHistorique();
@@ -204,6 +222,11 @@
   function afficherCaution(caution) {
     const div = document.getElementById('cautionPreview');
     div.style.display = 'block';
+
+    // Gestion sécurisée des propriétés du bail
+    const bienAdresse = caution.bail?.bien?.adresse || caution.bail?.adresse || '';
+    const bienCP = caution.bail?.bien?.codePostal || caution.bail?.codePostal || '';
+    const bienVille = caution.bail?.bien?.ville || caution.bail?.ville || '';
 
     div.innerHTML = `
       <h2 style="text-align:center;">ACTE DE CAUTION SOLIDAIRE</h2>
@@ -216,7 +239,7 @@
       <hr>
 
       <p><strong>Locataire garanti :</strong> ${caution.locataire.prenom} ${caution.locataire.nom}</p>
-      <p><strong>Logement :</strong> ${caution.bail.bien.adresse}, ${caution.bail.bien.codePostal} ${caution.bail.bien.ville}</p>
+      <p><strong>Logement :</strong> ${bienAdresse}, ${bienCP} ${bienVille}</p>
 
       <p><strong>Montant garanti :</strong> ${caution.montant} € / mois</p>
 
@@ -257,8 +280,8 @@
     `).join('');
   }
 
-  chargerListes();
-  afficherHistorique();
+  // Initialisation au chargement de la page
+  chargerDonnees();
 </script>
 
 </body>
