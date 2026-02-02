@@ -478,17 +478,17 @@
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 </script>
-  <script>
-const cautions = JSON.parse(localStorage.getItem('cautions') || '[]');
+//  <script>
+//const cautions = JSON.parse(localStorage.getItem('cautions') || '[]');
 
-const statCautions = document.getElementById('stat-cautions');
-if (statCautions) {
-  statCautions.textContent = `📊 ${cautions.length} acte${cautions.length > 1 ? 's' : ''}`;
-  statCautions.classList.add(cautions.length > 0 ? 'has-items' : 'zero-items');
-}
+//const statCautions = document.getElementById('stat-cautions');
+//if (statCautions) {
+//  statCautions.textContent = `📊 ${cautions.length} acte${cautions.length > 1 ? 's' : ''}`;
+//  statCautions.classList.add(cautions.length > 0 ? 'has-items' : 'zero-items');
+//}
 
   
-</script>
+//</script>
 <script type="module" src="https://patrick-1963.github.io/gestion-locative/js/app.js"></script>
   <!-- ========================= -->
 <!-- MODALE D’IMPORT DES DONNÉES -->
@@ -536,6 +536,7 @@ if (statCautions) {
 
 </body>
 </html>
+
 
 
 
