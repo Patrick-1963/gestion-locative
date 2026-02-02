@@ -4,7 +4,7 @@
  */
 
 const DB_NAME = "GestionLocativeDB";
-const DB_VERSION = 2; // Incrémenté pour ajouter le store liaisons
+const DB_VERSION = 3; // Incrémenté pour ajouter le store cautions
 
 let db = null;
 
@@ -53,6 +53,9 @@ export function openDB() {
       }
       if (!database.objectStoreNames.contains("settings")) {
         database.createObjectStore("settings", { keyPath: "key" });
+      }
+      if (!database.objectStoreNames.contains("cautions")) {
+        database.createObjectStore("cautions", { keyPath: "id" });
       }
       
       console.log("✅ Base de données mise à jour vers version", DB_VERSION);
@@ -473,6 +476,9 @@ export async function exportData() {
     if (availableStores.includes('liaisons')) {
       data.liaisons = await getLiaisons();
     }
+    if (availableStores.includes('cautions')) {
+      data.cautions = await getCautions();
+    }
     
     return data;
   } catch (err) {
@@ -489,7 +495,7 @@ export async function importData(data) {
   try {
     if (!db) await openDB();
     
-    const stores = ["aide", "biens", "proprietaires", "locataires", "baux", "quittances", "etatsDesLieux", "liaisons"];
+    const stores = ["aide", "biens", "proprietaires", "locataires", "baux", "quittances", "etatsDesLieux", "liaisons", "cautions"];
     
     for (const storeName of stores) {
       if (!data[storeName] || !Array.isArray(data[storeName])) continue;
@@ -520,7 +526,7 @@ export async function importAllData(data, mode = "merge") {
   try {
     if (!db) await openDB();
     
-    const stores = ["biens", "proprietaires", "locataires", "baux", "quittances", "etatsDesLieux", "liaisons"];
+    const stores = ["biens", "proprietaires", "locataires", "baux", "quittances", "etatsDesLieux", "liaisons", "cautions"];
     
     for (const storeName of stores) {
       if (!data[storeName] || !Array.isArray(data[storeName])) continue;
@@ -618,7 +624,7 @@ export async function getDatabaseSize() {
     if (!db) await openDB();
     
     let totalSize = 0;
-    const stores = ["biens", "proprietaires", "locataires", "baux", "quittances", "etatsDesLieux", "liaisons"];
+    const stores = ["biens", "proprietaires", "locataires", "baux", "quittances", "etatsDesLieux", "liaisons", "cautions"];
     
     for (const storeName of stores) {
       const items = await getAll(storeName);
@@ -636,79 +642,29 @@ export async function getDatabaseSize() {
     return { bytes: 0, kb: 0, mb: 0 };
   }
 }
-// Fonctions à ajouter dans votre fichier db.js existant
 
-// Fonctions à ajouter dans votre fichier db.js existant
+// ========================================
+// CAUTIONS
+// ========================================
 
-/* -----------------------------------------------
-   CAUTIONS
-------------------------------------------------- */
-
-/**
- * Récupère toutes les cautions
- */
 export function getCautions() {
-  const data = localStorage.getItem("cautions");
-  return data ? JSON.parse(data) : [];
+  return getAll("cautions");
 }
 
-/**
- * Ajoute une nouvelle caution
- */
-export function addCaution(caution) {
-  const cautions = getCautions();
-  
-  // Générer un ID unique si pas déjà présent
-  if (!caution.id) {
-    caution.id = "caution_" + Date.now();
-  }
-  
-  cautions.push(caution);
-  localStorage.setItem("cautions", JSON.stringify(cautions));
-  return caution;
+export function getCautionById(id) {
+  return getById("cautions", id);
 }
 
-/**
- * Supprime une caution
- */
+export function addCaution(data) {
+  data.id = data.id || "caution_" + Date.now();
+  data.dateCreation = data.dateCreation || new Date().toISOString();
+  return add("cautions", data);
+}
+
+export function updateCaution(data) {
+  return update("cautions", data);
+}
+
 export function deleteCaution(id) {
-  let cautions = getCautions();
-  cautions = cautions.filter(c => c.id !== id);
-  localStorage.setItem("cautions", JSON.stringify(cautions));
-}
-
-/* -----------------------------------------------
-   BAUX
-------------------------------------------------- */
-
-/**
- * Récupère tous les baux
- */
-export function getBaux() {
-  const data = localStorage.getItem("baux");
-  return data ? JSON.parse(data) : [];
-}
-
-/**
- * Ajoute un nouveau bail
- */
-export function addBail(bail) {
-  const baux = getBaux();
-  
-  if (!bail.id) {
-    bail.id = "bail_" + Date.now();
-  }
-  
-  baux.push(bail);
-  localStorage.setItem("baux", JSON.stringify(baux));
-  return bail;
-}
-
-/**
- * Supprime un bail
- */
-export function deleteBail(id) {
-  let baux = getBaux();
-  baux = baux.filter(b => b.id !== id);
-  localStorage.setItem("baux", JSON.stringify(baux));
+  return remove("cautions", id);
 }
