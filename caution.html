@@ -390,12 +390,16 @@
     container.innerHTML = cautions
       .sort((a, b) => new Date(b.dateCreation) - new Date(a.dateCreation))
       .map(c => `
-        <div class="history-item" onclick="afficherCautionExistante('${c.id}')">
-          <strong>${c.garant.prenom || ''} ${c.garant.nom || ''}</strong> 
-          → ${c.locataire.prenom || ''} ${c.locataire.nom || ''}
-          <br>
-          <small>Montant: ${c.montant} € | ${new Date(c.dateCreation).toLocaleDateString('fr-FR')}</small>
-        </div>
+<div class="history-item">
+  <div onclick="afficherCautionExistante('${c.id}')">
+    <strong>${c.garant.prenom || ''} ${c.garant.nom || ''}</strong> 
+    → ${c.locataire.prenom || ''} ${c.locataire.nom || ''}
+    <br>
+    <small>Montant: ${c.montant} € | ${new Date(c.dateCreation).toLocaleDateString('fr-FR')}</small>
+  </div>
+  <button class="secondary" onclick="supprimerCaution('${c.id}')">Supprimer</button>
+</div>
+
       `).join('');
   }
 
@@ -429,6 +433,7 @@ window.supprimerCaution = async function(id) {
 
 </body>
 </html>
+
 
 
 
