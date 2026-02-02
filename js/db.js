@@ -636,3 +636,77 @@ export async function getDatabaseSize() {
     return { bytes: 0, kb: 0, mb: 0 };
   }
 }
+// Fonctions à ajouter dans votre fichier db.js existant
+
+/* -----------------------------------------------
+   CAUTIONS
+------------------------------------------------- */
+
+/**
+ * Récupère toutes les cautions
+ */
+export function getCautions() {
+  const data = localStorage.getItem("cautions");
+  return data ? JSON.parse(data) : [];
+}
+
+/**
+ * Ajoute une nouvelle caution
+ */
+export function addCaution(caution) {
+  const cautions = getCautions();
+  
+  // Générer un ID unique si pas déjà présent
+  if (!caution.id) {
+    caution.id = "caution_" + Date.now();
+  }
+  
+  cautions.push(caution);
+  localStorage.setItem("cautions", JSON.stringify(cautions));
+  return caution;
+}
+
+/**
+ * Supprime une caution
+ */
+export function deleteCaution(id) {
+  let cautions = getCautions();
+  cautions = cautions.filter(c => c.id !== id);
+  localStorage.setItem("cautions", JSON.stringify(cautions));
+}
+
+/* -----------------------------------------------
+   BAUX
+------------------------------------------------- */
+
+/**
+ * Récupère tous les baux
+ */
+export function getBaux() {
+  const data = localStorage.getItem("baux");
+  return data ? JSON.parse(data) : [];
+}
+
+/**
+ * Ajoute un nouveau bail
+ */
+export function addBail(bail) {
+  const baux = getBaux();
+  
+  if (!bail.id) {
+    bail.id = "bail_" + Date.now();
+  }
+  
+  baux.push(bail);
+  localStorage.setItem("baux", JSON.stringify(baux));
+  return bail;
+}
+
+/**
+ * Supprime un bail
+ */
+export function deleteBail(id) {
+  let baux = getBaux();
+  baux = baux.filter(b => b.id !== id);
+  localStorage.setItem("baux", JSON.stringify(baux));
+}
