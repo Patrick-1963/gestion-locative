@@ -534,6 +534,10 @@
           <label for="clauseSolidaire">Clause de solidarité (colocataires)</label>
         </div>
         <div class="checkbox-group">
+          <input type="checkbox" id="clauseCautionSolidaire">
+          <label for="clauseCautionSolidaire">Caution solidaire</label>
+        </div>
+        <div class="checkbox-group">
           <input type="checkbox" id="clauseAnimaux" checked disabled>
           <label for="clauseAnimaux">Note sur les animaux</label>
         </div>
@@ -785,6 +789,7 @@ function genererBail() {
     dateRevision: document.getElementById("dateRevision").value,
     clauseResiliation: document.getElementById("clauseResiliation").checked,
     clauseSolidaire: document.getElementById("clauseSolidaire").checked,
+    clauseCautionSolidaire: document.getElementById("clauseCautionSolidaire").checked,
     clauseAnimaux: document.getElementById("clauseAnimaux").checked,
     clauseFumeur: document.getElementById("clauseFumeur").checked,
     clauseAssurance: document.getElementById("clauseAssurance").checked,
@@ -959,6 +964,21 @@ function afficherBail(bail) {
               <strong>un mois</strong> lorsque l'état des lieux de sortie est conforme à celui d'entrée, 
               ou de <strong>deux mois</strong> en cas de dégradations, d'impayés ou de retenues justifiées.</p>
           </div>
+
+          ${bail.clauseCautionSolidaire ? `
+            <div class="bail-article">
+              <p><strong>ARTICLE ${articleNum++} - CAUTION SOLIDAIRE</strong></p>
+              <p>Le présent bail est garanti par un acte de caution solidaire signé par une personne physique 
+                ou morale se portant caution pour le locataire.</p>
+              <p>Conformément aux articles 22-1 et 24 de la loi du 6 juillet 1989, la caution s'engage à 
+                garantir solidairement les obligations du locataire, notamment le paiement du loyer et des charges, 
+                ainsi que la réparation des dégradations locatives.</p>
+              <p>La caution renonce expressément au bénéfice de discussion et de division.</p>
+              <p>L'acte de caution solidaire est annexé au présent contrat et fait partie intégrante du bail.</p>
+              <p>La durée de l'engagement de la caution couvre toute la durée du bail et ses renouvellements éventuels, 
+                sauf dénonciation expresse dans les conditions légales.</p>
+            </div>
+          ` : ''}
 
           ${bail.clauseAssurance ? `
             <div class="bail-article">
@@ -1314,6 +1334,7 @@ function remplirFormulaireAvecBail(bail) {
 
   document.getElementById("clauseResiliation").checked = !!bail.clauseResiliation;
   document.getElementById("clauseSolidaire").checked = !!bail.clauseSolidaire;
+  document.getElementById("clauseCautionSolidaire").checked = !!bail.clauseCautionSolidaire;
   document.getElementById("clauseAnimaux").checked = !!bail.clauseAnimaux;
   document.getElementById("clauseFumeur").checked = !!bail.clauseFumeur;
   document.getElementById("clauseAssurance").checked = !!bail.clauseAssurance;
@@ -1401,5 +1422,6 @@ window.addEventListener("load", chargerDonnees);
 </body>
 
 </html>
+
 
 
