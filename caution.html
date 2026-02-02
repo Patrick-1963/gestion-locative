@@ -43,6 +43,7 @@
       margin-top: 0.3rem;
       border-radius: 6px;
       border: 1px solid #ccc;
+      box-sizing: border-box;
     }
 
     button {
@@ -59,8 +60,16 @@
       color: white;
     }
 
+    .primary:hover {
+      background: #2980b9;
+    }
+
     .secondary {
       background: #bdc3c7;
+    }
+
+    .secondary:hover {
+      background: #95a5a6;
     }
 
     .caution-preview {
@@ -90,6 +99,12 @@
       margin-bottom: 1rem;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
+
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #7f8c8d;
+    }
   </style>
 </head>
 
@@ -101,14 +116,14 @@
   <div class="section">
     <h2>Informations du garant</h2>
 
-    <label>Nom</label>
-    <input type="text" id="garantNom">
+    <label>Nom *</label>
+    <input type="text" id="garantNom" required>
 
-    <label>Prénom</label>
-    <input type="text" id="garantPrenom">
+    <label>Prénom *</label>
+    <input type="text" id="garantPrenom" required>
 
-    <label>Adresse</label>
-    <input type="text" id="garantAdresse">
+    <label>Adresse *</label>
+    <input type="text" id="garantAdresse" required>
 
     <label>Email</label>
     <input type="email" id="garantEmail">
@@ -120,14 +135,18 @@
   <div class="section">
     <h2>Locataire concerné</h2>
 
-    <label>Locataire</label>
-    <select id="locataireSelect"></select>
+    <label>Locataire *</label>
+    <select id="locataireSelect">
+      <option value="">Chargement...</option>
+    </select>
 
-    <label>Bail associé</label>
-    <select id="bailSelect"></select>
+    <label>Bail associé *</label>
+    <select id="bailSelect">
+      <option value="">Chargement...</option>
+    </select>
 
-    <label>Montant garanti (loyer + charges)</label>
-    <input type="number" id="montantGaranti" placeholder="Ex : 650">
+    <label>Montant garanti (loyer + charges) *</label>
+    <input type="number" id="montantGaranti" placeholder="Ex : 650" required>
   </div>
 
   <button class="primary" onclick="genererCaution()">Générer l'acte</button>
@@ -135,12 +154,12 @@
   <div id="cautionPreview" class="caution-preview"></div>
 
   <h2 style="margin-top:3rem;">Historique des cautions</h2>
-  <div id="historiqueCautions"></div>
+  <div id="historiqueCautions" class="loading">Chargement...</div>
 </div>
 
 <script type="module">
-  // Import des fonctions depuis db.js
-  import { getLocataires, getBaux, getCautions, addCaution } from './db.js';
+  // Import des fonctions depuis db.js dans le dossier js/
+  import { getLocataires, getBaux, getCautions, addCaution } from './js/db.js';
 
   let cautions = [];
   let baux = [];
@@ -148,75 +167,123 @@
 
   // Charger les données depuis IndexedDB
   async function chargerDonnees() {
-    locataires = await getLocataires();
-    baux = await getBaux();
-    cautions = await getCautions();
-    
-    chargerListes();
-    afficherHistorique();
+    try {
+      console.log('🔄 Chargement des données...');
+      
+      locataires = getLocataires();
+      baux = getBaux();
+      cautions = getCautions();
+      
+      console.log('✅ Données chargées:', {
+        locataires: locataires.length,
+        baux: baux.length,
+        cautions: cautions.length
+      });
+      
+      chargerListes();
+      afficherHistorique();
+    } catch (error) {
+      console.error('❌ Erreur lors du chargement des données:', error);
+      alert('Erreur lors du chargement des données. Vérifiez la console.');
+    }
   }
 
   function chargerListes() {
     const locSelect = document.getElementById('locataireSelect');
     const bailSelect = document.getElementById('bailSelect');
 
+    // Charger les locataires
     locSelect.innerHTML = '<option value="">Sélectionnez un locataire</option>';
-    locataires.forEach(l => {
-      const opt = document.createElement('option');
-      opt.value = l.id;
-      opt.textContent = `${l.prenom} ${l.nom}`;
-      locSelect.appendChild(opt);
-    });
+    
+    if (locataires.length === 0) {
+      locSelect.innerHTML += '<option value="" disabled>Aucun locataire trouvé</option>';
+    } else {
+      locataires.forEach(l => {
+        const opt = document.createElement('option');
+        opt.value = l.id;
+        opt.textContent = `${l.prenom || ''} ${l.nom || ''}`.trim();
+        locSelect.appendChild(opt);
+      });
+    }
 
+    // Charger les baux
     bailSelect.innerHTML = '<option value="">Sélectionnez un bail</option>';
-    baux.forEach(b => {
-      const opt = document.createElement('option');
-      opt.value = b.id;
-      // Affichage adapté selon la structure de vos baux
-      const adresse = b.bien?.adresse || b.adresse || 'Adresse non définie';
-      const locataireName = b.locataire?.nom || b.locataireNom || '';
-      opt.textContent = `${adresse} (${locataireName})`;
-      bailSelect.appendChild(opt);
-    });
+    
+    if (baux.length === 0) {
+      bailSelect.innerHTML += '<option value="" disabled>Aucun bail trouvé</option>';
+    } else {
+      baux.forEach(b => {
+        const opt = document.createElement('option');
+        opt.value = b.id;
+        
+        // Affichage adapté selon la structure de vos baux
+        const adresse = b.bien?.adresse || b.adresse || 'Adresse non définie';
+        const locataireName = b.locataire?.nom || b.locataireNom || 'Locataire inconnu';
+        opt.textContent = `${adresse} (${locataireName})`;
+        
+        bailSelect.appendChild(opt);
+      });
+    }
   }
 
-  window.genererCaution = async function() {
+  window.genererCaution = function() {
     const garant = {
-      nom: document.getElementById('garantNom').value,
-      prenom: document.getElementById('garantPrenom').value,
-      adresse: document.getElementById('garantAdresse').value,
-      email: document.getElementById('garantEmail').value,
-      tel: document.getElementById('garantTel').value
+      nom: document.getElementById('garantNom').value.trim(),
+      prenom: document.getElementById('garantPrenom').value.trim(),
+      adresse: document.getElementById('garantAdresse').value.trim(),
+      email: document.getElementById('garantEmail').value.trim(),
+      tel: document.getElementById('garantTel').value.trim()
     };
 
     const locataireId = document.getElementById('locataireSelect').value;
     const bailId = document.getElementById('bailSelect').value;
     const montant = document.getElementById('montantGaranti').value;
 
-    if (!garant.nom || !garant.prenom || !locataireId || !bailId || !montant) {
-      alert("Veuillez remplir tous les champs obligatoires.");
+    if (!garant.nom || !garant.prenom || !garant.adresse || !locataireId || !bailId || !montant) {
+      alert("Veuillez remplir tous les champs obligatoires (marqués *).");
       return;
     }
 
     const locataire = locataires.find(l => l.id == locataireId);
     const bail = baux.find(b => b.id == bailId);
 
+    if (!locataire || !bail) {
+      alert("Erreur: locataire ou bail introuvable.");
+      return;
+    }
+
     const caution = {
       garant,
       locataire,
       bail,
-      montant,
+      montant: parseFloat(montant),
       dateCreation: new Date().toISOString()
     };
 
-    // Sauvegarder dans IndexedDB
-    await addCaution(caution);
+    try {
+      // Sauvegarder dans IndexedDB/localStorage
+      addCaution(caution);
+      
+      // Recharger les cautions
+      cautions = getCautions();
 
-    // Recharger les cautions
-    cautions = await getCautions();
+      console.log('✅ Caution créée:', caution);
 
-    afficherCaution(caution);
-    afficherHistorique();
+      afficherCaution(caution);
+      afficherHistorique();
+      
+      // Réinitialiser le formulaire
+      document.getElementById('garantNom').value = '';
+      document.getElementById('garantPrenom').value = '';
+      document.getElementById('garantAdresse').value = '';
+      document.getElementById('garantEmail').value = '';
+      document.getElementById('garantTel').value = '';
+      document.getElementById('montantGaranti').value = '';
+      
+    } catch (error) {
+      console.error('❌ Erreur lors de la création de la caution:', error);
+      alert('Erreur lors de la création de la caution.');
+    }
   }
 
   function afficherCaution(caution) {
@@ -224,7 +291,7 @@
     div.style.display = 'block';
 
     // Gestion sécurisée des propriétés du bail
-    const bienAdresse = caution.bail?.bien?.adresse || caution.bail?.adresse || '';
+    const bienAdresse = caution.bail?.bien?.adresse || caution.bail?.adresse || 'Adresse non définie';
     const bienCP = caution.bail?.bien?.codePostal || caution.bail?.codePostal || '';
     const bienVille = caution.bail?.bien?.ville || caution.bail?.ville || '';
 
@@ -233,15 +300,17 @@
 
       <p><strong>Garant :</strong> ${caution.garant.prenom} ${caution.garant.nom}</p>
       <p><strong>Adresse :</strong> ${caution.garant.adresse}</p>
-      <p><strong>Email :</strong> ${caution.garant.email}</p>
-      <p><strong>Téléphone :</strong> ${caution.garant.tel}</p>
+      ${caution.garant.email ? `<p><strong>Email :</strong> ${caution.garant.email}</p>` : ''}
+      ${caution.garant.tel ? `<p><strong>Téléphone :</strong> ${caution.garant.tel}</p>` : ''}
 
       <hr>
 
-      <p><strong>Locataire garanti :</strong> ${caution.locataire.prenom} ${caution.locataire.nom}</p>
-      <p><strong>Logement :</strong> ${bienAdresse}, ${bienCP} ${bienVille}</p>
+      <p><strong>Locataire garanti :</strong> ${caution.locataire.prenom || ''} ${caution.locataire.nom || ''}</p>
+      <p><strong>Logement :</strong> ${bienAdresse}${bienCP ? ', ' + bienCP : ''}${bienVille ? ' ' + bienVille : ''}</p>
 
       <p><strong>Montant garanti :</strong> ${caution.montant} € / mois</p>
+
+      <hr>
 
       <p>Le garant s'engage à payer au bailleur les sommes dues par le locataire en cas de défaillance, 
       conformément aux articles 22-1 et 24 de la loi du 6 juillet 1989.</p>
@@ -254,30 +323,37 @@
         <p>Fait à ____________________, le ____________________</p>
 
         <div class="signature-line"></div>
-        <p>Signature du garant précédée de la mention "Lu et approuvé"</p>
+        <p style="font-style: italic;">Signature du garant précédée de la mention "Lu et approuvé"</p>
       </div>
 
       <div class="action-buttons">
-        <button onclick="window.print()">🖨️ Imprimer</button>
+        <button class="primary" onclick="window.print()">🖨️ Imprimer</button>
         <button class="secondary" onclick="document.getElementById('cautionPreview').style.display='none'">Fermer</button>
       </div>
     `;
+    
+    // Scroll vers l'aperçu
+    div.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function afficherHistorique() {
     const container = document.getElementById('historiqueCautions');
+    
     if (cautions.length === 0) {
       container.innerHTML = "<p>Aucune caution enregistrée.</p>";
       return;
     }
 
-    container.innerHTML = cautions.map(c => `
-      <div class="history-item">
-        <strong>${c.garant.prenom} ${c.garant.nom}</strong> → ${c.locataire.nom}
-        <br>
-        <small>${new Date(c.dateCreation).toLocaleDateString('fr-FR')}</small>
-      </div>
-    `).join('');
+    container.innerHTML = cautions
+      .sort((a, b) => new Date(b.dateCreation) - new Date(a.dateCreation))
+      .map(c => `
+        <div class="history-item">
+          <strong>${c.garant.prenom || ''} ${c.garant.nom || ''}</strong> 
+          → ${c.locataire.prenom || ''} ${c.locataire.nom || ''}
+          <br>
+          <small>Montant: ${c.montant} € | ${new Date(c.dateCreation).toLocaleDateString('fr-FR')}</small>
+        </div>
+      `).join('');
   }
 
   // Initialisation au chargement de la page
@@ -286,5 +362,6 @@
 
 </body>
 </html>
+
 
 
