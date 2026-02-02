@@ -320,7 +320,7 @@
     const etats = await getEtatsDesLieux();
     const quittances = await getQuittances();
     const baux = await getBaux();
-
+    const Cautions = await getCautions();
     const biensOccupes = locataires.filter(l => l.bienId).length;
     const biensDisponibles = biens.length - biensOccupes;
 
@@ -535,6 +535,7 @@ if (statCautions) {
 
 </body>
 </html>
+
 
 
 
