@@ -134,6 +134,41 @@
     .back-link:hover {
       background: rgba(255, 255, 255, 0.3);
     }
+    /* Impression : n'imprimer que l'acte */
+@media print {
+
+  body {
+    background: white !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Cacher tout sauf l'acte */
+  body * {
+    visibility: hidden !important;
+  }
+
+  #cautionPreview, 
+  #cautionPreview * {
+    visibility: visible !important;
+  }
+
+  /* Positionner l'acte en haut de page */
+  #cautionPreview {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  /* Cacher les boutons dans l'acte */
+  #cautionPreview .action-buttons {
+    display: none !important;
+  }
+}
+
   </style>
 </head>
 
@@ -433,6 +468,7 @@ window.supprimerCaution = async function(id) {
 
 </body>
 </html>
+
 
 
 
