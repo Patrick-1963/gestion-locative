@@ -498,6 +498,7 @@
       <button class="tab" onclick="switchTab('equipements')">🔧 Équipements</button>
       <button class="tab" onclick="switchTab('photos')">📸 Photos</button>
       <button class="tab" onclick="switchTab('finalisation')">✅ Finalisation</button>
+      <button class="tab" onclick="switchTab('historique')">📚 Historique</button>
     </div>
     
     <!-- Onglet Général -->
@@ -731,6 +732,14 @@
         <button class="btn-primary" onclick="enregistrerEtatDesLieux()">💾 Enregistrer l'État des Lieux</button>
       </div>
     </div>
+    
+    <!-- Onglet Historique -->
+    <div id="tab-historique" class="tab-content">
+      <div class="section">
+        <h2>📚 Historique des États des Lieux</h2>
+        <div id="listeEtatsDesLieux"></div>
+      </div>
+    </div>
   </div>
   
   <!-- Modal Ajout Pièce -->
@@ -879,7 +888,11 @@
   <script type="module">
     import { getBiens, initDB } from './js/db.js';
     import { getProprietaires, getLocataires } from './js/db.js';
-    import { addEtatDesLieux } from './js/db.js';
+    import { addEtatDesLieux, getEtatsDesLieux, getEtatDesLieuxById, updateEtatDesLieux, deleteEtatDesLieux } from './js/db.js';
+    
+    // Variables globales
+    let edlEnCours = null; // État des lieux en cours d'édition
+    let modeEdition = false;
     import { showNotification } from './js/app.js';
     
     let pieces = [];
@@ -1188,6 +1201,7 @@
       if (tabName === 'cles') afficherCles();
       if (tabName === 'equipements') afficherEquipements();
       if (tabName === 'photos') afficherPhotosGenerales();
+      if (tabName === 'historique') afficherHistorique();
     };
     
     // Gestion des pièces
@@ -1462,6 +1476,243 @@
     };
     
     // Enregistrement final
+    /* ---------------------------------------------------------
+       AFFICHAGE DE L'HISTORIQUE
+    --------------------------------------------------------- */
+    async function afficherHistorique() {
+      const etatsDesLieux = await getEtatsDesLieux();
+      const biens = await getBiens();
+      const container = document.getElementById('listeEtatsDesLieux');
+      
+      if (!etatsDesLieux || etatsDesLieux.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 3rem; color: #7f8c8d;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">📋</div>
+            <h3>Aucun état des lieux enregistré</h3>
+            <p>Commencez par créer un état des lieux dans l'onglet "Informations"</p>
+          </div>`;
+        return;
+      }
+      
+      container.innerHTML = etatsDesLieux.map(edl => {
+        const bien = biens.find(b => b.id === edl.bienId);
+        const typeBadge = edl.type === 'entree' 
+          ? '<span style="background: #d4edda; color: #155724; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem;">📥 Entrée</span>'
+          : '<span style="background: #f8d7da; color: #721c24; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem;">📤 Sortie</span>';
+        
+        return `
+          <div style="background: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+              <div>
+                <h3 style="margin: 0 0 0.5rem 0; color: #2c3e50;">
+                  ${bien ? `${bien.adresse}, ${bien.ville}` : 'Bien inconnu'}
+                </h3>
+                <div style="margin: 0.5rem 0;">
+                  ${typeBadge}
+                </div>
+                <p style="margin: 0.5rem 0; color: #7f8c8d;">
+                  📅 ${new Date(edl.date).toLocaleDateString('fr-FR')}
+                  ${edl.heureDebut ? ` à ${edl.heureDebut}` : ''}
+                </p>
+                <p style="margin: 0.5rem 0; color: #7f8c8d;">
+                  🏠 ${edl.pieces?.length || 0} pièce(s) - 
+                  🔑 ${edl.cles?.length || 0} clé(s) - 
+                  🔧 ${edl.equipements?.length || 0} équipement(s)
+                </p>
+              </div>
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button onclick="voirEtatDesLieux('${edl.id}')" style="padding: 0.5rem 1rem; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                  👁️ Voir
+                </button>
+                <button onclick="editerEtatDesLieux('${edl.id}')" style="padding: 0.5rem 1rem; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                  ✏️ Modifier
+                </button>
+                <button onclick="supprimerEtatDesLieux('${edl.id}')" style="padding: 0.5rem 1rem; background: #e74c3c; color: white; border: none; border-radius: 6px; cursor: pointer;">
+                  🗑️ Supprimer
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    /* ---------------------------------------------------------
+       VOIR UN ÉTAT DES LIEUX
+    --------------------------------------------------------- */
+    window.voirEtatDesLieux = async function(id) {
+      const edl = await getEtatDesLieuxById(id);
+      if (!edl) return;
+      
+      alert('Fonctionnalité "Voir" à venir - Pour l\'instant, utilisez "Modifier" pour consulter les détails');
+      // TODO: Créer une vue détaillée en lecture seule
+    };
+    
+    /* ---------------------------------------------------------
+       ÉDITER UN ÉTAT DES LIEUX
+    --------------------------------------------------------- */
+    window.editerEtatDesLieux = async function(id) {
+      const edl = await getEtatDesLieuxById(id);
+      if (!edl) {
+        showNotification('État des lieux introuvable', 'error');
+        return;
+      }
+      
+      modeEdition = true;
+      edlEnCours = edl;
+      
+      // Remplir le formulaire
+      document.getElementById('bienId').value = edl.bienId;
+      document.getElementById('typeEDL').value = edl.type;
+      document.getElementById('dateEDL').value = edl.date;
+      document.getElementById('heureDebut').value = edl.heureDebut || '';
+      document.getElementById('heureFin').value = edl.heureFin || '';
+      document.getElementById('autresPresents').value = edl.autresPresents || '';
+      
+      // Compteurs
+      if (edl.compteurs) {
+        if (edl.compteurs.electricite) {
+          document.getElementById('compteurElecNum').value = edl.compteurs.electricite.numero || '';
+          document.getElementById('compteurElecIndex').value = edl.compteurs.electricite.index || '';
+          document.getElementById('compteurElecType').value = edl.compteurs.electricite.type || 'simple';
+          document.getElementById('compteurElecHP').value = edl.compteurs.electricite.indexHP || '';
+          document.getElementById('compteurElecHC').value = edl.compteurs.electricite.indexHC || '';
+        }
+        if (edl.compteurs.gaz) {
+          document.getElementById('compteurGazNum').value = edl.compteurs.gaz.numero || '';
+          document.getElementById('compteurGazIndex').value = edl.compteurs.gaz.index || '';
+        }
+        if (edl.compteurs.eau) {
+          document.getElementById('compteurEauNum').value = edl.compteurs.eau.numero || '';
+          document.getElementById('compteurEauIndex').value = edl.compteurs.eau.index || '';
+        }
+        if (edl.compteurs.eauChaude) {
+          document.getElementById('compteurEauChaudeNum').value = edl.compteurs.eauChaude.numero || '';
+          document.getElementById('compteurEauChaudeIndex').value = edl.compteurs.eauChaude.index || '';
+        }
+      }
+      
+      // Pièces, clés, équipements
+      if (edl.pieces) pieces = edl.pieces;
+      if (edl.cles) cles = edl.cles;
+      if (edl.equipements) equipements = edl.equipements;
+      if (edl.photosGenerales) photosGenerales = edl.photosGenerales;
+      
+      // Observations et signatures
+      document.getElementById('observationsGenerales').value = edl.observationsGenerales || '';
+      document.getElementById('signatureBailleur').checked = edl.signatureBailleur || false;
+      document.getElementById('signatureLocataire').checked = edl.signatureLocataire || false;
+      
+      // Réafficher les éléments
+      afficherPieces();
+      afficherCles();
+      afficherEquipements();
+      afficherPhotosGenerales();
+      
+      // Changer le texte du bouton
+      const btnEnregistrer = document.querySelector('button[onclick="enregistrerEtatDesLieux()"]');
+      if (btnEnregistrer) {
+        btnEnregistrer.innerHTML = '💾 Mettre à jour l\'État des Lieux';
+      }
+      
+      // Revenir à l'onglet général
+      switchTab('general');
+      
+      // Afficher un bandeau d'édition
+      const header = document.querySelector('.header');
+      const existingBanner = document.getElementById('editBanner');
+      if (existingBanner) existingBanner.remove();
+      
+      const banner = document.createElement('div');
+      banner.id = 'editBanner';
+      banner.style.cssText = 'background: #fff3cd; padding: 1rem; border-radius: 6px; margin-bottom: 1rem; border-left: 4px solid #ffc107;';
+      banner.innerHTML = `
+        <strong>⚠️ Mode édition</strong> - Vous modifiez un état des lieux existant
+        <button onclick="annulerEdition()" style="float: right; background: #6c757d; color: white; border: none; padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer;">
+          Annuler
+        </button>
+      `;
+      header.after(banner);
+      
+      showNotification('📝 État des lieux chargé pour modification');
+    };
+    
+    /* ---------------------------------------------------------
+       SUPPRIMER UN ÉTAT DES LIEUX
+    --------------------------------------------------------- */
+    window.supprimerEtatDesLieux = async function(id) {
+      if (!confirm('Êtes-vous sûr de vouloir supprimer cet état des lieux ?\n\nCette action est irréversible.')) {
+        return;
+      }
+      
+      try {
+        await deleteEtatDesLieux(id);
+        showNotification('✅ État des lieux supprimé');
+        afficherHistorique();
+      } catch (err) {
+        console.error('Erreur suppression:', err);
+        showNotification('Erreur lors de la suppression', 'error');
+      }
+    };
+    
+    /* ---------------------------------------------------------
+       ANNULER L'ÉDITION
+    --------------------------------------------------------- */
+    window.annulerEdition = function() {
+      modeEdition = false;
+      edlEnCours = null;
+      
+      // Réinitialiser le formulaire
+      document.getElementById('bienId').value = '';
+      document.getElementById('typeEDL').value = '';
+      document.getElementById('dateEDL').valueAsDate = new Date();
+      document.getElementById('heureDebut').value = '';
+      document.getElementById('heureFin').value = '';
+      document.getElementById('autresPresents').value = '';
+      
+      // Réinitialiser les compteurs
+      document.getElementById('compteurElecNum').value = '';
+      document.getElementById('compteurElecIndex').value = '';
+      document.getElementById('compteurElecType').value = 'simple';
+      document.getElementById('compteurElecHP').value = '';
+      document.getElementById('compteurElecHC').value = '';
+      document.getElementById('compteurGazNum').value = '';
+      document.getElementById('compteurGazIndex').value = '';
+      document.getElementById('compteurEauNum').value = '';
+      document.getElementById('compteurEauIndex').value = '';
+      document.getElementById('compteurEauChaudeNum').value = '';
+      document.getElementById('compteurEauChaudeIndex').value = '';
+      
+      // Réinitialiser les données
+      pieces = [];
+      cles = [];
+      equipements = [];
+      photosGenerales = [];
+      
+      // Réafficher
+      afficherPieces();
+      afficherCles();
+      afficherEquipements();
+      afficherPhotosGenerales();
+      
+      // Réinitialiser observations
+      document.getElementById('observationsGenerales').value = '';
+      document.getElementById('signatureBailleur').checked = false;
+      document.getElementById('signatureLocataire').checked = false;
+      
+      // Retirer le bandeau
+      const banner = document.getElementById('editBanner');
+      if (banner) banner.remove();
+      
+      // Changer le texte du bouton
+      const btnEnregistrer = document.querySelector('button[onclick="enregistrerEtatDesLieux()"]');
+      if (btnEnregistrer) {
+        btnEnregistrer.innerHTML = '💾 Enregistrer l\'État des Lieux';
+      }
+      
+      showNotification('Édition annulée');
+    };
+    
     window.enregistrerEtatDesLieux = async function() {
       const bienId = document.getElementById('bienId').value;
       const typeEDL = document.getElementById('typeEDL').value;
@@ -1513,9 +1764,36 @@
           signatureLocataire: document.getElementById('signatureLocataire').checked
         };
         
-        await addEtatDesLieux(etatDesLieux);
-        showNotification('✅ État des lieux enregistré avec succès !');
-        window.location.href = '/gestion-locative/menu.html';
+        if (modeEdition && edlEnCours) {
+          // Mise à jour
+          etatDesLieux.id = edlEnCours.id;
+          etatDesLieux.dateCreation = edlEnCours.dateCreation;
+          etatDesLieux.dateModification = new Date().toISOString();
+          await updateEtatDesLieux(etatDesLieux);
+          showNotification('✅ État des lieux mis à jour avec succès !');
+          
+          // Réinitialiser le mode édition
+          modeEdition = false;
+          edlEnCours = null;
+          const banner = document.getElementById('editBanner');
+          if (banner) banner.remove();
+        } else {
+          // Création
+          etatDesLieux.dateCreation = new Date().toISOString();
+          await addEtatDesLieux(etatDesLieux);
+          showNotification('✅ État des lieux enregistré avec succès !');
+        }
+        
+        // Recharger l'historique
+        await afficherHistorique();
+        
+        // Retourner au menu ou rester sur la page
+        if (confirm('Voulez-vous revenir au menu principal ?')) {
+          window.location.href = '/gestion-locative/menu.html';
+        } else {
+          // Basculer vers l'onglet historique
+          switchTab('historique');
+        }
       } catch (err) {
         console.error('Erreur enregistrement:', err);
         showNotification('Erreur lors de l\'enregistrement', 'error');
@@ -1525,6 +1803,7 @@
 </body>
 
 </html>
+
 
 
 
