@@ -9,6 +9,10 @@
   <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css" />
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="manifest" href="manifest.json">
+  
+  <!-- Bibliothèques pour génération PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
   <style>
     body { 
@@ -906,7 +910,7 @@
     };
     
     /**
-     * Fonction de partage d'un état des lieux
+     * Fonction de partage d'un état des lieux en PDF
      */
     window.partagerEDL = async function(edlId) {
       const edl = etatsDesLieux.find(e => e.id === edlId);
@@ -916,64 +920,117 @@
       }
       
       const bien = biens.find(b => b.id === edl.bienId);
-      const locataire = locataires.find(l => l.bienId === edl.bienId);
+      const typeEDL = edl.type === 'entree' ? 'Entree' : 'Sortie';
+      const dateEDL = new Date(edl.date).toLocaleDateString('fr-FR').replace(/\//g, '-');
+      const adresse = bien ? bien.reference || bien.adresse : 'Bien';
       
-      // Préparer le texte à partager
-      const typeEDL = edl.type === 'entree' ? 'Entrée' : 'Sortie';
-      const dateEDL = new Date(edl.date).toLocaleDateString('fr-FR');
-      const adresse = bien ? `${bien.adresse}, ${bien.ville}` : 'Bien inconnu';
-      const locataireNom = locataire ? `${locataire.civilite} ${locataire.nom} ${locataire.prenom}` : '';
+      // Nom du fichier
+      const nomFichier = `EDL-${typeEDL}-${adresse}-${dateEDL}.pdf`;
       
-      const nbPieces = edl.pieces ? edl.pieces.length : 0;
-      const nbElements = edl.pieces ? edl.pieces.reduce((acc, p) => acc + (p.elements ? p.elements.length : 0), 0) : 0;
-      const nbCles = edl.cles ? edl.cles.length : 0;
-      const nbEquipements = edl.equipements ? edl.equipements.length : 0;
+      showNotification('⏳ Génération du PDF en cours...', 'info');
       
-      const texte = `📋 État des Lieux - ${typeEDL}
-
-📍 Bien : ${adresse}
-📅 Date : ${dateEDL}
-${locataireNom ? `👤 Locataire : ${locataireNom}` : ''}
-
-📊 Résumé :
-• ${nbPieces} pièce(s)
-• ${nbElements} élément(s) inspectés
-• ${nbCles} clé(s)
-• ${nbEquipements} équipement(s)
-
-${edl.signatureBailleur && edl.signatureLocataire ? '✅ Document signé par les deux parties' : '⚠️ Signatures en attente'}
-
----
-Généré par Gestion Locative Pro`;
-
-      // Vérifier si l'API Web Share est disponible
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: `État des Lieux ${typeEDL} - ${adresse}`,
-            text: texte,
-            // URL optionnelle si vous avez une version web
-            // url: window.location.origin + '/edl/' + edlId
-          });
+      try {
+        // Ouvrir le modal des détails pour avoir le contenu complet
+        window.afficherDetails(edlId);
+        
+        // Attendre que le modal soit affiché
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const modalContent = document.querySelector('.modal-content');
+        if (!modalContent) {
+          throw new Error('Impossible de trouver le contenu à convertir');
+        }
+        
+        // Sauvegarder les styles originaux
+        const originalMaxHeight = modalContent.style.maxHeight;
+        const originalOverflow = modalContent.style.overflow;
+        
+        // Préparer le contenu pour la capture
+        modalContent.style.maxHeight = 'none';
+        modalContent.style.overflow = 'visible';
+        
+        // Générer le canvas avec html2canvas
+        const canvas = await html2canvas(modalContent, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: '#ffffff'
+        });
+        
+        // Restaurer les styles
+        modalContent.style.maxHeight = originalMaxHeight;
+        modalContent.style.overflow = originalOverflow;
+        
+        // Créer le PDF avec jsPDF
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        
+        const imgWidth = 190;
+        const pageHeight = 297;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 10;
+        
+        const imgData = canvas.toDataURL('image/png');
+        
+        // Ajouter la première page
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+        
+        // Ajouter des pages supplémentaires si nécessaire
+        while (heightLeft > 0) {
+          pdf.addPage();
+          position = heightLeft - imgHeight + 10;
+          pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+        
+        // Convertir le PDF en Blob
+        const pdfBlob = pdf.output('blob');
+        
+        // Fermer le modal
+        window.fermerModal();
+        
+        // Vérifier si l'API Web Share est disponible ET supporte les fichiers
+        if (navigator.share && navigator.canShare) {
+          const fichier = new File([pdfBlob], nomFichier, { type: 'application/pdf' });
           
-          showNotification('✅ Partagé avec succès !');
-        } catch (err) {
-          // L'utilisateur a annulé le partage
-          if (err.name !== 'AbortError') {
-            console.error('Erreur partage:', err);
-            showNotification('❌ Erreur lors du partage', 'error');
+          // Vérifier si on peut partager ce fichier
+          if (navigator.canShare({ files: [fichier] })) {
+            try {
+              await navigator.share({
+                title: `État des Lieux ${typeEDL}`,
+                text: `État des lieux ${typeEDL} - ${adresse}`,
+                files: [fichier]
+              });
+              
+              showNotification('✅ PDF partagé avec succès !');
+              return;
+            } catch (err) {
+              if (err.name !== 'AbortError') {
+                console.error('Erreur partage fichier:', err);
+                // Fallback vers le téléchargement
+              }
+            }
           }
         }
-      } else {
-        // Fallback : copier dans le presse-papiers
-        try {
-          await navigator.clipboard.writeText(texte);
-          showNotification('📋 Texte copié dans le presse-papiers ! Vous pouvez le coller dans l\'application de votre choix.', 'success');
-        } catch (err) {
-          // Si le presse-papiers ne fonctionne pas non plus, afficher le texte
-          console.error('Erreur copie:', err);
-          alert('Votre navigateur ne supporte pas le partage.\n\nVoici le texte à copier :\n\n' + texte);
-        }
+        
+        // Fallback : télécharger le PDF
+        const url = URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = nomFichier;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        
+        showNotification('📥 PDF téléchargé ! Vous pouvez maintenant le partager depuis vos fichiers.', 'success');
+        
+      } catch (err) {
+        console.error('Erreur génération PDF:', err);
+        showNotification('❌ Erreur lors de la génération du PDF', 'error');
+        window.fermerModal();
       }
     };
     
@@ -1013,6 +1070,7 @@ Généré par Gestion Locative Pro`;
 </body>
 
 </html>
+
 
 
 
