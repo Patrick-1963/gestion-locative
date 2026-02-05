@@ -384,19 +384,30 @@
       .modal-header {
         border-bottom: 2px solid #000 !important;
         page-break-after: avoid !important;
+        break-after: avoid !important;
+      }
+      
+      h3 {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
       
       .detail-section {
         page-break-inside: avoid !important;
+        break-inside: avoid !important;
         margin-bottom: 1rem !important;
       }
       
       .piece-detail {
         page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
       
       .element-detail {
         page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
       
       img {
@@ -949,40 +960,76 @@
         modalContent.style.maxHeight = 'none';
         modalContent.style.overflow = 'visible';
         
+        // Ajouter des styles CSS pour éviter les coupures
+        const styleElement = document.createElement('style');
+        styleElement.id = 'pdf-print-styles';
+        styleElement.textContent = `
+          .detail-section {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          .piece-detail {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          .element-detail {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          h3 {
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+          }
+        `;
+        document.head.appendChild(styleElement);
+        
         // Générer le canvas avec html2canvas
         const canvas = await html2canvas(modalContent, {
           scale: 2,
           useCORS: true,
           logging: false,
-          backgroundColor: '#ffffff'
+          backgroundColor: '#ffffff',
+          windowWidth: modalContent.scrollWidth,
+          windowHeight: modalContent.scrollHeight
         });
+        
+        // Supprimer les styles temporaires
+        document.head.removeChild(styleElement);
         
         // Restaurer les styles
         modalContent.style.maxHeight = originalMaxHeight;
         modalContent.style.overflow = originalOverflow;
         
-        // Créer le PDF avec jsPDF
+        // Créer le PDF avec jsPDF - méthode améliorée
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF('p', 'mm', 'a4');
         
-        const imgWidth = 190;
-        const pageHeight = 297;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = imgHeight;
-        let position = 10;
+        const pdfWidth = 210; // A4 width in mm
+        const pdfHeight = 297; // A4 height in mm
+        const margin = 10;
+        const contentWidth = pdfWidth - (2 * margin);
+        
+        const imgWidth = contentWidth;
+        const imgHeight = (canvas.height * contentWidth) / canvas.width;
         
         const imgData = canvas.toDataURL('image/png');
         
-        // Ajouter la première page
-        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        let heightLeft = imgHeight;
+        let position = margin;
+        let pageCount = 0;
         
-        // Ajouter des pages supplémentaires si nécessaire
+        // Première page
+        pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+        heightLeft -= (pdfHeight - 2 * margin);
+        pageCount++;
+        
+        // Pages suivantes
         while (heightLeft > 0) {
           pdf.addPage();
-          position = heightLeft - imgHeight + 10;
-          pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
+          pageCount++;
+          position = -(pageCount - 1) * (pdfHeight - 2 * margin) + margin;
+          pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
+          heightLeft -= (pdfHeight - 2 * margin);
         }
         
         // Convertir le PDF en Blob
@@ -1070,3 +1117,4 @@
 </body>
 
 </html>
+
