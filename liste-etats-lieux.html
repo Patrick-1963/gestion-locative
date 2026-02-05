@@ -909,130 +909,129 @@
       }
     };
     
-    /**
-     * Fonction de partage d'un état des lieux en PDF
-     */
-    window.partagerEDL = async function(edlId) {
-      const edl = etatsDesLieux.find(e => e.id === edlId);
-      if (!edl) {
-        showNotification('❌ État des lieux introuvable', 'error');
-        return;
-      }
-      
-      const bien = biens.find(b => b.id === edl.bienId);
-      const typeEDL = edl.type === 'entree' ? 'Entree' : 'Sortie';
-      const dateEDL = new Date(edl.date).toLocaleDateString('fr-FR').replace(/\//g, '-');
-      const adresse = bien ? bien.reference || bien.adresse : 'Bien';
-      
-      // Nom du fichier
-      const nomFichier = `EDL-${typeEDL}-${adresse}-${dateEDL}.pdf`;
-      
-      showNotification('⏳ Génération du PDF en cours...', 'info');
-      
-      try {
-        // Ouvrir le modal des détails pour avoir le contenu complet
-        window.afficherDetails(edlId);
-        
-        // Attendre que le modal soit affiché
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        const modalContent = document.querySelector('.modal-content');
-        if (!modalContent) {
-          throw new Error('Impossible de trouver le contenu à convertir');
-        }
-        
-        // Sauvegarder les styles originaux
-        const originalMaxHeight = modalContent.style.maxHeight;
-        const originalOverflow = modalContent.style.overflow;
-        
-        // Préparer le contenu pour la capture
-        modalContent.style.maxHeight = 'none';
-        modalContent.style.overflow = 'visible';
-        
-        // Générer le canvas avec html2canvas
-        const canvas = await html2canvas(modalContent, {
-          scale: 2,
-          useCORS: true,
-          logging: false,
-          backgroundColor: '#ffffff'
-        });
-        
-        // Restaurer les styles
-        modalContent.style.maxHeight = originalMaxHeight;
-        modalContent.style.overflow = originalOverflow;
-        
-        // Créer le PDF avec jsPDF
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        
-        const imgWidth = 190;
-        const pageHeight = 297;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = imgHeight;
-        let position = 10;
-        
-        const imgData = canvas.toDataURL('image/png');
-        
-        // Ajouter la première page
-        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-        
-        // Ajouter des pages supplémentaires si nécessaire
-        while (heightLeft > 0) {
-          pdf.addPage();
-          position = heightLeft - imgHeight + 10;
-          pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
-        }
-        
-        // Convertir le PDF en Blob
-        const pdfBlob = pdf.output('blob');
-        
-        // Fermer le modal
-        window.fermerModal();
-        
-        // Vérifier si l'API Web Share est disponible ET supporte les fichiers
-        if (navigator.share && navigator.canShare) {
-          const fichier = new File([pdfBlob], nomFichier, { type: 'application/pdf' });
-          
-          // Vérifier si on peut partager ce fichier
-          if (navigator.canShare({ files: [fichier] })) {
-            try {
-              await navigator.share({
-                title: `État des Lieux ${typeEDL}`,
-                text: `État des lieux ${typeEDL} - ${adresse}`,
-                files: [fichier]
-              });
-              
-              showNotification('✅ PDF partagé avec succès !');
-              return;
-            } catch (err) {
-              if (err.name !== 'AbortError') {
-                console.error('Erreur partage fichier:', err);
-                // Fallback vers le téléchargement
-              }
-            }
+   /**
+ * Fonction de partage d'un état des lieux en PDF (version PRO)
+ */
+window.partagerEDL = async function(edlId) {
+  const edl = etatsDesLieux.find(e => e.id === edlId);
+  if (!edl) {
+    showNotification('❌ État des lieux introuvable', 'error');
+    return;
+  }
+
+  const bien = biens.find(b => b.id === edl.bienId);
+  const typeEDL = edl.type === 'entree' ? 'Entrée' : 'Sortie';
+  const dateEDL = new Date(edl.date).toLocaleDateString('fr-FR');
+  const adresse = bien ? (bien.reference || bien.adresse) : 'Bien';
+
+  const nomFichier = `EDL-${typeEDL}-${adresse}-${dateEDL.replace(/\//g, '-')}.pdf`;
+
+  showNotification('⏳ Génération du PDF...', 'info');
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // ============================
+    // TITRE
+    // ============================
+    doc.setFontSize(18);
+    doc.text(`État des lieux - ${typeEDL}`, 10, 20);
+
+    // ============================
+    // INFORMATIONS GÉNÉRALES
+    // ============================
+    doc.setFontSize(12);
+    doc.text(`Adresse : ${adresse}`, 10, 35);
+    doc.text(`Date : ${dateEDL}`, 10, 45);
+
+    if (edl.locataireNom) {
+      doc.text(`Locataire : ${edl.locataireNom}`, 10, 55);
+    }
+
+    // ============================
+    // TABLEAU DES PIÈCES
+    // ============================
+    doc.setFontSize(14);
+    doc.text("Pièces inspectées :", 10, 70);
+
+    if (edl.pieces && edl.pieces.length > 0) {
+      const body = edl.pieces.map(p => [
+        p.nom || '',
+        p.etat || '',
+        p.observations || ''
+      ]);
+
+      doc.autoTable({
+        startY: 75,
+        head: [['Pièce', 'État', 'Observations']],
+        body,
+        styles: { fontSize: 10, cellPadding: 2 },
+        headStyles: { fillColor: [118, 75, 162] } // ton violet
+      });
+    } else {
+      doc.setFontSize(12);
+      doc.text("Aucune pièce enregistrée.", 10, 80);
+    }
+
+    // ============================
+    // SIGNATURES
+    // ============================
+    let finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 20 : 110;
+
+    doc.setFontSize(12);
+    doc.text("Signature du locataire :", 10, finalY);
+    doc.text("Signature du propriétaire :", 110, finalY);
+
+    // ============================
+    // EXPORT PDF
+    // ============================
+    const pdfBlob = doc.output('blob');
+
+    // ============================
+    // PARTAGE (Web Share API)
+    // ============================
+    if (navigator.share && navigator.canShare) {
+      const fichier = new File([pdfBlob], nomFichier, { type: 'application/pdf' });
+
+      if (navigator.canShare({ files: [fichier] })) {
+        try {
+          await navigator.share({
+            title: `État des lieux ${typeEDL}`,
+            text: `État des lieux ${typeEDL} - ${adresse}`,
+            files: [fichier]
+          });
+
+          showNotification('✅ PDF partagé avec succès !');
+          return;
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            console.error('Erreur partage fichier:', err);
           }
         }
-        
-        // Fallback : télécharger le PDF
-        const url = URL.createObjectURL(pdfBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = nomFichier;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        
-        showNotification('📥 PDF téléchargé ! Vous pouvez maintenant le partager depuis vos fichiers.', 'success');
-        
-      } catch (err) {
-        console.error('Erreur génération PDF:', err);
-        showNotification('❌ Erreur lors de la génération du PDF', 'error');
-        window.fermerModal();
       }
-    };
+    }
+
+    // ============================
+    // FALLBACK : TÉLÉCHARGEMENT
+    // ============================
+    const url = URL.createObjectURL(pdfBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nomFichier;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    showNotification('📥 PDF téléchargé !', 'success');
+
+  } catch (err) {
+    console.error('Erreur génération PDF:', err);
+    showNotification('❌ Erreur lors de la génération du PDF', 'error');
+  }
+};
+
     
     window.agrandirPhoto = function(data) {
       const modal = document.createElement('div');
@@ -1070,6 +1069,7 @@
 </body>
 
 </html>
+
 
 
 
