@@ -920,166 +920,164 @@
       }
     };
     
-    /**
-     * Fonction de partage d'un état des lieux en PDF
-     */
-    window.partagerEDL = async function(edlId) {
-      const edl = etatsDesLieux.find(e => e.id === edlId);
-      if (!edl) {
-        showNotification('❌ État des lieux introuvable', 'error');
-        return;
+   window.partagerEDL = async function(edlId) {
+  const edl = etatsDesLieux.find(e => e.id === edlId);
+  if (!edl) {
+    showNotification('❌ État des lieux introuvable', 'error');
+    return;
+  }
+
+  const bien = biens.find(b => b.id === edl.bienId);
+  const typeEDL = edl.type === 'entree' ? 'Entree' : 'Sortie';
+  const dateEDL = new Date(edl.date).toLocaleDateString('fr-FR').replace(/\//g, '-');
+  const adresse = bien ? bien.reference || bien.adresse : 'Bien';
+
+  const nomFichier = `EDL-${typeEDL}-${adresse}-${dateEDL}.pdf`;
+
+  showNotification('⏳ Génération du PDF en cours...', 'info');
+
+  try {
+    // Ouvrir le modal des détails pour avoir le contenu complet
+    window.afficherDetails(edlId);
+
+    // Attendre que le modal soit affiché
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const modalContent = document.querySelector('.modal-content');
+    if (!modalContent) {
+      throw new Error('Impossible de trouver le contenu à convertir');
+    }
+
+    // Sauvegarder les styles originaux
+    const originalMaxHeight = modalContent.style.maxHeight;
+    const originalOverflow = modalContent.style.overflow;
+
+    // Préparer le contenu pour la capture
+    modalContent.style.maxHeight = 'none';
+    modalContent.style.overflow = 'visible';
+
+    // Ajouter des styles CSS pour éviter les coupures
+    const styleElement = document.createElement('style');
+    styleElement.id = 'pdf-print-styles';
+    styleElement.textContent = `
+      .detail-section, .piece-detail, .element-detail {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
-      
-      const bien = biens.find(b => b.id === edl.bienId);
-      const typeEDL = edl.type === 'entree' ? 'Entree' : 'Sortie';
-      const dateEDL = new Date(edl.date).toLocaleDateString('fr-FR').replace(/\//g, '-');
-      const adresse = bien ? bien.reference || bien.adresse : 'Bien';
-      
-      // Nom du fichier
-      const nomFichier = `EDL-${typeEDL}-${adresse}-${dateEDL}.pdf`;
-      
-      showNotification('⏳ Génération du PDF en cours...', 'info');
-      
-      try {
-        // Ouvrir le modal des détails pour avoir le contenu complet
-        window.afficherDetails(edlId);
-        
-        // Attendre que le modal soit affiché
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        const modalContent = document.querySelector('.modal-content');
-        if (!modalContent) {
-          throw new Error('Impossible de trouver le contenu à convertir');
-        }
-        
-        // Sauvegarder les styles originaux
-        const originalMaxHeight = modalContent.style.maxHeight;
-        const originalOverflow = modalContent.style.overflow;
-        
-        // Préparer le contenu pour la capture
-        modalContent.style.maxHeight = 'none';
-        modalContent.style.overflow = 'visible';
-        
-        // Ajouter des styles CSS pour éviter les coupures
-        const styleElement = document.createElement('style');
-        styleElement.id = 'pdf-print-styles';
-        styleElement.textContent = `
-          .detail-section {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-          }
-          .piece-detail {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-          }
-          .element-detail {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-          }
-          h3 {
-            page-break-after: avoid !important;
-            break-after: avoid !important;
-          }
-        `;
-        document.head.appendChild(styleElement);
-        
-        // Générer le canvas avec html2canvas
-        const canvas = await html2canvas(modalContent, {
-          scale: 2,
-          useCORS: true,
-          logging: false,
-          backgroundColor: '#ffffff',
-          windowWidth: modalContent.scrollWidth,
-          windowHeight: modalContent.scrollHeight
-        });
-        
-        // Supprimer les styles temporaires
-        document.head.removeChild(styleElement);
-        
-        // Restaurer les styles
-        modalContent.style.maxHeight = originalMaxHeight;
-        modalContent.style.overflow = originalOverflow;
-        
-        // Créer le PDF avec jsPDF - méthode améliorée
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        
-        const pdfWidth = 210; // A4 width in mm
-        const pdfHeight = 297; // A4 height in mm
-        const margin = 10;
-        const contentWidth = pdfWidth - (2 * margin);
-        
-        const imgWidth = contentWidth;
-        const imgHeight = (canvas.height * contentWidth) / canvas.width;
-        
-        const imgData = canvas.toDataURL('image/png');
-        
-        let heightLeft = imgHeight;
-        let position = margin;
-        let pageCount = 0;
-        
-        // Première page
-        pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
-        heightLeft -= (pdfHeight - 2 * margin);
-        pageCount++;
-        
-        // Pages suivantes
-        while (heightLeft > 0) {
-          pdf.addPage();
-          pageCount++;
-          position = -(pageCount - 1) * (pdfHeight - 2 * margin) + margin;
-          pdf.addImage(imgData, 'PNG', margin, position, imgWidth, imgHeight);
-          heightLeft -= (pdfHeight - 2 * margin);
-        }
-        
-        // Convertir le PDF en Blob
-        const pdfBlob = pdf.output('blob');
-        
-        // Fermer le modal
-        window.fermerModal();
-        
-        // Vérifier si l'API Web Share est disponible ET supporte les fichiers
-        if (navigator.share && navigator.canShare) {
-          const fichier = new File([pdfBlob], nomFichier, { type: 'application/pdf' });
-          
-          // Vérifier si on peut partager ce fichier
-          if (navigator.canShare({ files: [fichier] })) {
-            try {
-              await navigator.share({
-                title: `État des Lieux ${typeEDL}`,
-                text: `État des lieux ${typeEDL} - ${adresse}`,
-                files: [fichier]
-              });
-              
-              showNotification('✅ PDF partagé avec succès !');
-              return;
-            } catch (err) {
-              if (err.name !== 'AbortError') {
-                console.error('Erreur partage fichier:', err);
-                // Fallback vers le téléchargement
-              }
-            }
-          }
-        }
-        
-        // Fallback : télécharger le PDF
-        const url = URL.createObjectURL(pdfBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = nomFichier;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        
-        showNotification('📥 PDF téléchargé ! Vous pouvez maintenant le partager depuis vos fichiers.', 'success');
-        
-      } catch (err) {
-        console.error('Erreur génération PDF:', err);
-        showNotification('❌ Erreur lors de la génération du PDF', 'error');
-        window.fermerModal();
+      h3, h4, h5 {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
       }
-    };
+      img {
+        max-width: 100% !important;
+        height: auto !important;
+      }
+    `;
+    document.head.appendChild(styleElement);
+
+    // Générer le canvas avec html2canvas
+    const canvas = await html2canvas(modalContent, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      backgroundColor: '#ffffff',
+      windowWidth: modalContent.scrollWidth,
+      windowHeight: modalContent.scrollHeight,
+    });
+
+    // Supprimer les styles temporaires
+    document.head.removeChild(styleElement);
+
+    // Restaurer les styles
+    modalContent.style.maxHeight = originalMaxHeight;
+    modalContent.style.overflow = originalOverflow;
+
+    // Créer le PDF avec jsPDF
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+
+    // Calculer les dimensions
+    const pdfWidth = 210; // Largeur A4 en mm
+    const pdfHeight = 297; // Hauteur A4 en mm
+    const margin = 10;
+    const contentWidth = pdfWidth - (2 * margin);
+
+    // Ajouter une image par page si nécessaire
+    const imgWidth = contentWidth;
+    const imgHeight = (canvas.height * contentWidth) / canvas.width;
+
+    // Découper le canvas en plusieurs pages si nécessaire
+    let position = margin;
+    let remainingHeight = imgHeight;
+
+    // Ajouter le contenu au PDF
+    pdf.addImage(canvas, 'PNG', margin, position, imgWidth, imgHeight);
+
+    // Si le contenu dépasse une page, ajouter des pages supplémentaires
+    if (remainingHeight > (pdfHeight - 2 * margin)) {
+      let currentHeight = pdfHeight - 2 * margin;
+      let offset = currentHeight;
+
+      while (remainingHeight > 0) {
+        pdf.addPage();
+        pdf.addImage(
+          canvas,
+          'PNG',
+          margin,
+          -offset + margin,
+          imgWidth,
+          imgHeight,
+        );
+        remainingHeight -= currentHeight;
+        offset += currentHeight;
+      }
+    }
+
+    // Générer le blob PDF
+    const pdfBlob = pdf.output('blob');
+
+    // Fermer le modal
+    window.fermerModal();
+
+    // Partager ou télécharger le PDF
+    if (navigator.share && navigator.canShare) {
+      const fichier = new File([pdfBlob], nomFichier, { type: 'application/pdf' });
+      if (navigator.canShare({ files: [fichier] })) {
+        try {
+          await navigator.share({
+            title: `État des Lieux ${typeEDL}`,
+            text: `État des lieux ${typeEDL} - ${adresse}`,
+            files: [fichier],
+          });
+          showNotification('✅ PDF partagé avec succès !');
+          return;
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            console.error('Erreur partage fichier:', err);
+          }
+        }
+      }
+    }
+
+    // Télécharger le PDF si le partage n'est pas possible
+    const url = URL.createObjectURL(pdfBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nomFichier;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    showNotification('📥 PDF téléchargé ! Vous pouvez maintenant le partager depuis vos fichiers.', 'success');
+
+  } catch (err) {
+    console.error('Erreur génération PDF:', err);
+    showNotification('❌ Erreur lors de la génération du PDF', 'error');
+    window.fermerModal();
+  }
+};
+
     
     window.agrandirPhoto = function(data) {
       const modal = document.createElement('div');
@@ -1117,4 +1115,5 @@
 </body>
 
 </html>
+
 
