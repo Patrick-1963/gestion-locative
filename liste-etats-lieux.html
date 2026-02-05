@@ -660,6 +660,9 @@
               <button class="btn-primary" onclick="window.exporterPDF('${edl.id}')">
                 📄 Exporter PDF
               </button>
+              <button class="btn-success" onclick="window.partagerEDL('${edl.id}')">
+                📤 Partager
+              </button>
               <button class="btn-danger" onclick="window.supprimerEDL('${edl.id}')">
                 🗑️ Supprimer
               </button>
@@ -902,6 +905,78 @@
       }
     };
     
+    /**
+     * Fonction de partage d'un état des lieux
+     */
+    window.partagerEDL = async function(edlId) {
+      const edl = etatsDesLieux.find(e => e.id === edlId);
+      if (!edl) {
+        showNotification('❌ État des lieux introuvable', 'error');
+        return;
+      }
+      
+      const bien = biens.find(b => b.id === edl.bienId);
+      const locataire = locataires.find(l => l.bienId === edl.bienId);
+      
+      // Préparer le texte à partager
+      const typeEDL = edl.type === 'entree' ? 'Entrée' : 'Sortie';
+      const dateEDL = new Date(edl.date).toLocaleDateString('fr-FR');
+      const adresse = bien ? `${bien.adresse}, ${bien.ville}` : 'Bien inconnu';
+      const locataireNom = locataire ? `${locataire.civilite} ${locataire.nom} ${locataire.prenom}` : '';
+      
+      const nbPieces = edl.pieces ? edl.pieces.length : 0;
+      const nbElements = edl.pieces ? edl.pieces.reduce((acc, p) => acc + (p.elements ? p.elements.length : 0), 0) : 0;
+      const nbCles = edl.cles ? edl.cles.length : 0;
+      const nbEquipements = edl.equipements ? edl.equipements.length : 0;
+      
+      const texte = `📋 État des Lieux - ${typeEDL}
+
+📍 Bien : ${adresse}
+📅 Date : ${dateEDL}
+${locataireNom ? `👤 Locataire : ${locataireNom}` : ''}
+
+📊 Résumé :
+• ${nbPieces} pièce(s)
+• ${nbElements} élément(s) inspectés
+• ${nbCles} clé(s)
+• ${nbEquipements} équipement(s)
+
+${edl.signatureBailleur && edl.signatureLocataire ? '✅ Document signé par les deux parties' : '⚠️ Signatures en attente'}
+
+---
+Généré par Gestion Locative Pro`;
+
+      // Vérifier si l'API Web Share est disponible
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: `État des Lieux ${typeEDL} - ${adresse}`,
+            text: texte,
+            // URL optionnelle si vous avez une version web
+            // url: window.location.origin + '/edl/' + edlId
+          });
+          
+          showNotification('✅ Partagé avec succès !');
+        } catch (err) {
+          // L'utilisateur a annulé le partage
+          if (err.name !== 'AbortError') {
+            console.error('Erreur partage:', err);
+            showNotification('❌ Erreur lors du partage', 'error');
+          }
+        }
+      } else {
+        // Fallback : copier dans le presse-papiers
+        try {
+          await navigator.clipboard.writeText(texte);
+          showNotification('📋 Texte copié dans le presse-papiers ! Vous pouvez le coller dans l\'application de votre choix.', 'success');
+        } catch (err) {
+          // Si le presse-papiers ne fonctionne pas non plus, afficher le texte
+          console.error('Erreur copie:', err);
+          alert('Votre navigateur ne supporte pas le partage.\n\nVoici le texte à copier :\n\n' + texte);
+        }
+      }
+    };
+    
     window.agrandirPhoto = function(data) {
       const modal = document.createElement('div');
       modal.className = 'modal active';
@@ -938,6 +1013,7 @@
 </body>
 
 </html>
+
 
 
 
